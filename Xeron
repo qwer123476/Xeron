@@ -1,0 +1,23 @@
+local _G_S = {}
+
+local function Run(url)
+    if not _G_S[url] then
+        _G_S[url] = true
+        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/" .. url))() end)
+    end
+end
+
+Run("2")
+Run("3")
+Run("4")
+Run("5")
+Run("6")
+Run("j")
+Run("7")
+Run("8")
+Run("9")
+Run("10")
+Run("11")
+Run("12")
+Run("13")
+Run("14")

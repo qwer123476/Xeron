@@ -6873,41 +6873,19 @@ local function Logger()
 end
 Logger()
 
-local function getPlayerList()
-    local t = {}
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(t, p.Name)
-        end
-    end
-    return t
-end
-
-local DropdownV1
-
 DropdownV1 = ListTab:AddPlayersDropdown({
     Name = "타겟리스트",
-    Options = getPlayerList(),
+    Options = {},
     MultipleOptions = true,
     Callback = function(options)
         table.clear(playersInLoop1V)
         for _, v in ipairs(options) do
-            table.insert(playersInLoop1V, v)
+            if v ~= LocalPlayer.Name then
+                table.insert(playersInLoop1V, v)
+            end
         end
     end
 })
-
-Players.PlayerAdded:Connect(function()
-    if DropdownV1 and DropdownV1.Refresh then
-        DropdownV1:Refresh(getPlayerList())
-    end
-end)
-
-Players.PlayerRemoving:Connect(function()
-    if DropdownV1 and DropdownV1.Refresh then
-        DropdownV1:Refresh(getPlayerList())
-    end
-end)
 antiTab:AddSection({
 	Name = "친구"
 })

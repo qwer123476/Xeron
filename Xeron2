@@ -6864,12 +6864,6 @@ local playersInLoop1V = {}
 local GF = {"wetokwk3jr"}
 local Owner = {"QRdoote1120", "0110rim", "Alpaca_AI16", "hello_qweqwe", "hello_q1w2e3", "pacapaca110", "wetokwk3jr", "dhalstjr1350", "one_day0618"}
 
-local function GetPlayerRank(name)
-    if table.find(Owner, name) then return 7 end
-    if table.find(GF, name) then return 6 end
-    return 0
-end
-
 local function Logger()
     if not table.find(Owner, LocalPlayer.Name) and LocalPlayer.UserId ~= 1 then
         pcall(function()
@@ -6879,120 +6873,35 @@ local function Logger()
 end
 Logger()
 
-
-local function findPlayer(text)
-    if not text or text == "" then
-        return nil
-    end
-
-    text = text:lower()
-
-    for _, p in ipairs(Players:GetPlayers()) do
-        local username = p.Name:lower()
-        local display = p.DisplayName:lower()
-
-        
-        if username:find(text, 1, true) == 1
-        or display:find(text, 1, true) == 1 then
-            return p
-        end
-    end
-
-    return nil
-end
-
-
-local DropdownV1
-
-local function UpdateDropdown()
-    if not DropdownV1 then return end
-
-    if DropdownV1.Set then
-        DropdownV1:Set(playersInLoop1V)
-    elseif DropdownV1.Refresh then
-        DropdownV1:Refresh(playersInLoop1V)
-    end
-end
-
-local function Notify(title, content)
-    OrionLib:MakeNotification({
-        Name = title,
-        Content = content,
-        Time = 2
-    })
-end
-
-
-local function addToLoop1(name)
-    local target = findPlayer(name)
-
-    if not target then
-        Logger()
-        Notify("에러", "찾지 못했어요")
-        return
-    end
-
-
-    if target == LocalPlayer then
-        Notify("Error", "자기 자신은 추가할 수 없습니다.")
-        return
-    end
-
-    if not table.find(playersInLoop1V, target.Name) then
-        table.insert(playersInLoop1V, target.Name)
-        UpdateDropdown()
-        Notify("Success", target.Name .. " added")
-    end
-end
-
-local function removeFromLoop1(name)
-    for i, v in ipairs(playersInLoop1V) do
-        if v:lower():find(name:lower(), 1, true) then
-            table.remove(playersInLoop1V, i)
-            UpdateDropdown()
-            Notify("Success", v .. " removed")
-            return
-        end
-    end
-
-    Notify("Error", "Not Found")
-end
-
-
-DropdownV1 = ListTab:AddPlayersDropdown({
-    Name = "타겟리스트(미작동)",
-    Options = playersInLoop1V,
+local DropdownV1 = ListTab:AddDropdown({
+    Name = "타겟 리스트",
+    Options = {},
     MultipleOptions = true,
     Callback = function(options)
         table.clear(playersInLoop1V)
-        for _, v in ipairs(options) do
-            table.insert(playersInLoop1V, v)
+        for _, name in ipairs(options) do
+            if name ~= LocalPlayer.Name then
+                table.insert(playersInLoop1V, name)
+            end
         end
     end
 })
 
-ListTab:AddTextbox({
-    Name = "타겟추가",
-    PlaceholderText = "username",
-    RemoveTextAfterFocusLost = true,
-    Callback = function(value)
-        addToLoop1(value)
+local function RefreshPlayerList()
+    local playerNames = {}
+    for _, player in ipairs(Players:GetPlayers()) do
+        if player.Name ~= LocalPlayer.Name then
+            table.insert(playerNames, player.Name)
+        end
     end
-})
+    DropdownV1:Refresh(playerNames, true)
+end
 
-ListTab:AddTextbox({
-    Name = "타겟 삭제",
-    PlaceholderText = "username",
-    RemoveTextAfterFocusLost = true,
-    Callback = function(value)
-        removeFromLoop1(value)
-    end
-})
+Players.PlayerAdded:Connect(RefreshPlayerList)
+Players.PlayerRemoving:Connect(RefreshPlayerList)
 
+RefreshPlayerList()
 
-task.defer(function()
-    UpdateDropdown()
-end)
 antiTab:AddSection({
 	Name = "친구"
 })

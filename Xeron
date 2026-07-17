@@ -388,11 +388,12 @@ end
 
 
 local Window = OrionLib:MakeWindow({
-    Name = "PACA HUB V3 [Premium]",
+    Name = "Xeron V2 [ONWER]",
     HidePremium = false,
     SaveConfig = false,
-    ConfigFolder = "PacaHub",
-    IntroText = "파카허브 [프리미엄]"
+    ConfigFolder = "Xeron",
+	IntroIcon = "https://i.ibb.co.com/0jXzZ8k/neon-blue-x-black.jpg",
+    IntroText = "Xeron"
 })
 
 local playerTab = Window:MakeTab({Name = "플레이어 설정", Icon = "rbxassetid://6034281935", PremiumOnly = false})    

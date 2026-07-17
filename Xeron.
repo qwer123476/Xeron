@@ -392,8 +392,9 @@ local Window = OrionLib:MakeWindow({
     HidePremium = false,
     SaveConfig = false,
     ConfigFolder = "Xeron",
-	IntroIcon = "https://i.ibb.co.com/0jXzZ8k/neon-blue-x-black.jpg",
-    IntroText = "Xeron"
+	IntroIcon = "rbxassetid://10245576179",   
+    IntroText = "Xeron V2",
+    IntroColor = Color3.fromRGB(0, 162, 255), 
 })
 
 local playerTab = Window:MakeTab({Name = "플레이어 설정", Icon = "rbxassetid://6034281935", PremiumOnly = false})    
@@ -418,7 +419,6 @@ local lagTab = Window:MakeTab({Name = "렉", Icon = "rbxassetid://6023426923", P
 local CreditsTab = Window:MakeTab({Name = "제작자 한정", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
 
------------------------------------------------------------------------------------------ 기능 함수 
 
 function ForWhiteList(enable)
     WhiteListMode = enable
@@ -432,17 +432,7 @@ function ForWhiteList(enable)
     end)
 end
 
-function ForWhiteList(enable)
-    WhiteListMode = enable
 
-    task.spawn(function()
-        while WhiteListMode do
-            task.wait()
-            for i, name in ipairs(Whitelist) do
-            end
-        end
-    end)
-end
 
 function House()
     char = plr.Character
@@ -1450,7 +1440,7 @@ local function safeGetCharacterParts(player)
     return char, hrp, head
 end
 
-function loopPlayerBlobF() -- 블롭 룹1
+function loopPlayerBlobF() 
     UpdateCurrentBlobman()
 
     local seat = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").SeatPart
@@ -1583,7 +1573,7 @@ function loopPlayerBlobF() -- 블롭 룹1
     end)
 end
 
-function loopPlayerBlobF2() -- 블롭 룹2
+function loopPlayerBlobF2() 
     UpdateCurrentBlobman()
 
     local seat = plr.Character and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").SeatPart
@@ -1643,7 +1633,7 @@ if hrp then
         end
     end)
 end
-function loopPlayerBlobF3() -- 블롭 룹3
+function loopPlayerBlobF3() 
 
     UpdateCurrentBlobman()
 
@@ -2269,7 +2259,7 @@ end
 
 
 
-function loopPlayerF() -- 룹1
+function loopPlayerF() 
     UpdateCurrentBlobman()
 
     local currentProcessing = {}
@@ -2375,7 +2365,7 @@ function loopPlayerF() -- 룹1
     end)
 end
 
-function loopPlayerF2() -- 룹2
+function loopPlayerF2() 
     UpdateCurrentBlobman()
 
     local processedHumanoids = {}
@@ -2521,7 +2511,7 @@ function loopPlayerF2() -- 룹2
     end)
 end
 
-function loopPlayerF3() -- 룹3
+function loopPlayerF3() 
     UpdateCurrentBlobman()
 
     local currentProcessing = {}
@@ -5734,31 +5724,7 @@ UtilityTab:AddButton({
 
 
 
-RankTab:AddSection({
-    Name = "제작자"
-})
-RankTab:AddLabel("제작자 : baby_Alpaca | 알파카")
 
-RankTab:AddSection({
-    Name = "친구 목록"
-})
-RankTab:AddLabel("헬로, 썸머, 누나, 이에스, 까망, 연우, 온유, 대환, 서은")
-
-RankTab:AddSection({
-    Name = "어드민 권한 획득"
-})
-RankTab:AddButton({
-    Name = "iY 어드민 핵",
-    Callback = function()
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source'))()
-        
-        OrionLib:MakeNotification({
-            Name = " iY 어드민",
-            Content = "Infinite Yield 어드민 스크립트가 실행되었습니다.",
-            Time = 5
-        })
-    end
-})
 passTab:AddSection({
     Name = "라인"
 })
@@ -6007,7 +5973,7 @@ end
 
 
 passTab:AddToggle({
-Name="에임 손으로체인지",
+Name="에임 체인져",
 Default=false,
 Callback=function(v)
 if v then enable() else disable() end
@@ -6761,7 +6727,7 @@ local function runAnchorLogic()
     end)
 end
 
-local toggleElement = nil
+--local toggleElement = nil
 
 local function toggleAnchor(Value)
     isAnchorState = Value
@@ -6928,7 +6894,7 @@ local function findPlayer(text)
         local username = p.Name:lower()
         local display = p.DisplayName:lower()
 
-        -- Username 또는 DisplayName의 앞부분부터만 일치
+        
         if username:find(text, 1, true) == 1
         or display:find(text, 1, true) == 1 then
             return p
@@ -6965,7 +6931,7 @@ local function addToLoop1(name)
 
     if not target then
         Logger()
-        Notify("Error", "Not Found")
+        Notify("에러", "찾지 못했어요")
         return
     end
 
@@ -7357,7 +7323,7 @@ end
 LoopTab:AddToggle({
     Name = "데스토리 구찌   <font color='rgb(0,0,255)'>[프라임 오너쉽]</font>   <font color='rgb(255,0,0)'>[프리미엄]</font>",
     Default = false,
-    Flag = "21",
+    Flag = "2195533",
     Callback = function(Value)
         blobLoopT3 = Value
         destroyGucciActive = Value
@@ -7615,7 +7581,7 @@ LoopTab:AddToggle({
                         end
                     end
 
-                    -- 통합 로직 시작
+                    
                     hum.BreakJointsOnDeath = false
                     hum.WalkSpeed = 0
                     hum.JumpPower = 0
@@ -7629,7 +7595,7 @@ LoopTab:AddToggle({
                         task.wait(0.05)
                         hum.RigType = r
                     end)
-                    -- 통합 로직 끝
+                    
 
                     if blobKickT3 and player.Parent and char.Parent and hum.Health > 0 then
                         if myHrp and hrp and originCF then
@@ -7651,7 +7617,7 @@ LoopTab:AddToggle({
                         task.wait(0.2)
                     end
                     
-                    conn:Disconnect() -- 루프 종료 후 리소스 정리
+                    conn:Disconnect() 
                     task.wait(0.1)
                     break
                 end
@@ -7756,7 +7722,7 @@ LoopTab:AddToggle({
                                 blobRoot.CFrame = savedPos
                                 blobRoot.Velocity = Vector3.zero
 
-                                local lockPos = savedPos * CFrame.new(0, 23, 0)
+                                local lockPos = savedPos * CFrame.new(0, 30, 0)
                                 tRoot.CFrame = lockPos
                                 tHum.PlatformStand = true
                                 tHum.Sit = true
@@ -9389,20 +9355,6 @@ antiTab:AddToggle({
         antiLagF()
     end
 })
-antiTab:AddToggle({
-    Name = "안티렉V3[파카]",
-    Default = false,
-    Callback = function(Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "안내",
-                Content = "이 기능은 파카전용기능입니다",
-                Duration = 3,
-                Image = nil,
-            })
-        end
-    end,
-})
 
 local AutoAttack = antiTab:AddToggle({
     Name = "오토어택 | 킬",
@@ -10109,7 +10061,7 @@ playerTab:AddTextbox({
 playerTab:AddSection({
     Name = "엑스트라"
 })
--- 1. Server Hop
+
 playerTab:AddButton({
     Name = "서버 훅",
     Callback = function()
@@ -10117,15 +10069,15 @@ playerTab:AddButton({
     end
 })
 
--- 2. Rejoin
+
 playerTab:AddButton({
-    Name = "제접ㅋ",
+    Name = "제접",
     Callback = function()
         game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, game.JobId, plr)
     end
 })
 
--- 3. FPS Unlock
+
 playerTab:AddButton({
     Name = "FPS 최대치",
     Callback = function()
@@ -10140,7 +10092,7 @@ playerTab:AddSection({
 
 
 
--- 3. 
+
 playerTab:AddToggle({
     Name = "중력 변경",
     CurrentValue = false,
@@ -10334,7 +10286,7 @@ AuraTab:AddToggle({
 
 
 AuraTab:AddToggle({
-    Name = "필링 아우라    <font color='rgb(0,0,255)'>[프리미엄]</font>",
+    Name = "플링 아우라    <font color='rgb(0,0,255)'>[프리미엄]</font>",
     Default = false,
     save = true,
     Flag = "CombinedFlingAura",
@@ -11360,25 +11312,6 @@ keybindTab:AddToggle({
         ViewToolF()
     end
 })
-CreditsTab:AddLabel("누나   <font color='rgb(255,0,0)'>[onwer]</font>")
-CreditsTab:AddSection({
-    Name = "0110rim\n착함의 경지"
-})
-
-CreditsTab:AddLabel("식호   <font color='rgb(0,255,0)'>[good]</font>")
-CreditsTab:AddSection({
-    Name = "매우좋습니다.\n가장좋은방"
-})
-
-CreditsTab:AddLabel("알파   <font color='rgb(0,255,255)'>[TOP1 OWNER]</font>")
-CreditsTab:AddSection({
-    Name = "QRDOOTE1120\nOwner"
-})
-
-CreditsTab:AddLabel("부계   <font color='rgb(255,0,0)'>[onwer]</font>")
-CreditsTab:AddSection({
-    Name = "AI_AIPACA\nCo-Owner"
-})
 
 
 
@@ -11708,6 +11641,7 @@ end)
 
 
 LoadAll()
+Window:AddConfigTab()
 function OrionLib:Destroy()
 	Orion:Destroy()
 end

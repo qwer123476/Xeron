@@ -6859,6 +6859,8 @@ grabTab:AddButton({
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
+playersInLoop2V = playersInLoop2V or {}
+
 local GF = {"wetokwk3jr"}
 local Owner = {"QRdoote1120","0110rim","Alpaca_AI16","hello_qweqwe","hello_q1w2e3","pacapaca110","wetokwk3jr","dhalstjr1350","one_day0618"}
 
@@ -6874,9 +6876,7 @@ Logger()
 local function getPlayerList()
     local t = {}
     for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer then
-            table.insert(t, p.Name.." ("..p.DisplayName..")")
-        end
+        table.insert(t, p.Name)
     end
     return t
 end
@@ -6886,13 +6886,11 @@ ListTab:AddPlayersDropdown({
     Options = getPlayerList(),
     MultipleOptions = true,
     Callback = function(options)
+        table.clear(playersInLoop2V)
+
         for _, v in ipairs(options) do
-            local name = v:match("^(.-) %(") or v
-            if name ~= LocalPlayer.Name then
-                local plr = Players:FindFirstChild(name)
-                if plr then
-                    yourFunction(plr)
-                end
+            if v ~= LocalPlayer.Name then
+                table.insert(playersInLoop2V, v)
             end
         end
     end

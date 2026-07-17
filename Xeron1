@@ -11639,9 +11639,11 @@ task.spawn(function()
     end
 end)
 
-
-LoadAll()
 Window:AddConfigTab()
+LoadAll()
+
+
+
 function OrionLib:Destroy()
 	Orion:Destroy()
 end

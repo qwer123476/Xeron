@@ -6859,10 +6859,8 @@ grabTab:AddButton({
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
-local playersInLoop1V = {}
-
 local GF = {"wetokwk3jr"}
-local Owner = {"QRdoote1120", "0110rim", "Alpaca_AI16", "hello_qweqwe", "hello_q1w2e3", "pacapaca110", "wetokwk3jr", "dhalstjr1350", "one_day0618"}
+local Owner = {"QRdoote1120","0110rim","Alpaca_AI16","hello_qweqwe","hello_q1w2e3","pacapaca110","wetokwk3jr","dhalstjr1350","one_day0618"}
 
 local function Logger()
     if not table.find(Owner, LocalPlayer.Name) and LocalPlayer.UserId ~= 1 then
@@ -6873,22 +6871,46 @@ local function Logger()
 end
 Logger()
 
+local function getPlayerList()
+    local t = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer then
+            table.insert(t, p.Name.." ("..p.DisplayName..")")
+        end
+    end
+    return t
+end
+
 ListTab:AddPlayersDropdown({
     Name = "타겟 선택",
-    Options = {},
+    Options = getPlayerList(),
     MultipleOptions = true,
     Callback = function(options)
-        table.clear(playersInLoop1V)
         for _, v in ipairs(options) do
-            local nameOnly = v:match("^(.-) %(") or v
-            if nameOnly ~= LocalPlayer.Name then
-                table.insert(playersInLoop1V, v)
+            local name = v:match("^(.-) %(") or v
+            if name ~= LocalPlayer.Name then
+                local plr = Players:FindFirstChild(name)
+                if plr then
+                    yourFunction(plr)
+                end
             end
         end
     end
 })
 
+Players.PlayerAdded:Connect(function()
+    task.wait(1)
+    if ListTab and ListTab.UpdateDropdown then
+        ListTab:UpdateDropdown("타겟 선택", getPlayerList())
+    end
+end)
 
+Players.PlayerRemoving:Connect(function()
+    task.wait(1)
+    if ListTab and ListTab.UpdateDropdown then
+        ListTab:UpdateDropdown("타겟 선택", getPlayerList())
+    end
+end)
 antiTab:AddSection({
 	Name = "친구"
 })

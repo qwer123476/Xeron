@@ -6877,11 +6877,12 @@ ListTab:AddPlayersDropdown({
     Name = "타겟 선택",
     Options = {},
     MultipleOptions = true,
-    Callback = function(playerList)
+    Callback = function(options)
         table.clear(playersInLoop1V)
-        for _, player in ipairs(playerList) do
-            if player.Name ~= LocalPlayer.Name then
-                table.insert(playersInLoop1V, player.Name)
+        for _, v in ipairs(options) do
+            local nameOnly = v:match("^(.-) %(") or v
+            if nameOnly ~= LocalPlayer.Name then
+                table.insert(playersInLoop1V, v)
             end
         end
     end

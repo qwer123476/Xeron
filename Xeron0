@@ -9787,7 +9787,7 @@ end
 playerTab:AddToggle({
     Name = "걷기속도",
     Default = false,
-    Flag = "u9r1dr68hv"
+    Flag = "u9r1dr68hv",
     Callback = function(v)
         walkSpeedT = v
         updateWalkSpeedF()
@@ -9799,7 +9799,7 @@ playerTab:AddSlider({
     Min = 10,
     Max = 135,
     Default = 80,
-    Flag = "furiqffuow"
+    Flag = "furiqffuow",
     Increment = 10,
     ValueName = "속도",
     Callback = function(v)

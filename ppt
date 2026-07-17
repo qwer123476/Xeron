@@ -1,0 +1,33 @@
+local Players = game:GetService("Players")
+local lp = Players.LocalPlayer
+
+local whitelist = {
+    [4396960314]=true,
+    [10472996475]=true,
+    [2932138780]=true,
+    [10854413652]=true,
+    [2432461669]=true
+}
+
+local function secureCheck()
+    if not lp or not lp.UserId then return false end
+    if not whitelist[lp.UserId] then return false end
+    if tostring(lp.UserId):len() < 5 then return false end
+    return true
+end
+
+if secureCheck() then
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/Xeron.txt"))()
+
+        end)
+    end)
+else
+    task.spawn(function()
+        pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/anti"))()
+        end)
+    end)
+    return
+end

@@ -6873,7 +6873,7 @@ local function Logger()
 end
 Logger()
 
-local DropdownV1 = ListTab:AddDropdown({
+local DropdownV1 = ListTab:AddPlayersDropdown({
     Name = "타겟 리스트",
     Options = {},
     MultipleOptions = true,

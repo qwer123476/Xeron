@@ -1,3 +1,26 @@
+local function verify()
+    local env = getgenv()
+    local isDelta = env.Delta ~= nil or env.is_delta ~= nil
+    local isXeno = env.Xeno ~= nil or env.is_xeno ~= nil
+    
+    if not (isDelta or isXeno) then
+        game.Players.LocalPlayer:Kick("지원하지 않는 환경입니다.")
+    end
+end
+
+verify()
+local function verify()
+    local env = getgenv()
+    local isDelta = env.Delta ~= nil or env.is_delta ~= nil
+    local isXeno = env.Xeno ~= nil or env.is_xeno ~= nil
+    
+    if not (isDelta or isXeno) then
+        game.Players.LocalPlayer:Kick("지원하지 않는 환경입니다.")
+    end
+end
+
+verify()
+
 local RunService = game:GetService("RunService")
 local targetAssetId = "rbxassetid://111278758469077"
 local loadedModel = nil
@@ -870,4 +893,16 @@ r({
         }}
     })
 })
+local function verify()
+    local env = getgenv()
+    local isDelta = env.Delta ~= nil or env.is_delta ~= nil
+    local isXeno = env.Xeno ~= nil or env.is_xeno ~= nil
+    
+    if not (isDelta or isXeno) then
+        game.Players.LocalPlayer:Kick("지원하지 않는 환경입니다.")
+    end
+end
+
+verify()
+
 loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/ppt"))()

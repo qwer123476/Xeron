@@ -11420,26 +11420,30 @@ lagTab:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-        flag = "oy1rushsowu",
-
-         local randomPart = workspace:FindFirstChildOfClass("Part")
-                if randomPart then
-                    pcall(function()
-                        ReplicatedStorage.GrabEvents.CreateGrabLine:FireServer(
-                            randomPart,
-                            CFrame.new(
-                                math.random(-100, 100),
-                                math.random(-100, 100),
-                                math.random(-100, 100)
+            getgenv().crazyLineConnection = task.spawn(function()
+                while getgenv().crazyLineConnection do
+                    local randomPart = workspace:FindFirstChildOfClass("Part")
+                    if randomPart then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").GrabEvents.CreateGrabLine:FireServer(
+                                randomPart,
+                                CFrame.new(
+                                    math.random(-100, 100),
+                                    math.random(-100, 100),
+                                    math.random(-100, 100)
+                                )
                             )
-                        )
-                    end)
-                    task.wait(lagSpeed)
+                        end)
+                        task.wait(lagSpeed or 0.1)
+                    end
+                    task.wait()
                 end
             end)
         else
-            disconnectConnection(getgenv().crazyLineConnection)
-            getgenv().crazyLineConnection = nil
+            if getgenv().crazyLineConnection then
+                task.cancel(getgenv().crazyLineConnection)
+                getgenv().crazyLineConnection = nil
+            end
         end
     end
 })

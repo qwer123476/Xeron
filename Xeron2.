@@ -11449,8 +11449,10 @@ lagTab:AddToggle({
 lagTab:AddToggle({
     Name = "서버 에러 내기(렉)",
     Default = false,
-    
     Callback = function(Value)
+        local RunService = game:GetService("RunService")
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        
         if Value then
             getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
                 local randomPart = workspace:FindFirstChildOfClass("Part")
@@ -11473,13 +11475,10 @@ lagTab:AddToggle({
                 end
             end)
         else
-            disconnectConnection(getgenv().crazyLineConnection)
-            if Getgenv().crazyLineConnection then
-    Getgenv().crazyLineConnection:Disconnect()
-end
-
-Getgenv().crazyLineConnection = nil
-
+            if getgenv().crazyLineConnection then
+                getgenv().crazyLineConnection:Disconnect()
+                getgenv().crazyLineConnection = nil
+            end
         end
     end
 })

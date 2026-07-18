@@ -48,4 +48,4 @@ end
 
 print('개인정보 전송 차단 감시 시작 (화이트리스트 없음)')
 
-loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/FTAP Lu V2.txt"))()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/FTAPLuV2"))()

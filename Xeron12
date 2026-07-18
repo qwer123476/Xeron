@@ -11421,8 +11421,14 @@ lagTab:AddToggle({
     Callback = function(Value)
         if Value then
         flag = "oy1rushsowu",
-getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
-                local randomPart = workspace:FindFirstChildOfClass("Part")
+if Getgenv().crazyLineConnection then
+    Getgenv().crazyLineConnection:Disconnect()
+end
+
+Getgenv().crazyLineConnection = game:GetService("RunService").Heartbeat:Connect(function()
+
+end)
+         local randomPart = workspace:FindFirstChildOfClass("Part")
                 if randomPart then
                     pcall(function()
                         ReplicatedStorage.GrabEvents.CreateGrabLine:FireServer(
@@ -11439,7 +11445,7 @@ getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
             end)
         else
             disconnectConnection(getgenv().crazyLineConnection)
-            --getgenv().crazyLineConnection = nil
+            getgenv().crazyLineConnection = nil
         end
     end
 })

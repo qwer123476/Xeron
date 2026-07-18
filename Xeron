@@ -11423,7 +11423,7 @@ lagTab:AddToggle({
         flag = "oy1rushsowu",
 if Getgenv().crazyLineConnection then
     Getgenv().crazyLineConnection:Disconnect()
-end
+
 
 Getgenv().crazyLineConnection = game:GetService("RunService").Heartbeat:Connect(function()
 

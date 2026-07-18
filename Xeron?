@@ -8459,7 +8459,7 @@ end)
 antiTab:AddToggle({
     Name = "안티플링V3 (실험단계)",
     Default = false,
-    flag = "0851p75wl"
+    flag = "0851p75wl",
     Callback = function(Value)
         ToyCollisionDisabled = Value
         PlayerCollisionDisabled = Value

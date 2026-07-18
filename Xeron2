@@ -11420,35 +11420,31 @@ lagTab:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-        flag = "oy1rushsowu",
-if Getgenv().crazyLineConnection then
-    Getgenv().crazyLineConnection:Disconnect()
-
-
-Getgenv().crazyLineConnection = game:GetService("RunService").Heartbeat:Connect(function()
-
-end)
-         local randomPart = workspace:FindFirstChildOfClass("Part")
-                if randomPart then
-                    pcall(function()
-                        ReplicatedStorage.GrabEvents.CreateGrabLine:FireServer(
-                            randomPart,
-                            CFrame.new(
-                                math.random(-100, 100),
-                                math.random(-100, 100),
-                                math.random(-100, 100)
+            getgenv().crazyLineRunning = true
+            task.spawn(function()
+                while getgenv().crazyLineRunning do
+                    local randomPart = workspace:FindFirstChildOfClass("Part")
+                    if randomPart then
+                        pcall(function()
+                            game:GetService("ReplicatedStorage").GrabEvents.CreateGrabLine:FireServer(
+                                randomPart,
+                                CFrame.new(
+                                    math.random(-100, 100),
+                                    math.random(-100, 100),
+                                    math.random(-100, 100)
+                                )
                             )
-                        )
-                    end)
-                    task.wait(lagSpeed)
+                        end)
+                    end
+                    task.wait(0.1)
                 end
             end)
         else
-            disconnectConnection(getgenv().crazyLineConnection)
-            getgenv().crazyLineConnection = nil
+            getgenv().crazyLineRunning = false
         end
     end
 })
+
 
 lagTab:AddToggle({
     Name = "서버 에러 내기(렉)",

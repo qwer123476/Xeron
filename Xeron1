@@ -11472,7 +11472,12 @@ lagTab:AddToggle({
             end)
         else
             disconnectConnection(getgenv().crazyLineConnection)
-            getgenv().crazyLineConnection = nil
+            if Getgenv().crazyLineConnection then
+    Getgenv().crazyLineConnection:Disconnect()
+end
+
+Getgenv().crazyLineConnection = nil
+
         end
     end
 })

@@ -8598,7 +8598,7 @@ local antiBananaSitActive = false
 antiTab:AddToggle({
     Name = "안티 바나나(sit불가)",
     Default = false,
-    flag = "oudrqu91"
+    flag = "oudrqu91",
     Callback = function(Value)
         antiBananaSitActive = Value
         

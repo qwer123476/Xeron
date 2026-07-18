@@ -11422,7 +11422,6 @@ lagTab:AddToggle({
         if Value then
         flag = "oy1rushsowu",
 
-end})
          local randomPart = workspace:FindFirstChildOfClass("Part")
                 if randomPart then
                     pcall(function()

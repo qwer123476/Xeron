@@ -11439,7 +11439,7 @@ getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
             end)
         else
             disconnectConnection(getgenv().crazyLineConnection)
-            getgenv().crazyLineConnection = nil
+            --getgenv().crazyLineConnection = nil
         end
     end
 })

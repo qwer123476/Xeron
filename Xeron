@@ -4986,48 +4986,7 @@ function AntiBananaF()
     end
 end
 
-ifKickThenT = true
-local anchoredCache = {}
 
-function ifKickThenF()
-    Players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(function(char)
-            local hrp = char:WaitForChild("HumanoidRootPart", 1)
-            if hrp then
-                anchoredCache[plr] = false
-            end
-        end)
-    end)
-
-    Players.PlayerRemoving:Connect(function(plr)
-        if anchoredCache[plr] == true then
-            local DISP = plr.DisplayName
-            local NAP = plr.Name
-            OrionLib:MakeNotification({
-                Name = "[ Kick ]", 
-                Content = "[" .. DISP .. "] ( @" .. NAP ..  ")", 
-                Time = 7
-            })
-        end
-        anchoredCache[plr] = nil
-    end)
-
-    task.spawn(function()
-        while ifKickThenT do
-            for _, plr in ipairs(Players:GetPlayers()) do
-                local char = plr.Character
-                if char then
-                    local hrp = char:FindFirstChild("HumanoidRootPart")
-                    if hrp then
-                        anchoredCache[plr] = hrp.Anchored == true
-                    end
-                end
-            end
-            task.wait()
-        end
-    end)
-end
-ifKickThenF()
 
 local mouse = plr:GetMouse()
 function tpF()
@@ -6350,6 +6309,7 @@ passTab:AddButton({
 getTab:AddToggle({
     Name = "킥알림",
     Default = false,
+    flag = "uo9td186tf7wvo",
     Callback = function(Value)
         if Value then
             kickNotifyConnection = workspace.ChildAdded:Connect(function(obj)
@@ -6380,13 +6340,13 @@ getTab:AddToggle({
                     local realName = closestPlayer.Name or "Unknown"
                     
                     OrionLib:MakeNotification({
-                        Name = "POLAR HUB",
-                        Content = displayName .. " (" .. realName .. ") Got Kicked!",
+                        Name = "Xeron",
+                        Content = displayName .. " (" .. realName .. ") 킥이 되었어요!",
                         Time = 3
                     })
                 else
                     OrionLib:MakeNotification({
-                        Name = "POLAR HUB",
+                        Name = "Xeron",
                         Content = "Someone Got Kicked!",
                         Time = 3
                     })
@@ -6404,6 +6364,7 @@ getTab:AddToggle({
 getTab:AddToggle({
     Name = "패킷렉 알림",
     Default = false,
+    flag = "iqtv9ysoyg",
     Callback = function(Value)
         packetLagNotifyEnabled = Value
         if Value and not lastLagSource then
@@ -8498,6 +8459,7 @@ end)
 antiTab:AddToggle({
     Name = "안티플링V3 (실험단계)",
     Default = false,
+    flag = "0851p75wl"
     Callback = function(Value)
         ToyCollisionDisabled = Value
         PlayerCollisionDisabled = Value
@@ -8538,6 +8500,7 @@ end
 antiTab:AddToggle({
     Name = "안티 오너쉽 스팸V2",
     Default = false,
+    flag = "fo27rwk",
     Callback = function(Value)
         antiOwnershipActive = Value
         if antiOwnershipActive then
@@ -8545,11 +8508,12 @@ antiTab:AddToggle({
         end
     end    
 })
-local isHeldLoop = nil
+--local isHeldLoop = nil
 
 antiTab:AddToggle({
     Name = "안티 오너쉽 스팸V3    <font color='rgb(0,0,255)'>[프리미엄]</font>",
     Default = false,
+    flag = "f971rfutcss",
     Callback = function(Value)
         if Value then
             local plr = game:GetService("Players").LocalPlayer
@@ -8634,6 +8598,7 @@ local antiBananaSitActive = false
 antiTab:AddToggle({
     Name = "안티 바나나(sit불가)",
     Default = false,
+    flag = "oudrqu91"
     Callback = function(Value)
         antiBananaSitActive = Value
         
@@ -9724,20 +9689,7 @@ antiTab:AddToggle({
 end
 })
 
-antiTab:AddToggle({
-    Name = "구찌V3   <font color='rgb(0,0,250)'>[파카]</font>",
-    
-    Callback = function(Value)
-        if Value then
-            Rayfield:Notify({
-                Title = "안내",
-                Content = "이 기능은 파카전용기능입니다",
-                Duration = 3,
-                Image = nil,
-            })
-        end
-    end,
-})
+
 
 playerTab:AddSection({
     Name = "플레이어"
@@ -10176,6 +10128,7 @@ AuraTab:AddToggle({
 AuraTab:AddToggle({
     Name = "안티 킥 아우라",
     Default = false,
+    flag = "o71rciy",
     Callback = function(Value)
         removeAntiKickActive = Value
         
@@ -10411,12 +10364,12 @@ AuraTab:AddToggle({
                                             local distance = (torso.Position - root.Position).Magnitude
                                             if distance <= currentRadius then
                                                 
-                                                -- 1단계: 물리 오너십 박탈
+                                                
                                                 if SetNetworkOwner and SetNetworkOwner.FireServer then
                                                     SetNetworkOwner:FireServer(torso, targetRoot.CFrame)
                                                 end
                                                 
-                                                -- 2단계: 딜레이 없이 Y축 -10000 낭떠러지로 강제 사출 (시스템 즉사 유도)
+                                            
                                                 targetRoot.CFrame = CFrame.new(targetRoot.Position.X, -10000, targetRoot.Position.Z)
                                                 
                                             end
@@ -10574,6 +10527,7 @@ local label = plotTab:AddLabel("Time: ...")
 plotTab:AddToggle({
     Name="오토 슬롯",
     Default=false,
+    flag = "uot1fugwo"
     Callback=function(v)
         enabled = v
         if v then loop(label) end
@@ -11127,16 +11081,6 @@ keybindTab:AddBind({
 })
 
 
-
-keybindTab:AddBind({
-    Text = "앉기 <font color='rgb(255,0,0)'>[블롭맨]</font>",
-    Default = Enum.KeyCode.X,
-    Hold = false,
-    Callback = function()
-        BlobSit()
-    end
-})
-
 plotTab:AddSection({
     Name = "집"
 })
@@ -11431,7 +11375,6 @@ lagTab:AddToggle({
 	Name = "렉   <font color='rgb(255,0,0)'>[라인]</font>     <font color='rgb(0,0,255)'>[프리미엄]</font>",
 	Default = false,
     save = true,
-	Flag = "lagToggleFlag",
 	Callback = function(Value)
 		LineLagT = Value
 		LineLagF()
@@ -11475,7 +11418,8 @@ lagTab:AddToggle({
     Default = false,
     Callback = function(Value)
         if Value then
-            getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
+        flag = "oy1rushsowu",
+getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()
                 local randomPart = workspace:FindFirstChildOfClass("Part")
                 if randomPart then
                     pcall(function()
@@ -11501,6 +11445,7 @@ lagTab:AddToggle({
 lagTab:AddToggle({
     Name = "서버 에러 내기(렉)",
     Default = false,
+    
     Callback = function(Value)
         if Value then
             getgenv().crazyLineConnection = RunService.Heartbeat:Connect(function()

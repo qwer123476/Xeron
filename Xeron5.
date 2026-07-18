@@ -10521,13 +10521,15 @@ local function loop(label)
         end
     end)
 end
-
+plotTab:AddSection({
+    Name = "자동 슬롯"
+})
 local label = plotTab:AddLabel("Time: ...")
 
 plotTab:AddToggle({
     Name="오토 슬롯",
     Default=false,
-    flag = "uot1fugwo"
+    flag = "uot1fugwo",
     Callback=function(v)
         enabled = v
         if v then loop(label) end

@@ -11643,7 +11643,7 @@ function OrionLib:Destroy()
 end
 
 local ImageSection = MyTab:AddSection({
-    Name = "Xeron?"
+    Name = "디스코드"
 })
 
 ImageSection:AddLabel("디스코드")
@@ -11654,12 +11654,14 @@ ImageSection:AddButton({
         OrionLib:MakeNotification({
             Name = "AIPA Hub",
             Content = "디스코드 링크가 클립보드에 복사되었습니다.",
-            Image = "rbxassetid://4483345998",
+            Image = "rbxassetid://77989137998499",
             Time = 3
         })
     end
 })
-
+MyTab:AddSection({
+    Name = "Xeron?"
+})
 ImageSection:AddLabel("안녕하세요 반가워요^^ ")
 ImageSection:AddLabel("새로운 스크립트 Xeron(제론) 이라고 합니다.")
 ImageSection:AddLabel("더 많은 기능을 가진 V2모델입니닷")

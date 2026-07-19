@@ -405,6 +405,8 @@ local Window = OrionLib:MakeWindow({
     IntroColor = Color3.fromRGB(0, 162, 255), 
 })
 
+
+local MyTab = Window:MakeTab({Name = "Xeron",Icon = "rbxassetid://77989137998499", PremiumOnly = false})
 local playerTab = Window:MakeTab({Name = "플레이어 설정", Icon = "rbxassetid://6034281935", PremiumOnly = false})    
 local passTab = Window:MakeTab({Name = "패스잠금해제", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 local getTab = Window:MakeTab({Name = "알림", Icon = "rbxassetid://649498361", PremiumOnly = false})
@@ -11640,7 +11642,17 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
+MyTab:AddSection({
+    Name = "Xeron?"
+})
 
+ImageSection:AddLabel("rbxassetid://77989137998499")
+ImageSection:AddLabel("안녕하세요 반가워요^^ ")
+ImageSection:AddLabel("새로운 스크립트 Xeron(제론) 이라고 합니다.")
+ImageSection:AddLabel("더 많은 기능을 가진 V2모델입니닷")
+ImageSection:AddLabel("이스크립트는 지정된 사람만 쓸수있으며")
+ImageSection:AddLabel("이외의 사람은 이스크를  쓰면안되며 유포도 절대금지입니다")
+ImageSection:AddLabel("그럼재미 있게 즐겨주세요!")
 OrionLib:Init()
 
 

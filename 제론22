@@ -5978,11 +5978,11 @@ local skinSettings = {
         Texture = "rbxassetid://5814122171", Speed = 8, Width0 = 0.3, Width1 = 0.3,
         Color = ColorSequence.new(Color3.fromRGB(0,255,255)), Brightness = 5
     },
-    ["지옥불 사슬"] = {
-        Texture = "rbxassetid://155455243", Speed = -5, Width0 = 1.4, Width1 = 0.6,
-        Color = ColorSequence.new(Color3.fromRGB(255,40,0)), Brightness = 3.5
+    ["제론 라인"] = {
+        Texture = "rbxassetid://77989137998499", Speed = -5, Width0 = 1.4, Width1 = 0.6,
+        --Color = ColorSequence.new(Color3.fromRGB(255,40,0)), Brightness = 3.5
     },
-    ["보이드 촉수"] = {
+    ["보이드"] = {
         Texture = "rbxassetid://106048110", Speed = 4, Width0 = 1.6, Width1 = 1.6,
         Color = ColorSequence.new(Color3.fromRGB(120,0,255)), Brightness = 1.2
     },
@@ -6002,11 +6002,11 @@ local skinSettings = {
         Texture = "rbxassetid://5814144365", Speed = -8, Width0 = 0.5, Width1 = 0.5,
         Color = ColorSequence.new(Color3.fromRGB(0,255,80)), Brightness = 3
     },
-    ["디바인 플라즈마"] = {
+    ["플라즈마"] = {
         Texture = "rbxassetid://131093673", Speed = 6, Width0 = 1.8, Width1 = 0.2,
         Color = ColorSequence.new(Color3.fromRGB(255,200,130)), Brightness = 5
     },
-    ["DNA 소용돌이"] = {
+    ["DNA"] = {
         Texture = "rbxassetid://5814141697", Speed = 5, Width0 = 1.0, Width1 = 1.0,
         Color = ColorSequence.new(Color3.fromRGB(255,0,120)), Brightness = 3.5
     },
@@ -6090,13 +6090,13 @@ passTab:AddDropdown({
     Options = {
         "기본 화이트",
         "네온 레이저",
-        "지옥불 사슬",
-        "보이드 촉수",
+        "제론 라인",
+        "보이드",
         "레인보우 레이저",
         "고전압 전류",
         "디지털 웨이브",
-        "디바인 플라즈마",
-        "DNA 소용돌이",
+        "플라즈마",
+        "DNA",
         "블랙홀 스트림"
     },
     Callback = function(Value)
@@ -11646,6 +11646,19 @@ local ImageSection = MyTab:AddSection({
     Name = "Xeron?"
 })
 
+ImageSection:AddLabel("디스코드")
+ImageSection:AddButton({
+    Name = "디스코드 링크 복사",
+    Callback = function()
+        setclipboard("https://discord.gg/hANZr3WGm")
+        OrionLib:MakeNotification({
+            Name = "AIPA Hub",
+            Content = "디스코드 링크가 클립보드에 복사되었습니다.",
+            Image = "rbxassetid://4483345998",
+            Time = 3
+        })
+    end
+})
 
 ImageSection:AddLabel("안녕하세요 반가워요^^ ")
 ImageSection:AddLabel("새로운 스크립트 Xeron(제론) 이라고 합니다.")

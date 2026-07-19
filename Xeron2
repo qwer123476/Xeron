@@ -396,11 +396,11 @@ end
 
 
 local Window = OrionLib:MakeWindow({
-    Name = "Xeron V2 [ONWER]",
+    Name = "Xeron V2 [ONWER],rbxassetid://77989137998499",
     HidePremium = false,
     SaveConfig = false,
     ConfigFolder = "Xeron",
-	IntroIcon = "rbxassetid://10245576179",   
+	IntroIcon = "rbxassetid://77989137998499",   
     IntroText = "Xeron V2",
     IntroColor = Color3.fromRGB(0, 162, 255), 
 })
@@ -11643,3 +11643,12 @@ end
 
 OrionLib:Init()
 
+
+local loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/웹"))
+
+if loader then
+    pcall(loader)
+    print("warking")
+else
+    warn("[Loader] 스크립트 주소가 잘못되었거나 불러오지 못했습니다.")
+end

@@ -11642,7 +11642,7 @@ function OrionLib:Destroy()
 	Orion:Destroy()
 end
 
-MyTab:AddSection({
+local ImageSection = MyTab:AddSection({
     Name = "Xeron?"
 })
 

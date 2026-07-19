@@ -396,7 +396,7 @@ end
 
 
 local Window = OrionLib:MakeWindow({
-    Name = "Xeron V2 [ONWER],rbxassetid://77989137998499",
+    Name = "Xeron V2 [ONWER]",
     HidePremium = false,
     SaveConfig = false,
     ConfigFolder = "Xeron",
@@ -421,7 +421,7 @@ local bdTab = Window:MakeTab({Name = "배경체인저", Icon = "rbxassetid://448
 local funTab = Window:MakeTab({Name = "찌끄레기", Icon = "rbxassetid://4483345998", PremiumOnly = false})            
 local keybindTab = Window:MakeTab({Name = "설정", Icon = "rbxassetid://6031094678", PremiumOnly = false})             
 local lagTab = Window:MakeTab({Name = "렉", Icon = "rbxassetid://6023426923", PremiumOnly = false})   
-local CreditsTab = Window:MakeTab({Name = "설정 저장", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local CreditsTab = Window:MakeTab({Name = "설정 저장", Icon = "rbxassetid://77989137998499", PremiumOnly = false})
 
 
 

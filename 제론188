@@ -8468,7 +8468,7 @@ local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local characterConnections = {}
-local activeCharacters = setmetatable({}, { __mode = "k" })
+--local activeCharacters = setmetatable({}, { __mode = "k" })
 
 --local MAX_VELOCITY_THRESHOLD = 150
 --local MAX_ROT_VELOCITY_THRESHOLD = 150
@@ -8627,7 +8627,7 @@ antiTab:AddToggle({
         PlayerCollisionDisabled = Value
     end
 })
-local antiOwnershipActive = false
+--local antiOwnershipActive = false
 
 local function AntiOwnershipFunction()
     local Struggle = game:GetService("ReplicatedStorage").CharacterEvents.Struggle
@@ -8755,7 +8755,7 @@ antiTab:AddToggle({
 antiTab:AddSection({
     Name = "안티 바나나"
 })
-local antiBananaSitActive = false
+--local antiBananaSitActive = false
 
 antiTab:AddToggle({
     Name = "안티 바나나(sit불가)",

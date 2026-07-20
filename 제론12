@@ -9639,7 +9639,7 @@ local AntiPCLD = antiTab:AddToggle({
 antiTab:AddSection({
     Name = "래그돌"
 })
-local PermRag = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "래그돌",
     
     save = true,
@@ -9838,7 +9838,7 @@ playerTab:AddToggle({
     end
 })
 
-local jumpPowerTextbox = playerTab:AddTextbox({
+playerTab:AddTextbox({
     Name = "값",
     Default = "60",
     save = true,
@@ -9913,7 +9913,7 @@ playerTab:AddToggle({
 playerTab:AddSection({
     Name = "다른것들"
 })
-local NoClipToggle = playerTab:AddToggle({
+playerTab:AddToggle({
     Name = "노클립",
     Default = false,
     save = true,
@@ -9972,7 +9972,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
     end
 end)
 
-local Fly = playerTab:AddToggle({ 
+playerTab:AddToggle({ 
     Name = "플라이   <font color='rgb(255,0,0)'>[데스크톱]</font>", 
     Default = false,
     save = true,
@@ -10355,62 +10355,7 @@ AuraTab:AddToggle({
     end
 })
 
-AuraTab:AddToggle({
-    Name = "낙사 아우라   <font color='rgb(0,0,255)'>[프리미엄]</font>",
-    Default = false,
-    save = true,
-    Flag = "FtapVoidKill",
-    Callback = function(enabled)
-        runningFtapVoidKill = enabled
-        if enabled then
-            task.spawn(function()
-                local Players = game:GetService("Players")
-                local localPlayer = game.Players.LocalPlayer
-                local rs = game:GetService("ReplicatedStorage")
-                
-                local GrabEvents = rs:FindFirstChild("GrabEvents")
-                local SetNetworkOwner = GrabEvents and GrabEvents:FindFirstChild("SetNetworkOwner")
 
-                while runningFtapVoidKill do
-                    pcall(function()
-                        local character = localPlayer.Character
-                        local root = character and character:FindFirstChild("HumanoidRootPart")
-                        if root then
-                            local currentRadius = tonumber(auraRadius) or 30
-                            
-                            for _, player in pairs(Players:GetPlayers()) do
-                                if player ~= localPlayer and player.Character then
-                                    local isFriend = _G.Aurahowait and localPlayer:IsFriendsWith(player.UserId)
-                                    if not isFriend then
-                                        local targetChar = player.Character
-                                        local torso = targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso")
-                                        local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-                                        
-                                        if torso and targetRoot then
-                                            local distance = (torso.Position - root.Position).Magnitude
-                                            if distance <= currentRadius then
-                                                
-                                                
-                                                if SetNetworkOwner and SetNetworkOwner.FireServer then
-                                                    SetNetworkOwner:FireServer(torso, targetRoot.CFrame)
-                                                end
-                                                
-                                            
-                                                targetRoot.CFrame = CFrame.new(targetRoot.Position.X, -10000, targetRoot.Position.Z)
-                                                
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                    task.wait()
-                end
-            end)
-        end
-    end
-})
 
 
 

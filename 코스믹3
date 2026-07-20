@@ -343,45 +343,44 @@ v7:AddButton({
 })
 local v8 = false
 antiGrab = function()
-    while true do
+    local v
+    repeat
+        v = localPlayer2.Character
+        task.wait()
+    until v
 
-        local v = localPlayer2.Character
-    until v end
     local v2 = v:FindFirstChild("HumanoidRootPart")
 end
+
 v7:AddToggle({
     Name = "Anti Grab",
     Default = false,
     Callback = function(p0)
         v8 = p0
-
         if v8 then
-
             task.spawn(antiGrab)
         end
     end,
 })
+
 local v9 = false
 antiExplodeF = function()
     Workspace.ChildAdded:Connect(function(p0)
         if p0:IsA("Part") and p0.Name == "Part" and v9 then
             local v = localPlayer2.Character
-
             if v then
                 local v2 = v:FindFirstChild("HumanoidRootPart")
                 local v3 = v:FindFirstChild("Right Arm")
 
-                if v2 and v3 and p0.Position - v2.Position.Magnitude <= 20 then
+                if v2 and v3 and (p0.Position - v2.Position).Magnitude <= 20 then
                     v2.Anchored = true
-
                     task.wait(0.01)
 
                     while true do
-
                         if v3:FindFirstChild("RagdollLimbPart") and v3.RagdollLimbPart.CanCollide == true then
-
-                            task.wait(0.001)
+                            break
                         end
+                        task.wait(0.001)
                     end
 
                     v2.Anchored = false
@@ -390,14 +389,13 @@ antiExplodeF = function()
         end
     end)
 end
+
 v7:AddToggle({
     Name = "Anti Explode",
     Default = false,
     Callback = function(p0)
         v9 = p0
-
         if v9 then
-
             task.spawn(antiExplodeF)
         end
     end,

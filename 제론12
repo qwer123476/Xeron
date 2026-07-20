@@ -8470,9 +8470,9 @@ local LocalPlayer = Players.LocalPlayer
 local characterConnections = {}
 local activeCharacters = setmetatable({}, { __mode = "k" })
 
-local MAX_VELOCITY_THRESHOLD = 150
-local MAX_ROT_VELOCITY_THRESHOLD = 150
-_G.AntiFlingEnabled = false
+--local MAX_VELOCITY_THRESHOLD = 150
+--local MAX_ROT_VELOCITY_THRESHOLD = 150
+--_G.AntiFlingEnabled = false
 
 local function cleanupCharacterConnections(userId)
     if characterConnections[userId] then
@@ -8584,8 +8584,8 @@ antiTab:AddToggle({
         end
     end,
 })
-local ToyCollisionDisabled = false
-local PlayerCollisionDisabled = false
+--local ToyCollisionDisabled = false
+--local PlayerCollisionDisabled = false
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")

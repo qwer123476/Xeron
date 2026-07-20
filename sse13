@@ -6067,7 +6067,7 @@ JU[153] = function(...)
                 return
             else
                 A.AssemblyLinearVelocity = (mel_1.PrimaryPart.Position + Vector3.new(q * math.cos(n), R * f, q * math.sin(n)) - A.Position) * 10
-                 = 1 + 1
+                 
             end 
         end 
     end

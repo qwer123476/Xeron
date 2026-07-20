@@ -1,3 +1,4 @@
+local OrionLib =loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 
     local Window = OrionLib:MakeWindow({
@@ -297,7 +298,6 @@ end
     end
 end
 ]]
-local OrionLib =loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 local LnTab = Window:MakeTab({
     Name = "Line",

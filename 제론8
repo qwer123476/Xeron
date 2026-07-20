@@ -6376,11 +6376,153 @@ getTab:AddToggle({
     end    
 })
 
+grabTab:AddSection({
+	Name = "사일런트 에임봇"
+})
+
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Stats = game:GetService("Stats")
+
+local localPlayer = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+local config105 = config105 or {
+    SA = {
+        En = false,
+        Show = false,
+        Col = Color3.fromRGB(255, 0, 0),
+        HC = true,        
+        MHP_A = 0.16,
+    },
+    MBX = nil,            
+    CPA = 0.16,
+    EA = { Raycast = true },
+    Cam = camera,
+    RS = RunService,
+    Network = Stats.Network,
+}
+
+
+local function GCP()
+    local closest, shortestDist = nil, math.huge
+    local myPos = camera.CFrame.Position
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr \~= localPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+            local head = plr.Character.Head
+            local dist = (head.Position - myPos).Magnitude
+
+            if dist < shortestDist then
+                shortestDist = dist
+                closest = plr
+            end
+        end
+    end
+    return closest
+end
+
+
+local function VA(args, enabled)
+    if not enabled then return false end
+    
+    return true
+end
+
+
+local v36 = true  
+
+grabTab:AddToggle({
+    Name = "사일런트에임",
+    Default = config105.SA.Show,
+    Callback = function(state)
+        config105.SA.Show = state
+        if config105.MBX then config105.MBX.Visible = state end
+    end,
+})
+
+v35:R109({
+    Name = "사일런트에임 마커",
+    Default = config105.SA.Col,
+    Callback = function(color)
+        config105.SA.Col = color
+        if config105.MBX then config105.MBX.Color = color end
+    end,
+})
+
+
+RunService.Heartbeat:Connect(function()
+    if not config105.SA.En then return end
+
+    local success, pingStr = pcall(function()
+        return config105.Network.ServerStatsItem["Data Ping"]:GetValueString()
+    end)
+
+    if success and pingStr then
+        local ping = tonumber(pingStr:match("%d+")) or 50
+
+        if ping < 20 then config105.CPA = 0.11
+        elseif ping < 30 then config105.CPA = 0.115
+        elseif ping < 40 then config105.CPA = 0.12
+        elseif ping < 50 then config105.CPA = 0.125
+        elseif ping < 60 then config105.CPA = 0.13
+        elseif ping < 70 then config105.CPA = 0.135
+        elseif ping < 80 then config105.CPA = 0.14
+        elseif ping < 90 then config105.CPA = 0.145
+        elseif ping < 100 then config105.CPA = 0.15
+        elseif ping < 110 then config105.CPA = 0.155
+        else config105.CPA = config105.SA.MHP_A end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    if not (config105.SA.Show and config105.SA.En and v36) then return end
+
+    local target = GCP()
+    if target and target.Character and target.Character:FindFirstChild("Head") then
+        local headPos = target.Character.Head.Position
+        local screenPos, onScreen = camera:WorldToViewportPoint(headPos)
+
+        if config105.MBX then
+            config105.MBX.Visible = onScreen
+            config105.MBX.Position = Vector2.new(screenPos.X, screenPos.Y)
+        end
+    else
+        if config105.MBX then config105.MBX.Visible = false end
+    end
+end)
+
+
+if hookmetamethod then
+    local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+        local args = {...}
+        local method = getnamecallmethod()
+
+        if config105.SA.En 
+            and self == workspace 
+            and method == "Raycast" 
+            and VA(args, config105.EA.Raycast) then
+
+            local target = GCP()
+            if target and target.Character and target.Character:FindFirstChild("Head") then
+                local headPos = target.Character.Head.Position
+                local origin = args[2] or camera.CFrame.Position
+                
+                
+                args[3] = (headPos - origin).Unit * 1000
+                return oldNamecall(self, unpack(args))
+            end
+        end
+
+        return oldNamecall(self, ...)
+    end)
+end
 
 
 
 grabTab:AddSection({
-	Name = "Fling"
+	Name = "날리기"
 })
 grabTab:AddToggle({
     Name = "던지기 V1   <font color='rgb(255,0,0)'>[데스크톱]</font>",

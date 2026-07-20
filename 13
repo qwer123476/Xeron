@@ -1181,7 +1181,7 @@ end
     end
     return hrp
 end
-
+--[[
  function createSafeToggle(name, default, callback)
      isActive = default
      connections = {}
@@ -1219,6 +1219,8 @@ end
         end
     end
 end
+]]
+local OrionLib =loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 local LnTab = Window:MakeTab({
     Name = "Line",

@@ -5,7 +5,7 @@ r16 = setmetatable({}, {
     ["__metatable"] = nil
 })
 --JU[27] = "\xbc7\x93\xfb"
-JU[9] = "\x95<%\xad\x81"
+--JU[9] = "\x95<%\xad\x81"
 JU[13] = 34318604697196
 plr = game.Players.LocalPlayer
 JU[12] = 31548589390178

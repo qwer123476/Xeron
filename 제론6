@@ -6519,7 +6519,7 @@ end
 grabTab:AddSection({
 	Name = "Other"
 })
-local AntiStruggleGrab = grabTab:AddToggle({
+grabTab:AddToggle({
     Name = "루프 그랩  <font color='rgb(255,0,0)'>[오너쉽]</font>",
     
     save = true,
@@ -6532,7 +6532,7 @@ local AntiStruggleGrab = grabTab:AddToggle({
     end
 })
 
-local RagdollGrabToggle = grabTab:AddToggle({
+grabTab:AddToggle({
     Name = "래그돌 그랩  <font color='rgb(25,60,10)'>[판자]</font>",
     
     save = true,
@@ -6545,7 +6545,7 @@ local RagdollGrabToggle = grabTab:AddToggle({
     end
 })
 
-local MasslessGrab = grabTab:AddToggle({ 
+grabTab:AddToggle({ 
     Name = "무질량 그랩", 
     
     save = true,
@@ -6558,7 +6558,7 @@ local MasslessGrab = grabTab:AddToggle({
     end
 })
 
-local NoClipGrab = grabTab:AddToggle({ 
+grabTab:AddToggle({ 
     Name = "노클립 그랩", 
     
     save = true,

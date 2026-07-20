@@ -6050,7 +6050,7 @@ JU[153] = function(...)
         return
     end
         pairs(registeredBlocks)
-    }
+    
     while f do
         if Q.Parent then
             table.insert({}, Q)

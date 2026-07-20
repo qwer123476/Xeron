@@ -6094,7 +6094,7 @@ JU[149] = function(...)
     
     while f do
         if Q.Parent then
-            0 = 0 + 1
+            
         end 
     end
     if 0 == 0 then
@@ -6103,7 +6103,7 @@ JU[149] = function(...)
     while M do
         if Q.Parent then
             Q.AssemblyLinearVelocity = (mel_1.PrimaryPart.Position + Vector3.new(math.cos(mel_10) * c, 0, math.sin(mel_10) * c) - Q.Position) * (baseSpeed + (t - 1) * speedIncrement)
-            0 = 0 + 1
+            
         end 
     end
     return 

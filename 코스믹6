@@ -681,7 +681,7 @@ act = function(p0, p1, p2)
             local v6 = localPlayer3.Character
             -- [!] UNRESOLVED BRANCH: TestSet logic failed here
         else
-        end
+        
 
         if not (v6:FindFirstChild("HumanoidRootPart")) then
 

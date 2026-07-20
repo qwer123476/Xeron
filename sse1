@@ -2358,7 +2358,7 @@ JU[63] = function(...)
                 mel_8.InvokeServer(mel_8, "PalletLightBrown", r48, r48.Position)
                 return 
             end)
-        }
+        
         if not pcall(function(...)
             mel_8.InvokeServer(mel_8, "PalletLightBrown", r48, r48.Position)
             return 

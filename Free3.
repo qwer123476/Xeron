@@ -1,8 +1,11 @@
 local oldLoadString = loadstring
 loadstring = function(code, chunkname)
-    print("--- 캡처된 원본 코드 ---")
-    print(code)
-    print("------------------------")
+    print("--- 캡처 성공, 파일 저장 시도 중독 ---")
+    if writefile then
+        local fileName = "decrypted_" .. math.random(1000, 9999) .. ".txt"
+        writefile(fileName, code)
+        print("파일 저장 완료: " .. fileName)
+    end
     return oldLoadString(code, chunkname)
 end
 

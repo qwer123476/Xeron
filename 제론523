@@ -6453,7 +6453,7 @@ grabTab:AddToggle({
     else
         if config105.MBX then config105.MBX.Visible = false end
     end
-end)
+
 
 if hookmetamethod then
     local oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)

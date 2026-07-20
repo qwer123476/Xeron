@@ -11678,7 +11678,7 @@ localPlayer = Players.LocalPlayer
 Workspace = game:GetService("Workspace")
 ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-__uiSafeBlock("SMTab", function()
+--__uiSafeBlock("SMTab", function()
 	spawnedInToysFolder = Workspace:WaitForChild(localPlayer.Name .. "SpawnedInToys", 5) or Workspace:FindFirstChild(localPlayer.Name .. "SpawnedInToys")
 	if not spawnedInToysFolder then
 		warn("[UI BLOCK ERROR] SMTab: SpawnedInToys folder not found")

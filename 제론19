@@ -6409,7 +6409,7 @@ local function GCP()
     local myPos = camera.CFrame.Position
 
     for _, plr in ipairs(Players:GetPlayers()) do
-        if plr \~= localPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
+        if plr ~= localPlayer and plr.Character and plr.Character:FindFirstChild("Head") then
             local head = plr.Character.Head
             local dist = (head.Position - myPos).Magnitude
 

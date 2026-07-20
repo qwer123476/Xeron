@@ -246,7 +246,7 @@ config19.LP = game.Players.LocalPlayer
 config19.spawnGucci = function()
     -- [25] TailCall: return R0()
 
-    return config19.ReplicatedStorage.MenuToys.SpawnToyRemoteFunction:InvokeServer
+    --return config19.ReplicatedStorage.MenuToys.SpawnToyRemoteFunction:InvokeServer
 end
 config19.setup = function(...)
     config19.spawnGucci()

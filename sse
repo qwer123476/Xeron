@@ -6060,7 +6060,7 @@ JU[153] = function(...)
         return
     end
         math.sqrt(c)
-    }
+    
     for M = math.ceil(X(M)), mel_10, mel_10 do
         for v = 0, D, 0 do
             if 1 > #t then
@@ -6078,7 +6078,7 @@ JU[152] = function(...)
         return
     end
         pairs(registeredBlocks)
-    }
+    
     while Q do
         if c.Parent then
             c.AssemblyLinearVelocity = (e - c.Position) * 8
@@ -6091,7 +6091,7 @@ JU[149] = function(...)
         return
     end
         pairs(registeredBlocks)
-    }
+    
     while f do
         if Q.Parent then
             0 = 0 + 1

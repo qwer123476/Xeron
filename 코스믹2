@@ -346,7 +346,7 @@ antiGrab = function()
     while true do
 
         local v = localPlayer2.Character
-    until v
+    until v end
     local v2 = v:FindFirstChild("HumanoidRootPart")
 end
 v7:AddToggle({

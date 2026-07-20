@@ -6440,8 +6440,6 @@ grabTab:AddToggle({
 
 
 
-RunService.RenderStepped:Connect(function()
-    if not (config105.SA.Show and config105.SA.En and v36) then return end
 
     local target = GCP()
     if target and target.Character and target.Character:FindFirstChild("Head") then

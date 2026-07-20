@@ -259,7 +259,7 @@ end
     end
     return hrp
 end
---[[
+
  function createSafeToggle(name, default, callback)
      isActive = default
      connections = {}
@@ -297,7 +297,7 @@ end
         end
     end
 end
-]]
+
 
 local LnTab = Window:MakeTab({
     Name = "Line",

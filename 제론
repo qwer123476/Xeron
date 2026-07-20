@@ -7331,7 +7331,31 @@ LoopTab:AddToggle({
         end
     end
 })
+LoopTab:AddButton({
+    Name = "구찌 파괴 (all)",
+    Callback = function()
+        local p = game.Players.LocalPlayer
+        local h = p.Character or p.CharacterAdded:Wait()
+        local hrp = h:WaitForChild("HumanoidRootPart")
+        local hum = h:WaitForChild("Humanoid")
+        local startCF = hrp.CFrame
 
+        for _,v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("Model") and v.Name == "CreatureBlobman" then
+                local seat = v:FindFirstChildWhichIsA("VehicleSeat", true)
+                if seat then
+                    seat:Sit(hum)
+                    repeat task.wait() until hum.SeatPart == seat
+                    hum.Sit = false
+                    task.wait(0.2)
+                end
+            end
+        end
+
+        task.wait(0.2)
+        hrp.CFrame = startCF
+    end
+})
     LoopTab:AddSection({
     Name = "오너킥"
 })
@@ -10536,6 +10560,158 @@ plotTab:AddToggle({
         enabled = v
         if v then loop(label) end
     end
+})
+plotTab:AddSection({
+    Name = "무한 집 타임"
+})
+local RTime = nil
+local TimeInHouseLabel = plotTab:AddLabel("Time: 0")
+
+
+local function getCharacterRootPart()
+    if localPlayer.Character and localPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        return localPlayer.Character.HumanoidRootPart
+    end
+    return nil
+end
+
+
+pcall(function()
+    local plots = workspaceService and workspaceService:FindFirstChild("Plots")
+    if not plots then return end
+    plots.DescendantAdded:Connect(function(child)
+        if child.Name == "Value" and 
+           tostring(child.Parent) == "ThisPlotsOwners" and 
+           child.Value == localPlayer.Name then
+            
+            RTime = child:WaitForChild("TimeRemainingNum", 1)
+            if RTime then
+                RTime.Changed:Connect(function(timeInHouse)
+                    TimeInHouseLabel:Set("Time: " .. timeInHouse)
+                end)
+            end
+        end
+    end)
+end)
+
+
+local function teleportToLocation(location)
+    local rootPart = getCharacterRootPart()
+    if not rootPart then return end
+    
+    if location == "Spin" and _G.SavedPositionInSpin then
+        rootPart.CFrame = _G.SavedPositionInSpin
+    elseif location == "House" and _G.SavedPositionOutHouse then
+        rootPart.CFrame = _G.SavedPositionOutHouse
+    end
+end
+
+
+function saveCharacterPosition(location)
+    local rootPart = getCharacterRootPart()
+    if not rootPart then return end
+    
+    if location == "House" then
+        _G.SavedPositionOutHouse = rootPart.CFrame
+    elseif location == "Spin" then
+        _G.SavedPositionInSpin = rootPart.CFrame
+    end
+end
+
+
+local function updateTimeInHouseLabel()
+    while true do
+        pcall(function()
+            if workspaceService and workspaceService.Plots then
+                for _, descendant in pairs(workspaceService.Plots:GetDescendants()) do
+                    if descendant.Name == "TimeRemainingNum" and 
+                       descendant.Parent and 
+                       descendant.Parent.Value == localPlayer.Name then
+                        
+                        _G.RemainingTimeInHouse = descendant
+                        
+                        descendant.Changed:Connect(function(timeRemaining)
+                            TimeInHouseLabel:Set("Time: " .. timeRemaining)
+                        end)
+                        break
+                    end
+                end
+            end
+        end)
+        task.wait(1)
+    end
+end
+
+task.spawn(updateTimeInHouseLabel)
+
+local preserveTimeToggle = plotTab:AddToggle({
+    Name = "무한 시간",
+    Default = false,
+    Callback = function(isEnabled)
+        _G.AutoSaveHouseTime = isEnabled
+        
+        if isEnabled then
+            task.spawn(function()
+                while _G.AutoSaveHouseTime do
+                    pcall(function()
+                        if localPlayer.InfiniteHouseTime and localPlayer.InfiniteHouseTime.Value then
+                            preserveTimeToggle:Set(false)
+                            OrionLib:MakeNotification({
+                                Name = "House",
+                                Content = "You won Infinite Gamepass House!",
+                                Image = "rbxassetid://4483345998",
+                                Time = 5
+                            })
+                            return
+                        end
+                        
+                        local remainingTime = _G.RemainingTimeInHouse
+                        
+                        if typeof(remainingTime) == "Instance" and
+                           remainingTime:IsDescendantOf(workspaceService) and
+                           remainingTime:IsA("IntValue") then
+                            
+                            local plotArea = remainingTime.Parent.Parent.Parent.Parent:FindFirstChild("PlotArea")
+                            
+                            if remainingTime.Value < 20 and ChangeActivityPriority(4) then
+                                OrionLib:MakeNotification({
+                                    Name = "집 시간",
+                                    Content = "Time: " .. remainingTime.Value .. "s - 텔포",
+                                    Image = "rbxassetid://4483345998",
+                                    Time = 3
+                                })
+                                
+                                saveCharacterPosition("House")
+                                task.wait()
+                                
+                                repeat
+                                    if not _G.AutoSaveHouseTime then break end
+                                    
+                                    local rootPart = getCharacterRootPart()
+                                    if rootPart and plotArea then
+                                        rootPart.CFrame = CFrame.new(plotArea.Position) + Vector3.new(0, 5, 0)
+                                    end
+                                    
+                                    task.wait(1)
+                                until not remainingTime.Parent or 
+                                      not _G.AutoSaveHouseTime or 
+                                      remainingTime.Value > 15
+                                
+                                if _G.AutoSaveHouseTime then
+                                    teleportToLocation("House")
+                                end
+                                
+                                ChangeActivityPriority(0)
+                            end
+                        end
+                    end)
+                    task.wait(2)
+                end
+            end)
+        end
+    end,
+    Save = true,
+    Flag = "autosavehousetimeremaining_toggle"
 })
 funTab:AddSection({
     Name = "꼬추 만들기"

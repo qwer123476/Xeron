@@ -1651,12 +1651,7 @@ local function trackBlobmans()
     end
 end
 
-ResetManager:RegisterCharacterCallback(function()
-    if trackBlobmansActive then
-        task.wait(1)
-        trackBlobmans()
-    end
-end)
+
 
 PlTab:AddToggle({
     Name = "Freeze Blobman",

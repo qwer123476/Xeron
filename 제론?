@@ -6438,38 +6438,7 @@ grabTab:AddToggle({
     end,
 })
 
-v35:R109({
-    Name = "Silent Aim Target Color",
-    Default = config105.SA.Col,
-    Callback = function(color)
-        config105.SA.Col = color
-        if config105.MBX then config105.MBX.Color = color end
-    end,
-})
 
-RunService.Heartbeat:Connect(function()
-    if not config105.SA.En then return end
-
-    local success, pingStr = pcall(function()
-        return config105.Network.ServerStatsItem["Data Ping"]:GetValueString()
-    end)
-
-    if success and pingStr then
-        local ping = tonumber(pingStr:match("%d+")) or 50
-
-        if ping < 20 then config105.CPA = 0.11
-        elseif ping < 30 then config105.CPA = 0.115
-        elseif ping < 40 then config105.CPA = 0.12
-        elseif ping < 50 then config105.CPA = 0.125
-        elseif ping < 60 then config105.CPA = 0.13
-        elseif ping < 70 then config105.CPA = 0.135
-        elseif ping < 80 then config105.CPA = 0.14
-        elseif ping < 90 then config105.CPA = 0.145
-        elseif ping < 100 then config105.CPA = 0.15
-        elseif ping < 110 then config105.CPA = 0.155
-        else config105.CPA = config105.SA.MHP_A end
-    end
-end)
 
 RunService.RenderStepped:Connect(function()
     if not (config105.SA.Show and config105.SA.En and v36) then return end

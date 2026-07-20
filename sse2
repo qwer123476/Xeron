@@ -4399,7 +4399,7 @@ JU[125] = function(...)
                 task.wait(1)
             end
                 mel_10(nil)
-            }
+            
             for R, M in pairs(X(M)) do
                 if M.IsA(M, "Model") then
                     if M.Name == "NpcRobloxianMascot" then

@@ -6429,7 +6429,7 @@ end
 
 local v36 = true
 
-v35:AddToggle({
+grabRab:AddToggle({
     Name = "Show Silent Aim Target",
     Default = config105.SA.Show,
     Callback = function(state)

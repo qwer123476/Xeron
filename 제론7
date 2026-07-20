@@ -11678,17 +11678,17 @@ localPlayer = Players.LocalPlayer
 Workspace = game:GetService("Workspace")
 ReplicatedStorage = game:GetService("ReplicatedStorage")
 
-__uiSafeBlock("ExplosionTab", function()
+__uiSafeBlock("SMTab", function()
 	spawnedInToysFolder = Workspace:WaitForChild(localPlayer.Name .. "SpawnedInToys", 5) or Workspace:FindFirstChild(localPlayer.Name .. "SpawnedInToys")
 	if not spawnedInToysFolder then
-		warn("[UI BLOCK ERROR] ExplosionTab: SpawnedInToys folder not found")
+		warn("[UI BLOCK ERROR] SMTab: SpawnedInToys folder not found")
 		return
 	end
 
 	toysLimitCapValue = localPlayer:FindFirstChild("ToysLimitCap") or localPlayer:WaitForChild("ToysLimitCap", 5)
 	usedToyPointsValue = localPlayer:FindFirstChild("UsedToyPoints") or localPlayer:WaitForChild("UsedToyPoints", 5)
 	if not (toysLimitCapValue and usedToyPointsValue) then
-		warn("[UI BLOCK ERROR] ExplosionTab: required values not found (ToysLimitCap/UsedToyPoints)")
+		warn("[UI BLOCK ERROR] SMTab: required values not found (ToysLimitCap/UsedToyPoints)")
 		return
 	end
 
@@ -11696,7 +11696,7 @@ __uiSafeBlock("ExplosionTab", function()
 	local grabEvents = ReplicatedStorage:FindFirstChild("GrabEvents") or ReplicatedStorage:WaitForChild("GrabEvents", 5)
 	BombEvents = ReplicatedStorage:FindFirstChild("BombEvents") or ReplicatedStorage:WaitForChild("BombEvents", 5)
 	if not (menuToys and grabEvents and BombEvents) then
-		warn("[UI BLOCK ERROR] ExplosionTab: required services not found (MenuToys/GrabEvents/BombEvents)")
+		warn("[UI BLOCK ERROR] SMTab: required services not found (MenuToys/GrabEvents/BombEvents)")
 		return
 	end
 
@@ -11704,7 +11704,7 @@ __uiSafeBlock("ExplosionTab", function()
 	DeleteToyRE = menuToys:FindFirstChild("DestroyToy") or menuToys:WaitForChild("DestroyToy", 5)
 	setNetworkOwnerEvent = grabEvents:FindFirstChild("SetNetworkOwner") or grabEvents:WaitForChild("SetNetworkOwner", 5)
 	if not (SpawnToyRF and DeleteToyRE and setNetworkOwnerEvent) then
-		warn("[UI BLOCK ERROR] ExplosionTab: required remotes not found")
+		warn("[UI BLOCK ERROR] SMTab: required remotes not found")
 		return
 	end
 

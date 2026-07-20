@@ -1,3 +1,5 @@
+
+--[[
 loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
@@ -1055,7 +1057,7 @@ end
 
 _G.ResetManager = ResetManager
 ResetManager:Start()
-
+]]
 
      local v448, vu449, vu450, vu451
         _G.TP_Priority = 0

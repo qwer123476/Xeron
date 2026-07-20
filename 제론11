@@ -8140,7 +8140,7 @@ local Loop1 = LoopTab:AddToggle({
 
 
 
-local Loop2 = LoopTab:AddToggle({
+LoopTab:AddToggle({
     Name = "루프킥   <font color='rgb(0,255,0)'>[그랩]</font>",
     Default = false,
     Flag = "21",
@@ -8343,7 +8343,7 @@ LoopTab:AddButton({
 antiTab:AddSection({
     Name = "보호"
 })
-local AntiGrabV1 = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "무질량 이동 | TP",
     
     save = true,

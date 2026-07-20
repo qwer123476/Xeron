@@ -1,5 +1,5 @@
 --This file was generated with Lua Land Hub bot | https://discord.gg/dfZDFdwDN
-JU[7] = 27291772432804
+--JU[7] = 27291772432804
 r16 = setmetatable({}, {
     ["__index"] = r23,
     ["__metatable"] = nil

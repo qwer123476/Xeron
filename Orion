@@ -1,0 +1,1057 @@
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
+local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
+local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
+local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
+local SaveManager = loadstring(game:HttpGet(repo .. "addons/SaveManager.lua"))()
+
+local Options = Library.Options
+local Toggles = Library.Toggles
+
+Library.ForceCheckbox = false
+
+-- OrionLib shim (we keep OrionLib.Themes below intact)
+local OrionLib = {
+	Themes = {},
+	Flags = {},
+	ThemeObjects = {},
+}
+
+do
+	setmetatable(OrionLib.Flags, {
+		__index = function(t, k)
+			local flag = {
+				Set = function() end,
+				SetValue = function() end,
+				Get = function() return nil end,
+			}
+			rawset(t, k, flag)
+			return flag
+		end,
+	})
+
+	local function safeNotify(title, content, time)
+		pcall(function()
+			Library:Notify({
+				Title = tostring(title or "Notification"),
+				Description = tostring(content or ""),
+				Time = tonumber(time) or 5,
+			})
+		end)
+	end
+
+	function OrionLib:MakeNotification(info)
+		return safeNotify(info and (info.Name or info.Title), info and (info.Content or info.Description), info and info.Time)
+	end
+
+	local function getGroup(tabProxy)
+		if tabProxy._currentGroup then
+			return tabProxy._currentGroup
+		end
+		-- alternate sides to mimic left/right distribution
+		local side = tabProxy._side or 1
+		local groupName = (tabProxy._name or "Tab") .. " Main"
+		local grp = (side == 1) and tabProxy._tab:AddLeftGroupbox(groupName) or tabProxy._tab:AddRightGroupbox(groupName)
+		tabProxy._side = (side == 1) and 2 or 1
+		tabProxy._currentGroup = grp
+		return grp
+	end
+
+	local function makeLabelProxy(lbl)
+		return {
+			Set = function(_, v)
+				pcall(function() lbl:SetText(tostring(v)) end)
+			end,
+			SetText = function(_, v)
+				pcall(function() lbl:SetText(tostring(v)) end)
+			end,
+		}
+	end
+
+	local function makeToggleProxy(t)
+		local proxy = {
+			_obj = t,
+			Set = function(_, v) pcall(function() t:SetValue(v) end) end,
+			SetValue = function(_, v) pcall(function() t:SetValue(v) end) end,
+			Get = function() return t.Value end,
+		}
+		setmetatable(proxy, {
+			__index = function(_, k)
+				return t[k]
+			end,
+			__newindex = function(_, k, v)
+				t[k] = v
+			end,
+		})
+		return proxy
+	end
+
+	local function makeDropdownProxy(d)
+		if type(d) ~= "table" then
+			return d
+		end
+		d.Set = function(_, v)
+			pcall(function() d:SetValue(v) end)
+		end
+		d.SetValue = function(_, v)
+			pcall(function() d:SetValue(v) end)
+		end
+		d.Get = function()
+			return d.Value
+		end
+		d.Refresh = function(_, values, keep)
+			pcall(function() d:SetValues(values or {}) end)
+			if not keep then
+				pcall(function() d:SetValue(nil) end)
+			end
+		end
+		return d
+	end
+
+	local function ensureFlagObject(flagName, obj)
+		if type(flagName) == "string" and flagName ~= "" and obj ~= nil then
+			OrionLib.Flags[flagName] = obj
+		end
+	end
+
+	local function makeNoopSectionProxy()
+		local noop = {}
+		setmetatable(noop, {
+			__index = function(_, k)
+				if type(k) == "string" and k:sub(1, 3) == "Add" then
+					return function() return noop end
+				end
+				return nil
+			end,
+		})
+		return noop
+	end
+
+	local function makeSectionProxy(tabProxy, grp)
+		local section = {}
+
+		function section:AddToggle(ti)
+			local t = grp:AddToggle(ti.Name or "Toggle", {
+				Text = ti.Name or "Toggle",
+				Default = ti.Default == true,
+				Callback = ti.Callback,
+			})
+			local proxy = makeToggleProxy(t)
+			ensureFlagObject(ti and ti.Flag, proxy)
+			return proxy
+		end
+
+		function section:AddButton(ti)
+			grp:AddButton(ti.Name or "Button", {
+				Text = ti.Name or "Button",
+				Func = ti.Callback or ti.Func,
+			})
+		end
+
+		function section:AddDropdown(ti)
+			local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+			local d = grp:AddDropdown(ti.Name or "Dropdown", {
+				Text = ti.Name or "Dropdown",
+				Values = ti.Options or {},
+				Default = ti.Default,
+				Multi = multi,
+				Callback = ti.Callback,
+			})
+			d = makeDropdownProxy(d)
+			ensureFlagObject(ti and ti.Flag, d)
+			return d
+		end
+
+		function section:AddTeamsDropdown(ti)
+			local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+			local d = grp:AddDropdown(ti.Name or "Teams", {
+				Text = ti.Name or "Teams",
+				SpecialType = "Team",
+				Multi = multi,
+				Default = ti and ti.Default or nil,
+				Callback = function(val)
+					if not ti or not ti.Callback then return end
+					if multi and type(val) == "table" then
+						local out = {}
+						for name, enabled in pairs(val) do
+							if enabled then
+								table.insert(out, name)
+							end
+						end
+						ti.Callback(out)
+					else
+						ti.Callback(val)
+					end
+				end,
+			})
+			d = makeDropdownProxy(d)
+			ensureFlagObject(ti and ti.Flag, d)
+			return d
+		end
+
+		function section:AddColorpicker(ti)
+			local name = (ti and ti.Name) or "Color"
+			local flag = ti and ti.Flag
+			local default = (ti and ti.Default) or Color3.new(1, 1, 1)
+
+			-- Obsidian exposes ColorPicker as an addon (BaseAddons) attached to a toggle.
+			-- We create an inert toggle to host the color picker so sigma code remains compatible.
+			local host = grp:AddToggle("__cp_" .. tostring(name), {
+				Text = tostring(name),
+				Default = false,
+				Callback = function() end,
+			})
+			local cp = host:AddColorPicker("__cp_val_" .. tostring(flag or name), {
+				Title = tostring(name),
+				Default = default,
+				Callback = function(c)
+					if ti and ti.Callback then
+						ti.Callback(c)
+					end
+				end,
+			})
+			ensureFlagObject(flag, cp)
+			return cp
+		end
+		section.AddColorPicker = section.AddColorpicker
+
+		function section:AddSubSection(ti)
+			return tabProxy:AddSection(ti)
+		end
+
+		function section:AddPlayersDropdown(ti)
+			local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+			local d = grp:AddDropdown(ti.Name or "Players", {
+				Text = ti.Name or "Players",
+				SpecialType = "Player",
+				ExcludeLocalPlayer = ti and (ti.ExcludeLocalPlayer == true or ti.RemoveDP == true),
+				Multi = multi,
+				Default = ti and ti.Default or nil,
+				Callback = function(val)
+					if not ti or not ti.Callback then return end
+					if multi and type(val) == "table" then
+						local out = {}
+						for name, enabled in pairs(val) do
+							if enabled then
+								table.insert(out, name)
+							end
+						end
+						ti.Callback(out)
+					else
+						ti.Callback(val)
+					end
+				end,
+			})
+			d = makeDropdownProxy(d)
+			ensureFlagObject(ti and ti.Flag, d)
+			return d
+		end
+
+		function section:AddSlider(ti)
+			local s = grp:AddSlider(ti.Name or "Slider", {
+				Text = ti.Name or "Slider",
+				Min = tonumber(ti.Min) or 0,
+				Max = tonumber(ti.Max) or 100,
+				Default = tonumber(ti.Default) or tonumber(ti.Min) or 0,
+				Rounding = 0,
+				Callback = ti.Callback,
+			})
+			pcall(function()
+				if type(s) == "table" and s.Set == nil and s.SetValue ~= nil then
+					s.Set = function(_, v) s:SetValue(v) end
+				end
+			end)
+			ensureFlagObject(ti and ti.Flag, s)
+			return s
+		end
+
+		function section:AddTextbox(ti)
+			local i = grp:AddInput(ti.Name or "Textbox", {
+				Text = ti.Name or "Textbox",
+				Default = tostring(ti.Default or ""),
+				Numeric = false,
+				Finished = true,
+				Callback = ti.Callback,
+			})
+			pcall(function()
+				if type(i) == "table" and i.Set == nil and i.SetValue ~= nil then
+					i.Set = function(_, v) i:SetValue(v) end
+				end
+			end)
+			ensureFlagObject(ti and ti.Flag, i)
+			return i
+		end
+
+		function section:AddLabel(text)
+			local lbl = grp:AddLabel(tostring(text or ""))
+			return makeLabelProxy(lbl)
+		end
+
+		function section:AddBind(ti)
+			local kp = grp:AddKeyPicker(ti.Name or "Bind", {
+				Text = ti.Name or "Bind",
+				Default = ti.Default,
+				Mode = ti.Hold and "Hold" or "Toggle",
+				Callback = ti.Callback,
+			})
+			pcall(function()
+				if type(kp) == "table" and kp.Set == nil and kp.SetValue ~= nil then
+					kp.Set = function(_, v) kp:SetValue(v) end
+				end
+			end)
+			ensureFlagObject(ti and ti.Flag, kp)
+			return kp
+		end
+
+		function section:AddSection(ti)
+			return tabProxy:AddSection(ti)
+		end
+
+		function section:AddParagraph(ti)
+			local title = (ti and ti.Name) or (ti and ti.Title) or ""
+			local content = (ti and ti.Content) or (ti and ti.Description) or ""
+			if title ~= "" then
+				grp:AddLabel(tostring(title))
+			end
+			if content ~= "" then
+				grp:AddLabel(tostring(content))
+			end
+			return {}
+		end
+
+		return section
+	end
+
+	function OrionLib:MakeWindow(info)
+		local obsidianWindow = Library:CreateWindow({
+			Title = tostring(info and info.Name or "Window"),
+			Footer = tostring(info and info.IntroText or ""),
+			NotifySide = "Right",
+			ShowCustomCursor = true,
+		})
+
+		local windowProxy = {}
+		function windowProxy:MakeTab(tabInfo)
+			local tabName = tostring(tabInfo and tabInfo.Name or "Tab")
+			local obsidianTab = obsidianWindow:AddTab(tabName, "box")
+			local tabProxy = {
+				_tab = obsidianTab,
+				_name = tabName,
+				_side = 1,
+				_currentGroup = nil,
+			}
+			setmetatable(tabProxy, {
+				__index = function(t, k)
+					if type(k) == "string" and k:sub(1, 3) == "Add" then
+						return function() return makeNoopSectionProxy() end
+					end
+					return rawget(t, k)
+				end,
+			})
+
+			function tabProxy:AddToggle(ti)
+				local grp = getGroup(tabProxy)
+				local t = grp:AddToggle(ti.Name or "Toggle", {
+					Text = ti.Name or "Toggle",
+					Default = ti.Default == true,
+					Callback = ti.Callback,
+				})
+				local proxy = makeToggleProxy(t)
+				ensureFlagObject(ti and ti.Flag, proxy)
+				return proxy
+			end
+
+			function tabProxy:AddButton(ti)
+				local grp = getGroup(tabProxy)
+				grp:AddButton(ti.Name or "Button", {
+					Text = ti.Name or "Button",
+					Func = ti.Callback or ti.Func,
+				})
+			end
+
+			function tabProxy:AddDropdown(ti)
+				local grp = getGroup(tabProxy)
+				local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+				local d = grp:AddDropdown(ti.Name or "Dropdown", {
+					Text = ti.Name or "Dropdown",
+					Values = ti.Options or {},
+					Default = ti.Default,
+					Multi = multi,
+					Callback = ti.Callback,
+				})
+				d = makeDropdownProxy(d)
+				ensureFlagObject(ti and ti.Flag, d)
+				return d
+			end
+
+			function tabProxy:AddTeamsDropdown(ti)
+				local grp = getGroup(tabProxy)
+				local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+				local d = grp:AddDropdown(ti.Name or "Teams", {
+					Text = ti.Name or "Teams",
+					SpecialType = "Team",
+					Multi = multi,
+					Default = ti and ti.Default or nil,
+					Callback = function(val)
+						if not ti or not ti.Callback then return end
+						if multi and type(val) == "table" then
+							local out = {}
+							for name, enabled in pairs(val) do
+								if enabled then
+									table.insert(out, name)
+								end
+							end
+							ti.Callback(out)
+						else
+							ti.Callback(val)
+						end
+					end,
+				})
+				d = makeDropdownProxy(d)
+				ensureFlagObject(ti and ti.Flag, d)
+				return d
+			end
+
+			function tabProxy:AddColorpicker(ti)
+				local grp = getGroup(tabProxy)
+				return makeSectionProxy(tabProxy, grp):AddColorpicker(ti)
+			end
+			tabProxy.AddColorPicker = tabProxy.AddColorpicker
+
+			function tabProxy:AddSubSection(ti)
+				return tabProxy:AddSection(ti)
+			end
+
+			function tabProxy:AddPlayersDropdown(ti)
+				local grp = getGroup(tabProxy)
+				local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
+				local d = grp:AddDropdown(ti.Name or "Players", {
+					Text = ti.Name or "Players",
+					SpecialType = "Player",
+					ExcludeLocalPlayer = ti and (ti.ExcludeLocalPlayer == true or ti.RemoveDP == true),
+					Multi = multi,
+					Default = ti and ti.Default or nil,
+					Callback = function(val)
+						if not ti or not ti.Callback then return end
+						if multi and type(val) == "table" then
+							local out = {}
+							for name, enabled in pairs(val) do
+								if enabled then
+									table.insert(out, name)
+								end
+							end
+							ti.Callback(out)
+						else
+							ti.Callback(val)
+						end
+					end,
+				})
+				d = makeDropdownProxy(d)
+				ensureFlagObject(ti and ti.Flag, d)
+				return d
+			end
+
+			function tabProxy:AddSlider(ti)
+				local grp = getGroup(tabProxy)
+				local s = grp:AddSlider(ti.Name or "Slider", {
+					Text = ti.Name or "Slider",
+					Min = tonumber(ti.Min) or 0,
+					Max = tonumber(ti.Max) or 100,
+					Default = tonumber(ti.Default) or tonumber(ti.Min) or 0,
+					Rounding = 0,
+					Callback = ti.Callback,
+				})
+				pcall(function()
+					if type(s) == "table" and s.Set == nil and s.SetValue ~= nil then
+						s.Set = function(_, v) s:SetValue(v) end
+					end
+				end)
+				ensureFlagObject(ti and ti.Flag, s)
+				return s
+			end
+
+			function tabProxy:AddTextbox(ti)
+				local grp = getGroup(tabProxy)
+				local i = grp:AddInput(ti.Name or "Textbox", {
+					Text = ti.Name or "Textbox",
+					Default = tostring(ti.Default or ""),
+					Numeric = false,
+					Finished = true,
+					Callback = ti.Callback,
+				})
+				pcall(function()
+					if type(i) == "table" and i.Set == nil and i.SetValue ~= nil then
+						i.Set = function(_, v) i:SetValue(v) end
+					end
+				end)
+				ensureFlagObject(ti and ti.Flag, i)
+				return i
+			end
+
+			function tabProxy:AddLabel(text)
+				local grp = getGroup(tabProxy)
+				local lbl = grp:AddLabel(tostring(text or ""))
+				return makeLabelProxy(lbl)
+			end
+
+			function tabProxy:AddBind(ti)
+				local grp = getGroup(tabProxy)
+				local kp = grp:AddKeyPicker(ti.Name or "Bind", {
+					Text = ti.Name or "Bind",
+					Default = ti.Default,
+					Mode = ti.Hold and "Hold" or "Toggle",
+					Callback = ti.Callback,
+				})
+				pcall(function()
+					if type(kp) == "table" and kp.Set == nil and kp.SetValue ~= nil then
+						kp.Set = function(_, v) kp:SetValue(v) end
+					end
+				end)
+				ensureFlagObject(ti and ti.Flag, kp)
+				return kp
+			end
+
+			function tabProxy:AddSection(ti)
+				local side = tabProxy._side or 1
+				local name = (typeof(ti) == "table" and ti.Name) or tostring(ti or "")
+				if not name or name == "" then
+					name = (tabProxy._name or "Tab") .. " Section"
+				end
+				local grp = (side == 1) and tabProxy._tab:AddLeftGroupbox(name) or tabProxy._tab:AddRightGroupbox(name)
+				tabProxy._side = (side == 1) and 2 or 1
+				tabProxy._currentGroup = grp
+				return makeSectionProxy(tabProxy, grp)
+			end
+
+			function tabProxy:AddParagraph(ti)
+				local grp = getGroup(tabProxy)
+				local title = (ti and ti.Name) or (ti and ti.Title) or ""
+				local content = (ti and ti.Content) or (ti and ti.Description) or ""
+				if title ~= "" then
+					grp:AddLabel(tostring(title))
+				end
+				if content ~= "" then
+					grp:AddLabel(tostring(content))
+				end
+				return {}
+			end
+
+			return tabProxy
+		end
+
+		return windowProxy
+	end
+end
+
+OrionLib.Themes.RedDevil = {
+    Main = Color3.fromRGB(10, 0, 0),
+    Second = Color3.fromRGB(20, 0, 0),
+    Stroke = Color3.fromRGB(100, 0, 0),
+    Divider = Color3.fromRGB(100, 0, 0),
+    Text = Color3.fromRGB(255, 30, 30),
+    TextDark = Color3.fromRGB(130, 20, 20)
+}
+
+OrionLib.Themes.BloodMoon = {
+    Main = Color3.fromRGB(15, 0, 5),
+    Second = Color3.fromRGB(25, 0, 10),
+    Stroke = Color3.fromRGB(120, 0, 30),
+    Divider = Color3.fromRGB(120, 0, 30),
+    Text = Color3.fromRGB(255, 50, 70),
+    TextDark = Color3.fromRGB(160, 25, 45)
+}
+
+OrionLib.Themes.Inferno = {
+    Main = Color3.fromRGB(20, 5, 0),
+    Second = Color3.fromRGB(35, 10, 0),
+    Stroke = Color3.fromRGB(180, 40, 0),
+    Divider = Color3.fromRGB(180, 40, 0),
+    Text = Color3.fromRGB(255, 90, 50),
+    TextDark = Color3.fromRGB(200, 60, 25)
+}
+
+OrionLib.Themes.Demon = {
+    Main = Color3.fromRGB(12, 0, 8),
+    Second = Color3.fromRGB(22, 0, 15),
+    Stroke = Color3.fromRGB(110, 0, 70),
+    Divider = Color3.fromRGB(110, 0, 70),
+    Text = Color3.fromRGB(255, 60, 200),
+    TextDark = Color3.fromRGB(170, 30, 120)
+}
+
+OrionLib.Themes.Hell = {
+    Main = Color3.fromRGB(18, 0, 3),
+    Second = Color3.fromRGB(28, 0, 8),
+    Stroke = Color3.fromRGB(140, 0, 40),
+    Divider = Color3.fromRGB(140, 0, 40),
+    Text = Color3.fromRGB(255, 70, 90),
+    TextDark = Color3.fromRGB(180, 35, 55)
+}
+
+OrionLib.Themes.Satan = {
+    Main = Color3.fromRGB(8, 0, 12),
+    Second = Color3.fromRGB(18, 0, 22),
+    Stroke = Color3.fromRGB(90, 0, 130),
+    Divider = Color3.fromRGB(90, 0, 130),
+    Text = Color3.fromRGB(200, 60, 255),
+    TextDark = Color3.fromRGB(130, 30, 170)
+}
+
+OrionLib.Themes.DarkNeon = {
+    Main = Color3.fromRGB(10, 10, 15),
+    Second = Color3.fromRGB(15, 15, 25),
+    Stroke = Color3.fromRGB(0, 255, 150),
+    Divider = Color3.fromRGB(0, 200, 120),
+    Text = Color3.fromRGB(0, 255, 150),
+    TextDark = Color3.fromRGB(0, 120, 80)
+}
+
+OrionLib.Themes.IceBlue = {
+    Main = Color3.fromRGB(0, 25, 40),
+    Second = Color3.fromRGB(0, 40, 60),
+    Stroke = Color3.fromRGB(0, 140, 255),
+    Divider = Color3.fromRGB(0, 100, 180),
+    Text = Color3.fromRGB(150, 200, 255),
+    TextDark = Color3.fromRGB(80, 120, 200)
+}
+
+OrionLib.Themes.FireHell = {
+    Main = Color3.fromRGB(20, 0, 0),
+    Second = Color3.fromRGB(40, 5, 5),
+    Stroke = Color3.fromRGB(255, 60, 0),
+    Divider = Color3.fromRGB(200, 40, 0),
+    Text = Color3.fromRGB(255, 130, 60),
+    TextDark = Color3.fromRGB(150, 60, 40)
+}
+
+OrionLib.Themes.MidnightPurple = {
+    Main = Color3.fromRGB(15, 0, 30),
+    Second = Color3.fromRGB(25, 0, 45),
+    Stroke = Color3.fromRGB(150, 0, 255),
+    Divider = Color3.fromRGB(110, 0, 200),
+    Text = Color3.fromRGB(200, 150, 255),
+    TextDark = Color3.fromRGB(120, 80, 170)
+}
+
+OrionLib.Themes.PastelDream = {
+    Main = Color3.fromRGB(240, 220, 255),
+    Second = Color3.fromRGB(230, 200, 255),
+    Stroke = Color3.fromRGB(200, 150, 255),
+    Divider = Color3.fromRGB(180, 120, 230),
+    Text = Color3.fromRGB(90, 40, 140),
+    TextDark = Color3.fromRGB(120, 90, 150)
+}
+
+OrionLib.Themes.ToxicGreen = {
+    Main = Color3.fromRGB(5, 15, 5),
+    Second = Color3.fromRGB(10, 25, 10),
+    Stroke = Color3.fromRGB(0, 255, 0),
+    Divider = Color3.fromRGB(0, 200, 0),
+    Text = Color3.fromRGB(120, 255, 120),
+    TextDark = Color3.fromRGB(60, 160, 60)
+}
+
+OrionLib.Themes.CyberRed = {
+    Main = Color3.fromRGB(15, 0, 0),
+    Second = Color3.fromRGB(25, 0, 0),
+    Stroke = Color3.fromRGB(255, 0, 60),
+    Divider = Color3.fromRGB(200, 0, 40),
+    Text = Color3.fromRGB(255, 130, 150),
+    TextDark = Color3.fromRGB(150, 70, 90)
+}
+
+OrionLib.Themes.VaporWave = {
+    Main = Color3.fromRGB(30, 0, 50),
+    Second = Color3.fromRGB(40, 0, 70),
+    Stroke = Color3.fromRGB(255, 0, 200),
+    Divider = Color3.fromRGB(100, 200, 255),
+    Text = Color3.fromRGB(255, 180, 230),
+    TextDark = Color3.fromRGB(150, 100, 180)
+}
+
+OrionLib.Themes.SteelGray = {
+    Main = Color3.fromRGB(25, 25, 25),
+    Second = Color3.fromRGB(40, 40, 40),
+    Stroke = Color3.fromRGB(160, 160, 160),
+    Divider = Color3.fromRGB(120, 120, 120),
+    Text = Color3.fromRGB(220, 220, 220),
+    TextDark = Color3.fromRGB(150, 150, 150)
+}
+
+OrionLib.Themes.GoldElite = {
+    Main = Color3.fromRGB(20, 15, 0),
+    Second = Color3.fromRGB(35, 25, 0),
+    Stroke = Color3.fromRGB(255, 200, 0),
+    Divider = Color3.fromRGB(200, 150, 0),
+    Text = Color3.fromRGB(255, 220, 100),
+    TextDark = Color3.fromRGB(180, 140, 60)
+}
+
+OrionLib.Themes.OceanDeep = {
+    Main = Color3.fromRGB(0, 5, 20),
+    Second = Color3.fromRGB(0, 10, 40),
+    Stroke = Color3.fromRGB(0, 90, 180),
+    Divider = Color3.fromRGB(0, 70, 130),
+    Text = Color3.fromRGB(120, 180, 255),
+    TextDark = Color3.fromRGB(60, 120, 180)
+}
+
+OrionLib.Themes.Matrix = {
+    Main = Color3.fromRGB(0, 0, 0),
+    Second = Color3.fromRGB(10, 10, 10),
+    Stroke = Color3.fromRGB(0, 255, 0),
+    Divider = Color3.fromRGB(0, 180, 0),
+    Text = Color3.fromRGB(0, 255, 0),
+    TextDark = Color3.fromRGB(0, 160, 0)
+}
+
+OrionLib.Themes.Sunset = {
+    Main = Color3.fromRGB(40, 0, 10),
+    Second = Color3.fromRGB(70, 20, 20),
+    Stroke = Color3.fromRGB(255, 80, 0),
+    Divider = Color3.fromRGB(200, 50, 0),
+    Text = Color3.fromRGB(255, 140, 80),
+    TextDark = Color3.fromRGB(180, 90, 60)
+}
+
+OrionLib.Themes.ArcticWhite = {
+    Main = Color3.fromRGB(230, 230, 230),
+    Second = Color3.fromRGB(255, 255, 255),
+    Stroke = Color3.fromRGB(180, 180, 180),
+    Divider = Color3.fromRGB(150, 150, 150),
+    Text = Color3.fromRGB(40, 40, 40),
+    TextDark = Color3.fromRGB(100, 100, 100)
+}
+
+OrionLib.Themes.RoyalBlue = {
+    Main = Color3.fromRGB(0, 10, 50),
+    Second = Color3.fromRGB(0, 20, 80),
+    Stroke = Color3.fromRGB(0, 70, 255),
+    Divider = Color3.fromRGB(0, 50, 180),
+    Text = Color3.fromRGB(100, 160, 255),
+    TextDark = Color3.fromRGB(70, 110, 180)
+}
+
+OrionLib.Themes.InfernoRed = {
+    Main = Color3.fromRGB(25, 0, 0),
+    Second = Color3.fromRGB(40, 0, 0),
+    Stroke = Color3.fromRGB(255, 20, 20),
+    Divider = Color3.fromRGB(200, 0, 0),
+    Text = Color3.fromRGB(255, 120, 120),
+    TextDark = Color3.fromRGB(150, 60, 60)
+}
+
+OrionLib.Themes.PinkGalaxy = {
+    Main = Color3.fromRGB(40, 0, 40),
+    Second = Color3.fromRGB(55, 0, 55),
+    Stroke = Color3.fromRGB(255, 0, 255),
+    Divider = Color3.fromRGB(200, 0, 200),
+    Text = Color3.fromRGB(255, 170, 255),
+    TextDark = Color3.fromRGB(180, 100, 180)
+}
+
+OrionLib.Themes.SteelBlueDark = {
+    Main = Color3.fromRGB(10, 20, 30),
+    Second = Color3.fromRGB(20, 30, 50),
+    Stroke = Color3.fromRGB(60, 120, 180),
+    Divider = Color3.fromRGB(40, 90, 140),
+    Text = Color3.fromRGB(150, 200, 255),
+    TextDark = Color3.fromRGB(90, 130, 180)
+}
+
+OrionLib.Themes.CoffeeBrown = {
+    Main = Color3.fromRGB(30, 15, 5),
+    Second = Color3.fromRGB(45, 25, 15),
+    Stroke = Color3.fromRGB(150, 90, 40),
+    Divider = Color3.fromRGB(120, 70, 30),
+    Text = Color3.fromRGB(220, 180, 130),
+    TextDark = Color3.fromRGB(150, 120, 90)
+}
+
+OrionLib.Themes.GhostWhite = {
+    Main = Color3.fromRGB(245, 245, 255),
+    Second = Color3.fromRGB(230, 230, 250),
+    Stroke = Color3.fromRGB(200, 200, 220),
+    Divider = Color3.fromRGB(170, 170, 190),
+    Text = Color3.fromRGB(40, 40, 60),
+    TextDark = Color3.fromRGB(90, 90, 120)
+}
+
+OrionLib.Themes.PatoSigma = {
+        Main = Color3.fromRGB(0, 0, 0),
+        Second = Color3.fromRGB(10, 10, 10),
+        Stroke = Color3.fromRGB(40, 40, 40),
+        Divider = Color3.fromRGB(40, 40, 40),
+        Text = Color3.fromRGB(255, 255, 255),
+        TextDark = Color3.fromRGB(150, 150, 150)
+}
+OrionLib.SelectedTheme = "PatoSigma"
+
+    local Window = OrionLib:MakeWindow({
+        Name = "TKS Hub",
+        HidePremium = false,
+        SaveConfig = true,
+        ConfigFolder = "FunScript",
+        IntroEnabled = true,
+        KeyToOpenWindow = "M",
+        FreeMouse = true,
+        IntroText = "ã€Œ The King Scripts ã€",
+        IntroIcon = "rbxassetid://130521044774541",
+        SearchBar = {Default = "ðŸ” Search Everything"}
+    })
+
+
+local services = {
+    UserInputService = game:GetService("UserInputService"),
+    RunService = game:GetService("RunService"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    Players = game:GetService("Players"),
+    Workspace = game:GetService("Workspace"),
+    TweenService = game:GetService("TweenService"),
+    TextChatService = game:GetService("TextChatService"),
+    ContextActionService = game:GetService("ContextActionService"),
+    Camera = workspace.CurrentCamera
+}
+
+-- sigma.lua uses these as globals in a few places
+Players = services.Players
+LocalPlayer = services.Players.LocalPlayer
+
+ linguage = "pt-br"
+ function logMessage(_msg)
+
+end
+
+            local function isFriend(username)
+                local player = Players:FindFirstChild(username)
+                if player then
+                    local success, isFriendResult = pcall(function()
+                        return LocalPlayer:IsFriendsWith(player.UserId)
+                    end)
+                    return success and isFriendResult
+                end
+                return false
+            end
+
+localPlayer = services.Players.LocalPlayer
+localPlayerName = localPlayer.Name
+w = services.Workspace
+RunService = services.RunService
+
+
+ function IsNetworkOwner(part)
+    if not part or not part:IsA("BasePart") then return false end
+    local ok, owner = pcall(function()
+        return part:GetNetworkOwner()
+    end)
+    if not ok or owner == nil then return false end
+    return owner == localPlayer
+end
+
+local services2 = {
+	targetPlayer = services.Players,
+	rs = services.ReplicatedStorage,
+	lu = services.UserInputService,
+	plr = localPlayer,
+	CreateLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.CreateGrabLine,
+	DestroyLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.DestroyGrabLine,
+}
+
+
+local RE = {
+    SetNetworkOwner = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.SetNetworkOwner,
+    DestroyLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.DestroyGrabLine,
+}
+
+local localplayer = {
+    hentaipolice = 400,
+    hrp = nil,
+    Antigrab = false,
+    antifire = false,
+    antiexplode = false,
+    character = services.Players.LocalPlayer.Character,
+    IsHeld = services.Players.LocalPlayer.IsHeld,
+    humanoid = nil,
+    ExtinguishPart = (services.Workspace:FindFirstChild("Map")
+        and services.Workspace.Map:FindFirstChild("Hole", true)
+        and services.Workspace.Map.Hole:FindFirstChild("PoisonBigHole", true)
+        and services.Workspace.Map.Hole.PoisonBigHole:FindFirstChild("ExtinguishPart", true)) or nil,
+    UFO = nil,
+    isActive = false
+}
+
+pcall(function()
+	services.Players.LocalPlayer.CharacterAdded:Connect(function(c)
+		localplayer.character = c
+	end)
+end)
+
+_G.LoopKillBlobmanSelected = _G.LoopKillBlobmanSelected or {
+    enabled = false,
+    heartbeatConnection = nil,
+    currentTargetIndex = 1,
+    savedCFrame = nil,
+    cameraFixedCFrame = nil,
+    blobman = nil,
+    grab = nil,
+    release = nil,
+    rightDetector = nil,
+    weld = nil
+}
+--[[]]
+     vu1 = game:GetService("Players")
+     vu14 = vu1.LocalPlayer
+     vu8 = game:GetService("ReplicatedStorage")
+     vu4 = workspace
+     vu7 = game:GetService("UserInputService")
+     local _grabEvents = vu8:FindFirstChild("GrabEvents") or vu8:WaitForChild("GrabEvents", 5)
+     vu25 = _grabEvents and (_grabEvents:FindFirstChild("CreateGrabLine") or _grabEvents:WaitForChild("CreateGrabLine", 5)) or nil
+     vu26 = _grabEvents and (_grabEvents:FindFirstChild("DestroyGrabLine") or _grabEvents:WaitForChild("DestroyGrabLine", 5)) or nil
+     vu27 = _grabEvents and (_grabEvents:FindFirstChild("SetNetworkOwner") or _grabEvents:WaitForChild("SetNetworkOwner", 5)) or nil
+     vu28 = _grabEvents and (_grabEvents:FindFirstChild("ExtendGrabLine") or _grabEvents:WaitForChild("ExtendGrabLine", 5)) or nil
+     v33 = vu14:FindFirstChild("PlayerScripts") or vu14:WaitForChild("PlayerScripts", 5)
+     local _menuToys = vu8:FindFirstChild("MenuToys") or vu8:WaitForChild("MenuToys", 5)
+     BuyToy = _menuToys and (_menuToys:FindFirstChild("BuyToyRemoteFunction") or _menuToys:WaitForChild("BuyToyRemoteFunction", 5)) or nil
+    DeleteToyRE = game.ReplicatedStorage.MenuToys:FindFirstChild("DestroyToy")
+    workspaceService = workspace
+    U = services.UserInputService
+
+Players = game:GetService("Players")
+LocalPlayer = Players.LocalPlayer
+RunService = game:GetService("RunService")
+
+local ResetManager = {
+    _connections = {},
+    _tasks = {},
+    _toggles = {},
+    _characterCallbacks = {},
+    Character = nil,
+    Humanoid = nil,
+    HRP = nil
+}
+
+function ResetManager:SafeConnect(key, conn)
+    if not key or key == "" or conn == nil then return end
+    if self._connections[key] then
+        pcall(function() self._connections[key]:Disconnect() end)
+        self._connections[key] = nil
+    end
+    self._connections[key] = conn
+    return conn
+end
+
+function ResetManager:Disconnect(key)
+    if self._connections[key] then
+        pcall(function() self._connections[key]:Disconnect() end)
+        self._connections[key] = nil
+    end
+end
+
+function ResetManager:ClearAllConnections()
+    for k, c in pairs(self._connections) do
+        pcall(function() c:Disconnect() end)
+        self._connections[k] = nil
+    end
+end
+
+function ResetManager:StartTask(key, fn)
+    if self._tasks[key] and type(self._tasks[key]) == "function" then
+        pcall(self._tasks[key])
+        self._tasks[key] = nil
+    end
+    local cancelled = false
+     function cancel() cancelled = true end
+    self._tasks[key] = cancel
+    task.spawn(function()
+        fn(function() return cancelled end)
+        if self._tasks[key] == cancel then
+            self._tasks[key] = nil
+        end
+    end)
+end
+
+function ResetManager:CancelTask(key)
+    if self._tasks[key] and type(self._tasks[key]) == "function" then
+        pcall(self._tasks[key])
+        self._tasks[key] = nil
+    end
+end
+
+function ResetManager:RegisterToggle(name, state, restoreFunc)
+    self._toggles[name] = { state = not not state, restore = restoreFunc }
+end
+
+function ResetManager:SetToggleState(name, state)
+    if not self._toggles[name] then return end
+    self._toggles[name].state = not not state
+end
+
+function ResetManager:RestoreToggles()
+    for name, data in pairs(self._toggles) do
+        if data.restore and data.state then
+            task.spawn(function()
+                pcall(data.restore, true)
+            end)
+        end
+    end
+end
+
+function ResetManager:RegisterCharacterCallback(callback)
+    table.insert(self._characterCallbacks, callback)
+end
+
+function ResetManager:ExecuteCharacterCallbacks()
+    for _, callback in ipairs(self._characterCallbacks) do
+        task.spawn(function()
+            pcall(callback)
+        end)
+    end
+end
+
+ResetManager.Character = game.Players.LocalPlayer.Character or game.Players.LocalPlayer.CharacterAdded:Wait()
+ResetManager.Humanoid = ResetManager.Character:FindFirstChildOfClass("Humanoid")
+ResetManager.HRP = ResetManager.Character:FindFirstChild("HumanoidRootPart")
+
+function ResetManager:UpdateCharacterRefs()
+    self.Character = game.Players.LocalPlayer.Character
+    if self.Character then
+        self.Humanoid = self.Character:FindFirstChildOfClass("Humanoid")
+        self.HRP = self.Character:FindFirstChild("HumanoidRootPart")
+    else
+        self.Humanoid = nil
+        self.HRP = nil
+    end
+end
+
+ function onCharacterAdded(char)
+    task.wait(0.15)
+    ResetManager:UpdateCharacterRefs()
+    ResetManager:RestoreToggles()
+    ResetManager:ExecuteCharacterCallbacks()
+end
+
+ function onCharacterRemoving(char)
+    ResetManager:ClearAllConnections()
+    for k, _ in pairs(ResetManager._tasks) do
+        ResetManager:CancelTask(k)
+    end
+end
+
+function ResetManager:Start()
+    local plr = game.Players.LocalPlayer
+    plr.CharacterAdded:Connect(onCharacterAdded)
+    plr.CharacterRemoving:Connect(onCharacterRemoving)
+    if plr.Character then
+        onCharacterAdded(plr.Character)
+    end
+end
+
+function ResetManager:BindHeartbeat(key, fn)
+    self:SafeConnect("heartbeat_"..key, game:GetService("RunService").Heartbeat:Connect(fn))
+end
+
+function ResetManager:BindStepped(key, fn)
+    self:SafeConnect("stepped_"..key, game:GetService("RunService").Stepped:Connect(fn))
+end
+
+_G.ResetManager = ResetManager
+ResetManager:Start()

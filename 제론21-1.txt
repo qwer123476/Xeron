@@ -11499,16 +11499,7 @@ Window:AddConfigTab()
 LoadAll()
 
 
-if not ({
-    [4396960314]=1, -- 누나
-    [10472996475]=1, -- 나 부계
-    [2932138780]=1, -- 나
-    [10854413652]=1, -- 헬로
-    [2432461669]=1, -- 썸머
-    [10713887475]=1, --썸머
-})[game:GetService("Players").LocalPlayer.UserId] then
-    game:GetService("Players").LocalPlayer:Kick("인증되지 않은 유저입니다. 접속이 차단되었습니다.")
-end
+
 function OrionLib:Destroy()
 	Orion:Destroy()
 end

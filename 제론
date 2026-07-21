@@ -8992,9 +8992,9 @@ antiTab:AddSection({
     Name = "안티 킥"
 })
 
-local flyingResetConn = nil
-local resetProtectionConn = nil
-local FlyingReset = antiTab:AddToggle({
+--local flyingResetConn = nil
+--local resetProtectionConn = nil
+antiTab:AddToggle({
     Name = "킥 방지리셋  <font color='rgb(50,0,50)'>[셀프 킬]</font>",
     
     save = true,
@@ -9208,7 +9208,7 @@ function AntiPCLDF()
     end
 end
 
-local AntiPCLD = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 킥   <font color='rgb(255,0,0)'>[PCLD 감지]</font>",
     
     save = true,
@@ -9436,63 +9436,7 @@ playerTab:AddTextbox({
 })
 --jumpPowerInput:Set("60")
 
-local realisticFP = false
-local fpConnection = nil
 
-local function updateFirstPerson()
-    local char = plr.Character
-    if not char then return end
-
-    for _, part in pairs(char:GetChildren()) do
-        if part:IsA("BasePart") then
-            if part.Name == "Head" then
-                part.LocalTransparencyModifier = 1          
-            elseif part.Name:find("Arm") or part.Name:find("Hand") then
-                part.LocalTransparencyModifier = 0          
-            elseif part.Name:find("Torso") or part.Name == "UpperTorso" or part.Name == "LowerTorso" then
-                part.LocalTransparencyModifier = 1        
-            else
-                part.LocalTransparencyModifier = 0
-            end
-        end
-    end
-end
-
-local function startRealisticFP()
-    if fpConnection then fpConnection:Disconnect() end
-    fpConnection = RunService.RenderStepped:Connect(updateFirstPerson)
-end
-
-local function stopRealisticFP()
-    if fpConnection then 
-        fpConnection:Disconnect() 
-        fpConnection = nil 
-    end
-    
-    local char = plr.Character
-    if char then
-        for _, part in pairs(char:GetChildren()) do
-            if part:IsA("BasePart") then
-                part.LocalTransparencyModifier = 0
-            end
-        end
-    end
-end
-
-playerTab:AddToggle({
-    Name = "1인칭 리얼뷰",
-    Default = false,
-    save = true,
-    Flag = "jwisisjsh",
-    Callback = function(Value)
-        realisticFP = Value
-        if Value then
-            startRealisticFP()
-        else
-            stopRealisticFP()
-        end
-    end
-})
 
 playerTab:AddSection({
     Name = "다른것들"
@@ -9567,7 +9511,7 @@ playerTab:AddToggle({
     end
 })
 
-local flyTextbox = playerTab:AddTextbox({
+playerTab:AddTextbox({
     Name = "속도",
     Default = "",
     save = true,
@@ -9806,76 +9750,7 @@ AuraTab:AddSection({
 
 
 
-AuraTab:AddToggle({
-    Name = "래그돌 아우라",
-    Default = false,
-    save = true,
-    Flag = "FtapKillAura",
-    Callback = function(enabled)
-        runningFtapKillAura = enabled
-        if enabled then
-            task.spawn(function()
-                local Players = game:GetService("Players")
-                local localPlayer = game.Players.LocalPlayer
-                local rs = game:GetService("ReplicatedStorage")
-                
-               
-                local GrabEvents = rs:FindFirstChild("GrabEvents")
-                local SetNetworkOwner = GrabEvents and GrabEvents:FindFirstChild("SetNetworkOwner")
-                
-                
-                local DamageEvent = rs:FindFirstChild("DamageEvent") or (GrabEvents and GrabEvents:FindFirstChild("Struggle"))
 
-                while runningFtapKillAura do
-                    pcall(function()
-                        local character = localPlayer.Character
-                        local root = character and character:FindFirstChild("HumanoidRootPart")
-                        if root then
-                            
-                            local currentRadius = tonumber(auraRadius) or 30
-                            
-                            for _, player in pairs(Players:GetPlayers()) do
-                                if player ~= localPlayer and player.Character then
-                                    
-                                    local isFriend = _G.Aurahowait and localPlayer:IsFriendsWith(player.UserId)
-                                    if not isFriend then
-                                        local targetChar = player.Character
-                                        local torso = targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("UpperTorso")
-                                        local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-                                        local humanoid = targetChar:FindFirstChildOfClass("Humanoid")
-                                        
-                                        if torso and targetRoot and humanoid then
-                                            local distance = (torso.Position - root.Position).Magnitude
-                                            if distance <= currentRadius then
-                                                
-                                                
-                                                if SetNetworkOwner and SetNetworkOwner.FireServer then
-                                                    SetNetworkOwner:FireServer(torso, targetRoot.CFrame)
-                                                end
-                                                
-                                                
-                                                if DamageEvent and DamageEvent.FireServer then
-                                                    
-                                                    DamageEvent:FireServer(humanoid, 0)
-                                                else
-                                                    
-                                                    humanoid.Health = 100
-                                                end
-                                                
-                                            end
-                                        end
-                                    end
-                                end
-                            end
-                        end
-                    end)
-                    task.wait() 
-                end
-            end)
-        end
-    end
-})
---local runningCombinedAura = false
 
 
 

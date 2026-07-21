@@ -302,14 +302,18 @@ end
 
 
 local Window = OrionLib:MakeWindow({
-    Name = "Xeron V2 [ONWER]",
-    HidePremium = false,
-    SaveConfig = false,
-    ConfigFolder = "Xeron",
-	IntroIcon = "rbxassetid://77989137998499",   
-    IntroText = "Xeron V2",
-    IntroColor = Color3.fromRGB(0, 162, 255), 
-})
+        Name = "Xeron V2",
+        HidePremium = false,
+        SaveConfig = false,
+        ConfigFolder = "FunScript",
+        IntroEnabled = true,
+        KeyToOpenWindow = "M",
+        FreeMouse = true,
+        IntroText = "22",
+        IntroIcon = "rbxassetid://130521044774541",
+        SearchBar = {Default = "Xeron V2"}
+    })
+
 
 
 local MyTab = Window:MakeTab({Name = "Xeron",Icon = "rbxassetid://77989137998499", PremiumOnly = false})

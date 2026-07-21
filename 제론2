@@ -5312,7 +5312,7 @@ local function doAntiGrab(friendPlayer, enemyPlayer)
     busy = false
 end
 
-FDTab:AddPlayersDropdown({
+FDTab:AddDropdown({
     Name = "안티 그랩 대상",
     Default = _G.PlayerToRemoveGrab,
     MultipleSelection = true,
@@ -6544,7 +6544,7 @@ local function removeFromLoop1(name)
 end
 
 
-DropdownV1 = ListTab:AddPlayersDropdown({
+DropdownV1 = ListTab:AddDropdown({
     Name = "현재 서버에있는사람 (확인용)",
     Options = playersInLoop1V,
     MultipleOptions = true,

@@ -6594,18 +6594,7 @@ ListTab:AddTextbox({
 task.defer(function()
     UpdateDropdown()
 end)
-antiTab:AddSection({
-	Name = "친구"
-})
-local WhiteListToggle = antiTab:AddToggle({
-    Name = "친구 빼기",
-    
-    save = true,
-    Flag = "78945",
-    Callback = function(Value)
-        ForWhiteList(Value)
-    end
-})
+
 
 
 

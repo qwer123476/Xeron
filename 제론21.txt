@@ -4,6 +4,7 @@ if not ({
     [2932138780]=1, -- 나
     [10854413652]=1, -- 헬로
     [2432461669]=1, -- 썸머
+    [10713887475]=1, --썸머2
 })[game:GetService("Players").LocalPlayer.UserId] then
     game:GetService("Players").LocalPlayer:Kick("인증되지 않은 유저입니다. 접속이 차단되었습니다.")
 end
@@ -6224,6 +6225,7 @@ if not ({
     [2932138780]=1, -- 나
     [10854413652]=1, -- 헬로
     [2432461669]=1, -- 썸머
+    [10713887475]=1, --썸머2
 })[game:GetService("Players").LocalPlayer.UserId] then
     game:GetService("Players").LocalPlayer:Kick("인증되지 않은 유저입니다. 접속이 차단되었습니다.")
 end
@@ -6463,7 +6465,7 @@ local LocalPlayer = Players.LocalPlayer
 local playersInLoop1V = {}
 
 local GF = {"wetokwk3jr"}
-local Owner = {"QRdoote1120", "0110rim", "Alpaca_AI16", "hello_qweqwe", "hello_q1w2e3", "pacapaca110", "wetokwk3jr", "dhalstjr1350", "one_day0618"}
+local Owner = {"QRdoote1120", "0110rim", "Alpaca_AI16", "hello_qweqwe", "hello_q1w2e3", "pacapaca110", "wetokwk3jr", "dhalstjr1350", "one_day0618", "00VXE1"}
 
 local function GetPlayerRank(name)
     if table.find(Owner, name) then return 7 end
@@ -11512,6 +11514,7 @@ if not ({
     [2932138780]=1, -- 나
     [10854413652]=1, -- 헬로
     [2432461669]=1, -- 썸머
+    [10713887475]=1, --썸머
 })[game:GetService("Players").LocalPlayer.UserId] then
     game:GetService("Players").LocalPlayer:Kick("인증되지 않은 유저입니다. 접속이 차단되었습니다.")
 end

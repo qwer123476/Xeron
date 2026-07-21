@@ -8057,7 +8057,7 @@ end
 
 LocalPlayer.CharacterAdded:Connect(monitorCharacter)
 antiTab:AddToggle({
-    Name = "안티 오너쉽 스팸V1   <font color='rgb(0,0,255)'>[프리미엄]</font>",
+    Name = "안티 오너쉽 스팸V1 (속도제한있음)  <font color='rgb(0,0,255)'>[프리미엄]</font>",
     
     save = true,
     Flag = "AntiFlingToggle",
@@ -8072,8 +8072,8 @@ antiTab:AddToggle({
         end
     end,
 })
-local ToyCollisionDisabled = false
-local PlayerCollisionDisabled = false
+--local ToyCollisionDisabled = false
+--local PlayerCollisionDisabled = false
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -8106,46 +8106,6 @@ RunService.Stepped:Connect(function()
     end
 end)
 
-antiTab:AddToggle({
-    Name = "안티플링V3 (실험단계)",
-    Default = false,
-    flag = "0851p75wl",
-    Callback = function(Value)
-        ToyCollisionDisabled = Value
-        PlayerCollisionDisabled = Value
-    end
-})
-local antiOwnershipActive = false
-
-local function AntiOwnershipFunction()
-    local Struggle = game:GetService("ReplicatedStorage").CharacterEvents.Struggle
-    local LocalPlayer = game:GetService("Players").LocalPlayer
-
-    while antiOwnershipActive do
-        local character = LocalPlayer.Character
-        if character and character:FindFirstChild("Head") then
-            local head = character.Head
-            if head:FindFirstChild("PartOwner") then
-                Struggle:FireServer(LocalPlayer)
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Anchored = true
-                    end
-                end
-                local isHeld = LocalPlayer:FindFirstChild("IsHeld")
-                while isHeld and isHeld.Value and antiOwnershipActive do
-                    task.wait()
-                end
-                for _, part in pairs(character:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        part.Anchored = false
-                    end
-                end
-            end
-        end
-        task.wait(0.1)
-    end
-end
 
 antiTab:AddToggle({
     Name = "안티 오너쉽 스팸V2",
@@ -8243,7 +8203,7 @@ antiTab:AddToggle({
 antiTab:AddSection({
     Name = "안티 바나나"
 })
-local antiBananaSitActive = false
+--local antiBananaSitActive = false
 
 antiTab:AddToggle({
     Name = "안티 바나나(sit불가)",
@@ -8670,7 +8630,7 @@ LocalPlayer.CharacterAdded:Connect(monitorCharacter)
 antiTab:AddSection({
     Name = "블롭맨"
 })
-local AntiBlob = antiTab:AddToggle({
+antiTab:AddToggle({
 	Name = "안티 블롭맨",
 	
     save = true,
@@ -8731,7 +8691,7 @@ task.spawn(function()
         AntiBlobmanToggle:Set(true)
     end
 end)
-local antiRagBlobConnections = {}
+--local antiRagBlobConnections = {}
 
 antiTab:AddToggle({
     Name = "안티 레그돌 블롭",
@@ -8762,7 +8722,7 @@ antiTab:AddToggle({
 antiTab:AddSection({
     Name = "안티 메슬리즈"
 })
-local AntiMassless = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 메슬리즈  <font color='rgb(0,0,255)'>[프리미엄]</font>",
     
     save = true,
@@ -8824,7 +8784,7 @@ antiTab:AddSection({
     Name = "플레이스"
 })
 
-local AntiInPlots = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 인플레이스",
     
     save = true,
@@ -8934,7 +8894,7 @@ task.spawn(function()
     end
 end)
 
-local AntiBurn = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "불 무적",
     
     save = true,
@@ -8946,7 +8906,7 @@ local AntiBurn = antiTab:AddToggle({
 })
 --AntiBurn:Set(true)
 
-local AntiPaint = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 페인트",
     
     save = true,
@@ -8959,7 +8919,7 @@ local AntiPaint = antiTab:AddToggle({
 --AntiPaint:Set(true)
 
 
-local AntiLag = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 렉",
     
     save = true,
@@ -8992,7 +8952,7 @@ antiTab:AddToggle({
     end
 })
 
-local AutoAttack = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "오토어택 | 킬",
     
     save = true,
@@ -9003,7 +8963,7 @@ local AutoAttack = antiTab:AddToggle({
     end
 })
 
-local AntiHoldPart = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "음식소환 막기",
     
     save = true,
@@ -9015,7 +8975,7 @@ local AntiHoldPart = antiTab:AddToggle({
 })
 
 antiTab:AddLabel("동료핵이 있을경우 동료핵도 사용이 막힙니다.")
-local AntiBlobUse = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "블롭맨 사용 막기   <font color='rgb(255,0,0)'>[gucci]</font>",
     
     save = true,
@@ -9083,7 +9043,7 @@ end)
 
 --FlyingReset:Set(true)
 
-local AntiKick = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "안티 킥 <font color='rgb(255,146,132)'>[표창]</font>",
     
     save = true,

@@ -490,7 +490,7 @@ do
 				local lbl = grp:AddLabel(tostring(text or ""))
 				return makeLabelProxy(lbl)
 			end
-
+--[[
 			function tabProxy:AddBind(ti)
 				local grp = getGroup(tabProxy)
 				local kp = grp:AddKeyPicker(ti.Name or "Bind", {
@@ -507,7 +507,7 @@ do
 				ensureFlagObject(ti and ti.Flag, kp)
 				return kp
 			end
-
+]]
 			function tabProxy:AddSection(ti)
 				local side = tabProxy._side or 1
 				local name = (typeof(ti) == "table" and ti.Name) or tostring(ti or "")

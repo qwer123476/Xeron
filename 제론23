@@ -5378,96 +5378,10 @@ if _G.AntiGrabLoopConnected == nil then
     end)
 end
 
-UtilityTab:AddSection({
-    Name = "환경 및 시야"
-})
-
-
-UtilityTab:AddButton({
-    Name = "최대 줌 거리 무제한",
-    Callback = function()
-        pcall(function()
-            plr.CameraMaxZoomDistance = 100000000000000000000000000000000000000
-        end)
-    end,
-})
-
-
-UtilityTab:AddButton({
-    Name = "맵 안개 제거",
-    Callback = function()
-        pcall(function()
-            game:GetService("Lighting").FogEnd = 9e9
-        end)
-    end,
-})
-
-
-UtilityTab:AddButton({
-    Name = "서버 시간 낮으로 고정",
-    Callback = function()
-        pcall(function()
-            game:GetService("Lighting").ClockTime = 14
-        end)
-    end,
-})
 
 
 
 
-UtilityTab:AddToggle({
-    Name = "유령 모드 (반투명)",
-    
-    save = true,
-    Flag = "1",
-    Callback = function(Value)
-        pcall(function()
-            local char = plr.Character
-            if char then
-                for _, v in pairs(char:GetChildren()) do
-                    if v:IsA("BasePart") and v.Name ~= "HumanoidRootPart" then
-                        v.Transparency = Value and 0.5 or 0
-                    end
-                end
-            end
-        end)
-    end,
-})
-
-
-UtilityTab:AddSlider({
-    Name = "머리 크기 조절",
-    save = true,
-    Min = 0,
-    Max = 100,
-    Increment = 1,
-    Default = 1,
-    Callback = function(Value)
-        pcall(function()
-            local head = plr.Character and plr.Character:FindFirstChild("Head")
-            if head then
-                head.Size = Vector3.new(Value, Value, Value)
-            end
-        end)
-    end,
-})
-
-
-UtilityTab:AddToggle({
-    Name = "내 머리위 이름표 제거",
-    save = true,
-    
-    Flag = "2",
-    Callback = function(Value)
-        pcall(function()
-            local head = plr.Character and plr.Character:FindFirstChild("Head")
-            if head then
-                local bgui = head:FindFirstChildOfClass("BillboardGui")
-                if bgui then bgui.Enabled = not Value end
-            end
-        end)
-    end,
-})
 
 UtilityTab:AddSection({
     Name = "시스템"
@@ -5501,114 +5415,7 @@ UtilityTab:AddButton({
 
 
 
-UtilityTab:AddToggle({
-    Name = "채팅 UI 숨기기",
-    
-    save = true,
-    Flag = "3",
-    Callback = function(Value)
-        pcall(function()
-            plr.PlayerGui.Chat.Frame.Visible = not Value
-        end)
-    end,
-})
 
-
-UtilityTab:AddSection({
-    Name = "환경"
-})
-UtilityTab:AddToggle({
-    Name = "무마찰 모드 (미끄러지기)",
-    Default = false,
-    save = true,
-    Flag = "4",
-    Callback = function(Value)
-        pcall(function()
-            local char = game.Players.LocalPlayer.Character
-            for _, v in pairs(char:GetChildren()) do
-                if v:IsA("BasePart") then
-                    v.CustomPhysicalProperties = PhysicalProperties.new(Value and 0 or 0.7, 0.3, 0.5)
-                end
-            end
-        end)
-    end,
-})
-
-
---local clicking = false
-
-
-UtilityTab:AddButton({
-    Name = "모든 화면 효과 제거 (깔끔한 시야)",
-    Callback = function()
-        pcall(function()
-            local lighting = game:GetService("Lighting")
-            for _, v in pairs(lighting:GetChildren()) do
-                if v:IsA("PostProcessEffect") or v:IsA("BloomEffect") or v:IsA("BlurEffect") then
-                    v.Enabled = false
-                end
-            end
-        end)
-    end,
-})
-
-
-
-UtilityTab:AddToggle({
-    Name = "강제 1인칭 시점",
-    
-    save = true,
-     Flag = "5",
-    Callback = function(Value)
-        pcall(function()
-            game.Players.LocalPlayer.CameraMode = Value and Enum.CameraMode.LockFirstPerson or Enum.CameraMode.Classic
-        end)
-    end,
-})
-
-
-UtilityTab:AddSlider({
-    Name = "캐릭터 회전 민감도",
-    
-    Min = 1,
-    Max = 10,
-    Increment = 1,
-    Default = 3,
-    Callback = function(Value)
-        pcall(function()
-            game.Players.LocalPlayer.Character.Humanoid.AutoRotate = true
-            
-        end)
-    end,
-})
-
-
-
-UtilityTab:AddButton({
-    Name = "맵 전체 오브젝트 개수 스캔",
-    Callback = function()
-        local count = #workspace:GetDescendants()
-        OrionLib:MakeNotification({Name="스캔 완료", Content="현재 맵에 "..count.."개의 물체가 있습니다.", Time=3})
-    end,
-})
-
-
-UtilityTab:AddButton({
-    Name = "서버훅v2",
-    Callback = function()
-        pcall(function()
-            local HttpService = game:GetService("HttpService")
-            local TPS = game:GetService("TeleportService")
-            local Servers = HttpService:JSONDecode(game:HttpGet("https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"))
-            for _, s in pairs(Servers.data) do
-                if s.playing < s.maxPlayers and s.id ~= game.JobId then
-                    TPS:TeleportToPlaceInstance(game.PlaceId, s.id, game.Players.LocalPlayer)
-                    break
-                end
-            end
-        end)
-    end,
-})
 
 
 
@@ -6307,7 +6114,7 @@ grabTab:AddToggle({
     end
 })
 
-local strengthTextbox = grabTab:AddTextbox({
+grabTab:AddTextbox({
     Name = "던지는 힘 V1",
     
     PlaceholderText = "Value",
@@ -6398,7 +6205,7 @@ end)
 grabTab:AddSection({
 	Name = "Line"
 })
-local extendLineToggle = grabTab:AddToggle({
+grabTab:AddToggle({
     Name = "무한줄  <font color='rgb(0,255,0)'>[데스크톱]</font>",
     
     Flag = "3uw",
@@ -6659,104 +6466,6 @@ grabTab:AddButton({
     end,
 })
 
-grabTab:AddButton({
-    Name = "색상: 빨강",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 0, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 주황",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 127, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 노랑",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 255, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 초록",
-    Callback = function()
-        hColor = Color3.fromRGB(0, 255, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 파랑",
-    Callback = function()
-        hColor = Color3.fromRGB(0, 0, 255)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 남색",
-    Callback = function()
-        hColor = Color3.fromRGB(75, 0, 130)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 보라",
-    Callback = function()
-        hColor = Color3.fromRGB(148, 0, 211)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 검정",
-    Callback = function()
-        hColor = Color3.fromRGB(0, 0, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 흰색",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 255, 255)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 핑크",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 105, 180)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 민트",
-    Callback = function()
-        hColor = Color3.fromRGB(170, 255, 195)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 골드",
-    Callback = function()
-        hColor = Color3.fromRGB(255, 215, 0)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 네온 그린",
-    Callback = function()
-        hColor = Color3.fromRGB(57, 255, 20)
-    end,
-})
-
-grabTab:AddButton({
-    Name = "색상: 청록",
-    Callback = function()
-        hColor = Color3.fromRGB(0, 128, 128)
-    end,
-})
-
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
@@ -6916,7 +6625,7 @@ local WhiteListToggle = antiTab:AddToggle({
 LoopTab:AddSection({
     Name = "오토블롭"
 })
-local AutoSit = LoopTab:AddToggle({
+LoopTab:AddToggle({
     Name = "자동블롭앉기",
     
     save = true,
@@ -7274,7 +6983,7 @@ LoopTab:AddButton({
     LoopTab:AddSection({
     Name = "오너킥"
 })
-    local OLTPTextbox = LoopTab:AddTextbox({
+LoopTab:AddTextbox({
         Name = "X Y Z",
         Default = "0,40,0",
         PlaceholderText = "",
@@ -7291,7 +7000,7 @@ LoopTab:AddButton({
     })
     --OLTPInput:Set("0,40,0")
     
-    local blobLoop4Toggle = LoopTab:AddToggle({
+    LoopTab:AddToggle({
         Name = "스팸킥    <font color='rgb(255,0,255)'>[스팸]</font>    <font color='rgb(0,0,255)'>[프리미엄]</font>",
         Default = false,
         Flag = "21",
@@ -7552,7 +7261,7 @@ LoopTab:AddToggle({
 LoopTab:AddSection({
     Name = "블롭 킥"
 })
-local loopKickBlobActive = false
+--local loopKickBlobActive = false
 
 LoopTab:AddToggle({
     Name = "블롭킥     <font color='rgb(255,0,0)'>[프리미엄]</font>",
@@ -7578,7 +7287,7 @@ LoopTab:AddToggle({
                     local LocalPlayer = Players.LocalPlayer
                     local GE = RS:WaitForChild("GrabEvents")
 
-                    local REMOTE_DELAY = 0.002
+                    local REMOTE_DELAY = 0.0002
                     local lastRemote = 0
 
                     local target = Players:FindFirstChild(targetName)
@@ -7635,7 +7344,7 @@ LoopTab:AddToggle({
 
                                 if grabStartTime == 0 then grabStartTime = tick() end
 
-                                if tick() - grabStartTime > 0.35 then
+                                if tick() - grabStartTime > 0.42 then
                                     dragging = true
                                     grabStartTime = 0
                                     blobRoot.CFrame = savedPos
@@ -7874,7 +7583,7 @@ LoopTab:AddToggle({
 
 
 
-local blobLoop2Toggle = LoopTab:AddToggle({
+LoopTab:AddToggle({
     Name = "루프 그랩   <font color='rgb(255,154,123)'>[블롭맨]</font>",
     Default = false,
     Flag = "21",
@@ -7897,7 +7606,7 @@ local blobLoop2Toggle = LoopTab:AddToggle({
 LoopTab:AddSection({
     Name = "노 블롭"
 })
-local Loop1 = LoopTab:AddToggle({
+LoopTab:AddToggle({
     Name = "루프킬   <font color='rgb(0,255,0)'>[그랩]</font>",
     Default = false,
     Flag = "21",
@@ -7919,7 +7628,7 @@ local Loop1 = LoopTab:AddToggle({
 
 
 
-local Loop2 = LoopTab:AddToggle({
+LoopTab:AddToggle({
     Name = "루프킥   <font color='rgb(0,255,0)'>[그랩]</font>",
     Default = false,
     Flag = "21",
@@ -8122,7 +7831,7 @@ LoopTab:AddButton({
 antiTab:AddSection({
     Name = "보호"
 })
-local AntiGrabV1 = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "무질량 이동 | TP",
     
     save = true,
@@ -8194,7 +7903,7 @@ local AntiGrabV1 = antiTab:AddToggle({
     end
 })
 
-local AntiGrabV1 = antiTab:AddToggle({
+antiTab:AddToggle({
     Name = "루프 TP | 랜덤",
     
     save = true,

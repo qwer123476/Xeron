@@ -285,15 +285,7 @@ do
 		end
 
 		
-			pcall(function()
-				if type(kp) == "table" and kp.Set == nil and kp.SetValue ~= nil then
-					kp.Set = function(_, v) kp:SetValue(v) end
-				end
-			end)
-			ensureFlagObject(ti and ti.Flag, kp)
-			return kp
-		end
-
+			
 		function section:AddSection(ti)
 			return tabProxy:AddSection(ti)
 		end

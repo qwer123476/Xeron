@@ -12104,16 +12104,7 @@ firework_section:AddDropdown({
     end
 })
 
-firework_section:AddBind({
-    Name = "트리거 폭탄",
-    Default = Enum.KeyCode.F,
-    Hold = true,
-    Callback = function()
-        if TriggerMode == 0 then
-            FireBomb = true
-        end
-    end
-})
+
 
 firework_section:AddDropdown({
     Name = "트리거 모드",

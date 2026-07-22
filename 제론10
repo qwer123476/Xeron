@@ -12254,7 +12254,7 @@ task.spawn(function()
     end
 end)
 
-Window:AddConfigTab()
+--Window:AddConfigTab()
 LoadAll()
 
 

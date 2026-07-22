@@ -7,7 +7,7 @@ local Toggles = Library.Toggles
 
 Library.ForceCheckbox = false
 
--- OrionLib shim (we keep OrionLib.Themes below intact)
+
 local OrionLib = {
 	Themes = {},
 	Flags = {},
@@ -45,7 +45,7 @@ do
 		if tabProxy._currentGroup then
 			return tabProxy._currentGroup
 		end
-		-- alternate sides to mimic left/right distribution
+		
 		local side = tabProxy._side or 1
 		local groupName = (tabProxy._name or "Tab") .. " Main"
 		local grp = (side == 1) and tabProxy._tab:AddLeftGroupbox(groupName) or tabProxy._tab:AddRightGroupbox(groupName)
@@ -191,9 +191,7 @@ do
 			local flag = ti and ti.Flag
 			local default = (ti and ti.Default) or Color3.new(1, 1, 1)
 
-			-- Obsidian exposes ColorPicker as an addon (BaseAddons) attached to a toggle.
-			-- We create an inert toggle to host the color picker so sigma code remains compatible.
-			local host = grp:AddToggle("__cp_" .. tostring(name), {
+						local host = grp:AddToggle("__cp_" .. tostring(name), {
 				Text = tostring(name),
 				Default = false,
 				Callback = function() end,
@@ -1082,8 +1080,8 @@ local Window = OrionLib:MakeWindow({
         IntroEnabled = true,
         KeyToOpenWindow = "M",
         FreeMouse = true,
-        IntroText = "22",
-        IntroIcon = "rbxassetid://130521044774541",
+        IntroText = "Xeron⚡️",
+        IntroIcon = "rbxassetid://77989137998499",
         SearchBar = {Default = "Xeron V2"}
     })
 
@@ -12262,15 +12260,8 @@ LoadAll()
 function OrionLib:Destroy()
 	Orion:Destroy()
 end
-MyTab:AddSection({
-    Name = "Xeron"
-})
-MyTab:AddDropdown({
-    Name = "logo",
-    Options = {
-        {Name = "Xeron logo", Image = "rbxassetid://77989137998499"}
-    }
-})
+
+
 
 local ImageSection = MyTab:AddSection({
     Name = "디스코드"

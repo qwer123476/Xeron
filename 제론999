@@ -10432,7 +10432,7 @@ do
 		end
 	end)
 
-	local creatureControlToggle = {
+	funTab:AddToggle({
 		Name = 'Control (C)',
 		Default = false,
 		Save = true,
@@ -10448,10 +10448,8 @@ do
 				_G.ControllingCreature = nil
 			end
 		end
-	}
+	})
 end
-
-
 
 
 bdTab:AddSection({

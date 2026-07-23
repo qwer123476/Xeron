@@ -11436,7 +11436,7 @@ ImageSection:AddLabel("그럼재미 있게 즐겨주세요!")
 OrionLib:Init()
 
 
---local loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/웹"))
+local loader = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/Xeron/main/웹"))
 
 if loader then
     pcall(loader)

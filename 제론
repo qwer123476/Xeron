@@ -10209,7 +10209,7 @@ do
 	end
 
 	local function sendFireServer(action, model)
-		if not targetRemote then
+		if not targetRemote or not targetRemote.Parent then
 			targetRemote = ReplicatedStorage:FindFirstChild(REMOTE_NAME, true)
 		end
 		if targetRemote and targetRemote:IsA("RemoteEvent") then
@@ -10241,7 +10241,7 @@ do
 				end
 
 				_G.ControllingCreature = targetModel
-				targetHumanoid.WalkSpeed = 24
+				targetHumanoid.WalkSpeed = 0
 				targetHumanoid.JumpPower = 24
 
 				sendFireServer("StartControl", targetModel)
@@ -10276,11 +10276,7 @@ do
 					end
 
 					activeConnections[3] = RunService.Heartbeat:Connect(function()
-						if targetRootPart and targetRootPart.Parent then
-							if targetRootPart:GetNetworkOwner() ~= LocalPlayer then
-								sendFireServer("StartControl", targetModel)
-							end
-						end
+						sendFireServer("StartControl", targetModel)
 
 						if myHumanoid and targetBodyVelocity and targetHumanoid then
 							local moveDir = myHumanoid.MoveDirection
@@ -10315,8 +10311,8 @@ do
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
-				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -12, 0)))
+				while targetModel.Parent and _G.ControllingCreature == targetModel and (myCharacter and myCharacter.Parent) do
+					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -20, 0)))
 					task.wait()
 				end
 
@@ -10428,23 +10424,27 @@ do
 		end
 	end)
 
-	funTab:AddToggle({
-		Name = 'Control (C)',
-		Default = false,
-		Save = true,
-		Flag = 'controlbind_toggle',
-		Callback = function(enabled)
-			imageButtonControl.Visible = enabled
-			imageButtonControl.Active = enabled
+	if typeof(funTab) == "table" and typeof(funTab.AddToggle) == "function" then
+		funTab:AddToggle({
+			Name = 'Control (C)',
+			Default = false,
+			Save = true,
+			Flag = 'controlbind_toggle',
+			Callback = function(enabled)
+				imageButtonControl.Visible = enabled
+				imageButtonControl.Active = enabled
 
-			if enabled then
-				ContextActionService:BindAction('Control(C)', controlBind, false, Enum.KeyCode.C)
-			else
-				ContextActionService:UnbindAction('Control(C)')
-				_G.ControllingCreature = nil
+				if enabled then
+					ContextActionService:BindAction('Control(C)', controlBind, false, Enum.KeyCode.C)
+				else
+					ContextActionService:UnbindAction('Control(C)')
+					_G.ControllingCreature = nil
+				end
 			end
-		end
-	})
+		})
+	else
+		ContextActionService:BindAction('Control(C)', controlBind, false, Enum.KeyCode.C)
+	end
 end
 
 

@@ -10145,12 +10145,10 @@ funTab:AddButton({
 })
 
 do
-	local TweenService = game:GetService("TweenService")
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
 	local ContextActionService = game:GetService("ContextActionService")
 	local RunService = game:GetService("RunService")
-	local Lighting = game:GetService("Lighting")
 	local LocalPlayer = Players.LocalPlayer
 
 	_G.ControllingCreature = nil
@@ -10194,61 +10192,10 @@ do
 		end
 	end
 
-	local currentCam = workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera")
-
-	local controlSoundEffect = Instance.new('Sound', workspace)
-	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
-	controlSoundEffect.PlaybackSpeed = 1.25
-
-	local controlColorCorrection = Instance.new('ColorCorrectionEffect', Lighting)
-	controlColorCorrection.Enabled = false
-
-	local cameraFovTween = TweenService:Create(
-		currentCam, 
-		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
-		{ FieldOfView = 120 }
-	)
-	local colorTintTween = TweenService:Create(
-		controlColorCorrection, 
-		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
-		{ TintColor = Color3.fromRGB(210, 218, 255) }
-	)
-	local brightnessPulseTween = TweenService:Create(
-		controlColorCorrection, 
-		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
-		{ Brightness = -0.1 }
-	)
-	local resetColorTween = TweenService:Create(
-		controlColorCorrection, 
-		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
-		{ TintColor = Color3.new(1, 1, 1), Brightness = 0 }
-	)
-
-	local function playControlEffectIn()
-		controlColorCorrection.Enabled = true
-		controlColorCorrection.TintColor = Color3.new()
-
-		cameraFovTween:Play()
-		colorTintTween:Play()
-		controlSoundEffect:Play()
-
-		colorTintTween.Completed:Once(function()
-			brightnessPulseTween:Play()
-		end)
-	end
-
-	local function playControlEffectOut()
-		resetColorTween:Play()
-		resetColorTween.Completed:Once(function()
-			controlColorCorrection.Enabled = false
-		end)
-	end
-
 	local function controlCreature(targetModel)
 		if typeof(targetModel) == 'Instance' and targetModel:IsA('Model') then
 			local targetHumanoid = targetModel:FindFirstChildOfClass('Humanoid')
 			local targetRootPart = targetModel:FindFirstChild('HumanoidRootPart')
-			local targetHead = targetModel:FindFirstChild('Head')
 
 			if targetModel and targetHumanoid and targetRootPart then
 				local activeConnections = {}
@@ -10279,8 +10226,6 @@ do
 
 				makeCharacterNotGrabbable(targetModel)
 
-				playControlEffectIn()
-
 				local myCharacter = safeGetCharacter()
 				local myRootPart, myHumanoid
 
@@ -10295,27 +10240,32 @@ do
 						end)
 					end
 
-					-- 1. 매 프레임 이동 방향 실시간 동기화 (멈춤 & 이동 정확도 수정)
-					activeConnections[5] = RunService.Heartbeat:Connect(function()
-						if myHumanoid and targetBodyVelocity then
-							targetBodyVelocity.Velocity = myHumanoid.MoveDirection * 20
-						end
-					end)
-
-					-- 2. 매 프레임 카메라 고정 및 시선 조절
-					activeConnections[6] = RunService.RenderStepped:Connect(function()
-						local cam = workspace.CurrentCamera
-						if cam and targetHumanoid then
-							cam.CameraSubject = targetHumanoid
-							if targetHead then
-								local lookVec = cam.CFrame.LookVector
-								targetHead.CFrame = CFrame.new(targetHead.Position, targetHead.Position + Vector3.new(lookVec.X, 0, lookVec.Z))
-								targetHumanoid.CameraOffset = -Vector3.new(lookVec.X, 2, lookVec.Z) * 1.5
+					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화
+					activeConnections[3] = RunService.Heartbeat:Connect(function()
+						if myHumanoid and targetBodyVelocity and targetHumanoid then
+							local moveDir = myHumanoid.MoveDirection
+							targetBodyVelocity.Velocity = moveDir * 20
+							
+							-- 이동하는 방향으로 자연스럽게 회전
+							if moveDir.Magnitude > 0 then
+								local targetCFrame = CFrame.new(targetRootPart.Position, targetRootPart.Position + moveDir)
+								targetRootPart.CFrame = targetRootPart.CFrame:Lerp(targetCFrame, 0.25)
 							end
 						end
 					end)
 
-					activeConnections[3] = UserInputService.JumpRequest:Connect(function()
+					-- 2. 완벽한 3인칭 빙의 시점 고정 (카메라 문제 해결)
+					activeConnections[4] = RunService.RenderStepped:Connect(function()
+						local cam = workspace.CurrentCamera
+						if cam and targetHumanoid then
+							cam.CameraType = Enum.CameraType.Custom
+							cam.CameraSubject = targetHumanoid
+							targetHumanoid.CameraOffset = Vector3.new(0, 0, 0)
+						end
+					end)
+
+					-- 점프 기능
+					activeConnections[5] = UserInputService.JumpRequest:Connect(function()
 						if targetHumanoid then
 							targetHumanoid:ChangeState('Jumping')
 						end
@@ -10324,31 +10274,29 @@ do
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
-				-- 조종 중 본래 내 캐릭터 위치 지하 숨김 루프
+				-- 조종 중 내 실제 캐릭터는 땅 밑에 위치 고정
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
+					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -12, 0)))
 					task.wait()
 				end
 
-				-- 복구 작업
+				-- 조종 종료 후 원래대로 복구
 				cleanupConnections()
-				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
+				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(3, 3, 3)))
 				makeCharacterGrabbable(targetModel)
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
 
-				if myHumanoid then
-					workspace.CurrentCamera.CameraSubject = myHumanoid
-					myHumanoid.CameraOffset = Vector3.new(0, 0, 0)
+				local cam = workspace.CurrentCamera
+				if myHumanoid and cam then
+					cam.CameraSubject = myHumanoid
 				end
 				
 				_G.ControllingCreature = nil
 				if myRootPart then
 					myRootPart.Velocity = Vector3.new()
 				end
-
-				playControlEffectOut()
 			end
 		end
 	end
@@ -10423,7 +10371,7 @@ do
 	end)
 
 	funTab:AddToggle({
-		Name = '컨트롤 (C)',
+		Name = '컨트롤 (C키)',
 		Default = false,
 		Save = true,
 		Flag = 'controlbind_toggle',
@@ -10440,6 +10388,7 @@ do
 		end
 	})
 end
+
 
 bdTab:AddSection({
     Name = "배경"

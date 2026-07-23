@@ -2162,15 +2162,7 @@ function loopPlayerBlobF4()
 end
 
 
-if not ({
-    [4396960314]=1, -- 누나
-    [10472996475]=1, -- 나 부계
-    [2932138780]=1, -- 나
-    [10854413652]=1, -- 헬로
-    [2432461669]=1, -- 썸머
-})[game:GetService("Players").LocalPlayer.UserId] then
-    game:GetService("Players").LocalPlayer:Kick("인증되지 않은 유저입니다. 접속이 차단되었습니다.")
-end
+
 function loopPlayerF() 
     UpdateCurrentBlobman()
 
@@ -2730,85 +2722,6 @@ function AntiBlobF()
     end)
 end
 
-function CheckBlob(blob, myHRP, myAttach, source)
-    local script = blob:FindFirstChild("BlobmanSeatAndOwnerScript")
-    if not script then return end
-
-    for _, side in ipairs({"Left", "Right"}) do
-        local detector = blob:FindFirstChild(side .. "Detector")
-        if not detector then continue end
-
-        local weld = detector:FindFirstChild(side .. "Weld")
-        local align = detector:FindFirstChild(side .. "AlignOrientation")
-
-        if weld and weld:IsA("AlignPosition") and weld.Attachment0 == myAttach then
-            local msg = source .. " → " .. side .. " Grab"
-            local now = tick()
-
-            if not notifyCooldowns[msg] or (now - notifyCooldowns[msg]) >= 2 then
-                notifyCooldowns[msg] = now
-                Rayfield:Notify({Title = "[ ✊ ]", Content = msg, Duration = 3, Image = 0})
-            end
-
-            local success, errorMsg = pcall(function()
-                rs.CharacterEvents.RagdollRemote:FireServer(myHRP, 0)
-
-                local myChar = plr.Character
-                if not myChar then return end
-
-                local myHD = myChar:FindFirstChild("Head")
-                local myLA = myChar:FindFirstChild("Left Arm")
-                local myRA = myChar:FindFirstChild("Right Arm")
-                local myLL = myChar:FindFirstChild("Left Leg")
-                local myLR = myChar:FindFirstChild("Right Leg")
-
-                if humanoid then
-                    humanoid.PlatformStand = true
-                end
-
-                local bodyParts = {}
-
-                if myHRP then table.insert(bodyParts, myHRP) end
-                if myHD then table.insert(bodyParts, myHD) end
-                if myLA then table.insert(bodyParts, myLA) end
-                if myRA then table.insert(bodyParts, myRA) end
-                if myLL then table.insert(bodyParts, myLL) end
-                if myLR then table.insert(bodyParts, myLR) end
-
-                for _, part in ipairs(bodyParts) do
-                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                end
-
-                align.Attachment0 = nil
-                weld.Attachment0 = nil
-                weld.Enabled = false
-                align.Enabled = false
-
-                for _, part in ipairs(bodyParts) do
-                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                end
-
-                weld.Enabled = true
-                align.Enabled = true
-
-                if humanoid then
-                    humanoid.PlatformStand = false
-                end
-
-                for _, part in ipairs(bodyParts) do
-                    part.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
-                    part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
-                end
-            end)
-
-            if not success then
-                warn("CheckBlob: " .. errorMsg)
-            end
-        end
-    end
-end
 
 function AntiStickyGBF()
     if not AntiStickyGBT then

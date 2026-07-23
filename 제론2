@@ -10149,6 +10149,16 @@ do
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
 	local Lighting = game:GetService("Lighting")
+	local LocalPlayer = Players.LocalPlayer
+
+	local function safeGetCharacter()
+		if typeof(GetPlayerCharacter) == "function" then
+			local char = GetPlayerCharacter()
+			if char then return char end
+		end
+		return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+	end
+
 	local currentCam = workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera")
 
 	local controlSoundEffect = Instance.new('Sound', workspace)
@@ -10213,7 +10223,9 @@ do
 				end
 			end)()
 
-			if targetModel and targetHumanoid and targetRootPart and not u54(targetModel) then
+			local isCheckValid = (typeof(u54) == "function" and u54(targetModel)) or false
+
+			if targetModel and targetHumanoid and targetRootPart and not isCheckValid then
 				local activeConnections = {}
 
 				local function cleanupConnections()
@@ -10241,15 +10253,17 @@ do
 				myBodyVelocity.Velocity = Vector3.new()
 				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
 
-				makeCharacterNotGrabbable(targetModel)
+				if typeof(makeCharacterNotGrabbable) == "function" then
+					makeCharacterNotGrabbable(targetModel)
+				end
 
 				task.spawn(function()
-					u113()
+					if typeof(u113) == "function" then u113() end
 					while targetModel.Parent and _G.ControllingCreature ~= nil do
 						if isSpecialNPC then
-							SNOWshipOnceAndDelete(targetHead)
+							if typeof(SNOWshipOnceAndDelete) == "function" then SNOWshipOnceAndDelete(targetHead) end
 						else
-							SNOWshipOnce(targetHead)
+							if typeof(SNOWshipOnce) == "function" then SNOWshipOnce(targetHead) end
 						end
 						targetHumanoid.AutoRotate = true
 						task.wait()
@@ -10259,7 +10273,7 @@ do
 				workspace.CurrentCamera.CameraSubject = targetHumanoid
 				playControlEffectIn()
 
-				local myCharacter = GetPlayerCharacter()
+				local myCharacter = safeGetCharacter()
 				local myRootPart, myHumanoid
 
 				if myCharacter then
@@ -10267,19 +10281,21 @@ do
 					myRootPart = myCharacter:FindFirstChild('HumanoidRootPart')
 					myBodyVelocity.Parent = myRootPart
 
-					activeConnections[2] = myHumanoid.Died:Connect(function()
-						_G.ControllingCreature = nil
-					end)
+					if myHumanoid then
+						activeConnections[2] = myHumanoid.Died:Connect(function()
+							_G.ControllingCreature = nil
+						end)
+
+						activeConnections[5] = myHumanoid.Changed:Connect(function(property)
+							if property == 'MoveDirection' then
+								targetBodyVelocity.Velocity = myHumanoid.MoveDirection * 20
+							end
+						end)
+					end
 
 					local inputService = typeof(_UserInputService) ~= "nil" and _UserInputService or UserInputService
 					activeConnections[3] = inputService.JumpRequest:Connect(function()
 						targetHumanoid:ChangeState('Jumping')
-					end)
-
-					activeConnections[5] = myHumanoid.Changed:Connect(function(property)
-						if property == 'MoveDirection' then
-							targetBodyVelocity.Velocity = myHumanoid.MoveDirection * 20
-						end
 					end)
 
 					activeConnections[6] = workspace.CurrentCamera.Changed:Connect(function(property)
@@ -10289,25 +10305,33 @@ do
 					end)
 
 					local lookVector = nil
-					activeConnections[7] = targetHead.Changed:Connect(function(property)
-						if property == 'CFrame' then
-							lookVector = workspace.CurrentCamera.CFrame.lookVector
-							targetHumanoid.CameraOffset = -Vector3.new(lookVector.X, 5, lookVector.Z) * 1.7
-						end
-					end)
+					if targetHead then
+						activeConnections[7] = targetHead.Changed:Connect(function(property)
+							if property == 'CFrame' then
+								lookVector = workspace.CurrentCamera.CFrame.lookVector
+								targetHumanoid.CameraOffset = -Vector3.new(lookVector.X, 5, lookVector.Z) * 1.7
+							end
+						end)
+					end
 
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
+					if typeof(TeleportPlayer) == "function" then
+						TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
+					end
 					task.wait()
 				end
 
 				cleanupConnections()
-				u114()
-				TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
-				makeCharacterGrabbable(targetModel)
+				if typeof(u114) == "function" then u114() end
+				if typeof(TeleportPlayer) == "function" then
+					TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
+				end
+				if typeof(makeCharacterGrabbable) == "function" then
+					makeCharacterGrabbable(targetModel)
+				end
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
@@ -10323,25 +10347,27 @@ do
 		end
 	end
 
-	local characterRaycastFilter = RaycastParams.new()
-	--characterRaycastFilter.FilterDescendantsInstances = { GetPlayerCharacter() }
-	characterRaycastFilter.FilterType = Enum.RaycastFilterType.Exclude
-
 	local function controlBindF()
-		local myCharacter = GetPlayerCharacter()
+		local myCharacter = safeGetCharacter()
 
 		if myCharacter then
-			local myHead = myCharacter.Head
+			local myHead = myCharacter:FindFirstChild("Head")
 			local currentCamInst = workspace.CurrentCamera
 			local myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
 			
-			local raycastResult = workspace:Raycast(myHead.Position, currentCamInst.CFrame.lookVector * 50, characterRaycastFilter)
+			if myHead and currentCamInst and myHumanoid and myHumanoid.Health > 0 then
+				local rayFilter = RaycastParams.new()
+				rayFilter.FilterDescendantsInstances = { myCharacter }
+				rayFilter.FilterType = Enum.RaycastFilterType.Exclude
 
-			if raycastResult and myHumanoid and myHumanoid.Health > 0 then
-				local hitModel = raycastResult.Instance.Parent
+				local raycastResult = workspace:Raycast(myHead.Position, currentCamInst.CFrame.lookVector * 50, rayFilter)
 
-				if hitModel:FindFirstChildOfClass('Humanoid') then
-					controlCreature(hitModel)
+				if raycastResult and raycastResult.Instance then
+					local hitModel = raycastResult.Instance.Parent
+
+					if hitModel and hitModel:FindFirstChildOfClass('Humanoid') then
+						controlCreature(hitModel)
+					end
 				end
 			end
 		end
@@ -10365,6 +10391,7 @@ do
 		end
 	})
 end
+
 
 
 

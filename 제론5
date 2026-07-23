@@ -10194,7 +10194,18 @@ do
 		end
 	end
 
-	-- 빙의 사운드 효과만 복구 (화면 이펙트는 제외)
+	-- 내 캐릭터 노클립 설정/해제 함수
+	local function setCharacterNoclip(character, noclipState)
+		if typeof(character) == "Instance" and character:IsA("Model") then
+			for _, part in ipairs(character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.CanCollide = not noclipState
+				end
+			end
+		end
+	end
+
+	-- 빙의 사운드 효과
 	local controlSoundEffect = Instance.new('Sound', workspace)
 	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
 	controlSoundEffect.PlaybackSpeed = 1.25
@@ -10250,7 +10261,7 @@ do
 						end)
 					end
 
-					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화 (공중 뜸 현상 방지)
+					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화
 					activeConnections[3] = RunService.Heartbeat:Connect(function()
 						if myHumanoid and targetBodyVelocity and targetHumanoid then
 							local moveDir = myHumanoid.MoveDirection
@@ -10263,14 +10274,17 @@ do
 						end
 					end)
 
-					-- 2. 시점 고정 및 1인칭 떨림(카메라 충돌) 방지
-					activeConnections[4] = RunService.RenderStepped:Connect(function()
+					-- 2. 완벽한 시점 고정 및 노클립(Noclip) 루프 적용
+					activeConnections[4] = RunService.Stepped:Connect(function()
+						-- 내 캐릭터 완전 노클립 상태 유지
+						if myCharacter and myCharacter.Parent then
+							setCharacterNoclip(myCharacter, true)
+						end
+
 						local cam = workspace.CurrentCamera
 						if cam and targetHumanoid then
 							cam.CameraType = Enum.CameraType.Custom
 							cam.CameraSubject = targetHumanoid
-							
-							-- 1인칭 시 마찰/떨림을 막기 위해 파츠의 CanCollide 일시적 제어 혹은 오프셋 고정
 							targetHumanoid.CameraOffset = Vector3.new(0, 0.5, 0)
 						end
 					end)
@@ -10285,7 +10299,7 @@ do
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
-				-- 조종 중 내 실제 캐릭터는 땅 밑에 위치 고정
+				-- 조종 중 내 실제 캐릭터 땅 밑 이동 처리
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
 					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -12, 0)))
 					task.wait()
@@ -10293,6 +10307,12 @@ do
 
 				-- 조종 종료 후 원래대로 복구
 				cleanupConnections()
+
+				-- 내 캐릭터 노클립 해제 (충돌 원상복구)
+				if myCharacter then
+					setCharacterNoclip(myCharacter, false)
+				end
+
 				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(3, 3, 3)))
 				makeCharacterGrabbable(targetModel)
 
@@ -10383,7 +10403,7 @@ do
 	end)
 
 	funTab:AddToggle({
-		Name = '컨트론 (C키)',
+		Name = 'Control (C)',
 		Default = false,
 		Save = true,
 		Flag = 'controlbind_toggle',

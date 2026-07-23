@@ -10159,6 +10159,17 @@ do
 		return LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 	end
 
+	local function safeTeleport(cframe)
+		if typeof(TeleportPlayer) == "function" then
+			TeleportPlayer(cframe)
+		else
+			local char = safeGetCharacter()
+			if char and char:FindFirstChild("HumanoidRootPart") then
+				char.HumanoidRootPart.CFrame = cframe
+			end
+		end
+	end
+
 	local currentCam = workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera")
 
 	local controlSoundEffect = Instance.new('Sound', workspace)
@@ -10223,9 +10234,7 @@ do
 				end
 			end)()
 
-			local isCheckValid = (typeof(u54) == "function" and u54(targetModel)) or false
-
-			if targetModel and targetHumanoid and targetRootPart and not isCheckValid then
+			if targetModel and targetHumanoid and targetRootPart then
 				local activeConnections = {}
 
 				local function cleanupConnections()
@@ -10253,17 +10262,11 @@ do
 				myBodyVelocity.Velocity = Vector3.new()
 				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
 
-				if typeof(makeCharacterNotGrabbable) == "function" then
-					makeCharacterNotGrabbable(targetModel)
-				end
-
 				task.spawn(function()
-					if typeof(u113) == "function" then u113() end
 					while targetModel.Parent and _G.ControllingCreature ~= nil do
-						if isSpecialNPC then
-							if typeof(SNOWshipOnceAndDelete) == "function" then SNOWshipOnceAndDelete(targetHead) end
-						else
-							if typeof(SNOWshipOnce) == "function" then SNOWshipOnce(targetHead) end
+						if targetHead then
+							local camCF = workspace.CurrentCamera.CFrame
+							targetHead.CFrame = CFrame.new(targetHead.Position, targetHead.Position + camCF.LookVector)
 						end
 						targetHumanoid.AutoRotate = true
 						task.wait()
@@ -10295,7 +10298,9 @@ do
 
 					local inputService = typeof(_UserInputService) ~= "nil" and _UserInputService or UserInputService
 					activeConnections[3] = inputService.JumpRequest:Connect(function()
-						targetHumanoid:ChangeState('Jumping')
+						if targetHumanoid then
+							targetHumanoid:ChangeState('Jumping')
+						end
 					end)
 
 					activeConnections[6] = workspace.CurrentCamera.Changed:Connect(function(property)
@@ -10318,25 +10323,19 @@ do
 				end
 
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					if typeof(TeleportPlayer) == "function" then
-						TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
-					end
+					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
 					task.wait()
 				end
 
 				cleanupConnections()
-				if typeof(u114) == "function" then u114() end
-				if typeof(TeleportPlayer) == "function" then
-					TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
-				end
-				if typeof(makeCharacterGrabbable) == "function" then
-					makeCharacterGrabbable(targetModel)
-				end
+				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
 
-				workspace.CurrentCamera.CameraSubject = myHumanoid
+				if myHumanoid then
+					workspace.CurrentCamera.CameraSubject = myHumanoid
+				end
 				_G.ControllingCreature = nil
 				if myRootPart then
 					myRootPart.Velocity = Vector3.new()
@@ -10365,6 +10364,10 @@ do
 				if raycastResult and raycastResult.Instance then
 					local hitModel = raycastResult.Instance.Parent
 
+					while hitModel and hitModel ~= workspace and not hitModel:FindFirstChildOfClass('Humanoid') do
+						hitModel = hitModel.Parent
+					end
+
 					if hitModel and hitModel:FindFirstChildOfClass('Humanoid') then
 						controlCreature(hitModel)
 					end
@@ -10391,7 +10394,6 @@ do
 		end
 	})
 end
-
 
 
 

@@ -1523,7 +1523,7 @@ function makeCharacterGrabbable(p362)
 		end
 	end
 end
----여기부터
+---[[
 controlsoundeffect = Instance.new('Sound', _Workspace)
 controlsoundeffect.SoundId = 'rbxassetid://9126228625'
 controlsoundeffect.PlaybackSpeed = 1.25
@@ -1729,7 +1729,7 @@ function controlBind(p395, p396, _)
 		end
 	end
 end
---여기?까지
+]]
 _G.PlayerToLongGrab = nil
 _G.TargetAura = nil
 _G.SuperStrength = nil
@@ -7438,10 +7438,6 @@ LagServerToggle = v1296:AddToggle({
 		laggg = p1297
 
 		while laggg do
-			
-				break
-			end
-
 			for _ = 0, Lag_Intensity do
 				local v1298, v1299, v1300 = ipairs(game:GetService('Players'):GetPlayers())
 
@@ -7478,6 +7474,7 @@ v1296:AddSlider({
 		Lag_Intensity = p1302
 	end,
 })
+
 v1294:AddColorpicker({
 	Name = 'Choose the color',
 	Default = Color3.fromRGB(255, 0, 0),

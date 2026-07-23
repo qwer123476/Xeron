@@ -1719,7 +1719,7 @@ function controlBindF()
 			end
 		end
 	end
-end
+
 function controlBind(p395, p396, _)
 	if p395 == 'Control(C)' and p396 == Enum.UserInputState.Begin then
 		if _G.ControllingCreature then

@@ -67,7 +67,7 @@ end
 
 local function u33(p32)
 	u3:MakeNotification({
-		Name = 'Bliz_T HUB',
+		Name = '파카',
 		Content = p32,
 		Image = 'rbxassetid://16570630989',
 		Time = 5,
@@ -1523,7 +1523,7 @@ function makeCharacterGrabbable(p362)
 		end
 	end
 end
-
+---여기부터
 controlsoundeffect = Instance.new('Sound', _Workspace)
 controlsoundeffect.SoundId = 'rbxassetid://9126228625'
 controlsoundeffect.PlaybackSpeed = 1.25
@@ -1733,7 +1733,7 @@ function controlBind(p395, p396, _)
 		end
 	end
 end
-
+--여기?까지
 _G.PlayerToLongGrab = nil
 _G.TargetAura = nil
 _G.SuperStrength = nil

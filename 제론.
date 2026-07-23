@@ -10154,7 +10154,7 @@ do
 	local controlColorCorrection = Instance.new('ColorCorrectionEffect', game:GetService('Lighting'))
 	controlColorCorrection.Enabled = false
 
-	local cameraFovTween = _TweenService:Create(
+	local cameraFovTween = _TweenService:Add(
 		currentCam, 
 		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
 		{ FieldOfView = 120 }

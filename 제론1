@@ -10145,31 +10145,35 @@ funTab:AddButton({
 })
 
 do
+	local TweenService = game:GetService("TweenService")
+	local Players = game:GetService("Players")
+	local UserInputService = game:GetService("UserInputService")
+	local Lighting = game:GetService("Lighting")
 	local currentCam = workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera")
 
 	local controlSoundEffect = Instance.new('Sound', workspace)
 	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
 	controlSoundEffect.PlaybackSpeed = 1.25
 
-	local controlColorCorrection = Instance.new('ColorCorrectionEffect', game:GetService('Lighting'))
+	local controlColorCorrection = Instance.new('ColorCorrectionEffect', Lighting)
 	controlColorCorrection.Enabled = false
 
-	local cameraFovTween = _TweenService:Add(
+	local cameraFovTween = TweenService:Create(
 		currentCam, 
 		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
 		{ FieldOfView = 120 }
 	)
-	local colorTintTween = _TweenService:Create(
+	local colorTintTween = TweenService:Create(
 		controlColorCorrection, 
 		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
 		{ TintColor = Color3.fromRGB(210, 218, 255) }
 	)
-	local brightnessPulseTween = _TweenService:Create(
+	local brightnessPulseTween = TweenService:Create(
 		controlColorCorrection, 
 		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
 		{ Brightness = -0.1 }
 	)
-	local resetColorTween = _TweenService:Create(
+	local resetColorTween = TweenService:Create(
 		controlColorCorrection, 
 		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
 		{ TintColor = Color3.new(1, 1, 1), Brightness = 0 }
@@ -10202,7 +10206,8 @@ do
 			local targetHead = targetModel:FindFirstChild('Head')
 
 			local isSpecialNPC = (function()
-				if not _Players:GetPlayerFromCharacter(targetModel) and 
+				local playerService = typeof(_Players) ~= "nil" and _Players or Players
+				if not playerService:GetPlayerFromCharacter(targetModel) and 
 				   (targetModel.Name == 'YouDecoy' or targetModel.Name == 'CreatureBlobman' or tostring(targetModel.Parent.Name) == 'Robloxians') then
 					return true
 				end
@@ -10266,7 +10271,8 @@ do
 						_G.ControllingCreature = nil
 					end)
 
-					activeConnections[3] = _UserInputService.JumpRequest:Connect(function()
+					local inputService = typeof(_UserInputService) ~= "nil" and _UserInputService or UserInputService
+					activeConnections[3] = inputService.JumpRequest:Connect(function()
 						targetHumanoid:ChangeState('Jumping')
 					end)
 

@@ -10145,10 +10145,12 @@ funTab:AddButton({
 })
 
 do
+	local TweenService = game:GetService("TweenService")
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
 	local ContextActionService = game:GetService("ContextActionService")
 	local RunService = game:GetService("RunService")
+	local Lighting = game:GetService("Lighting")
 	local LocalPlayer = Players.LocalPlayer
 
 	_G.ControllingCreature = nil
@@ -10192,6 +10194,11 @@ do
 		end
 	end
 
+	-- 빙의 사운드 효과만 복구 (화면 이펙트는 제외)
+	local controlSoundEffect = Instance.new('Sound', workspace)
+	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
+	controlSoundEffect.PlaybackSpeed = 1.25
+
 	local function controlCreature(targetModel)
 		if typeof(targetModel) == 'Instance' and targetModel:IsA('Model') then
 			local targetHumanoid = targetModel:FindFirstChildOfClass('Humanoid')
@@ -10225,6 +10232,9 @@ do
 				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
 
 				makeCharacterNotGrabbable(targetModel)
+				
+				-- 사운드 재생
+				controlSoundEffect:Play()
 
 				local myCharacter = safeGetCharacter()
 				local myRootPart, myHumanoid
@@ -10240,27 +10250,28 @@ do
 						end)
 					end
 
-					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화
+					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화 (공중 뜸 현상 방지)
 					activeConnections[3] = RunService.Heartbeat:Connect(function()
 						if myHumanoid and targetBodyVelocity and targetHumanoid then
 							local moveDir = myHumanoid.MoveDirection
-							targetBodyVelocity.Velocity = moveDir * 20
+							targetBodyVelocity.Velocity = Vector3.new(moveDir.X * 20, targetRootPart.Velocity.Y, moveDir.Z * 20)
 							
-							-- 이동하는 방향으로 자연스럽게 회전
 							if moveDir.Magnitude > 0 then
-								local targetCFrame = CFrame.new(targetRootPart.Position, targetRootPart.Position + moveDir)
+								local targetCFrame = CFrame.new(targetRootPart.Position, targetRootPart.Position + Vector3.new(moveDir.X, 0, moveDir.Z))
 								targetRootPart.CFrame = targetRootPart.CFrame:Lerp(targetCFrame, 0.25)
 							end
 						end
 					end)
 
-					-- 2. 완벽한 3인칭 빙의 시점 고정 (카메라 문제 해결)
+					-- 2. 시점 고정 및 1인칭 떨림(카메라 충돌) 방지
 					activeConnections[4] = RunService.RenderStepped:Connect(function()
 						local cam = workspace.CurrentCamera
 						if cam and targetHumanoid then
 							cam.CameraType = Enum.CameraType.Custom
 							cam.CameraSubject = targetHumanoid
-							targetHumanoid.CameraOffset = Vector3.new(0, 0, 0)
+							
+							-- 1인칭 시 마찰/떨림을 막기 위해 파츠의 CanCollide 일시적 제어 혹은 오프셋 고정
+							targetHumanoid.CameraOffset = Vector3.new(0, 0.5, 0)
 						end
 					end)
 
@@ -10291,6 +10302,7 @@ do
 				local cam = workspace.CurrentCamera
 				if myHumanoid and cam then
 					cam.CameraSubject = myHumanoid
+					myHumanoid.CameraOffset = Vector3.new(0, 0, 0)
 				end
 				
 				_G.ControllingCreature = nil
@@ -10371,7 +10383,7 @@ do
 	end)
 
 	funTab:AddToggle({
-		Name = '컨트롤 (C키)',
+		Name = '컨트론 (C키)',
 		Default = false,
 		Save = true,
 		Flag = 'controlbind_toggle',
@@ -10388,6 +10400,7 @@ do
 		end
 	})
 end
+
 
 
 bdTab:AddSection({

@@ -10324,7 +10324,7 @@ do
 	end
 
 	local characterRaycastFilter = RaycastParams.new()
-	characterRaycastFilter.FilterDescendantsInstances = { GetPlayerCharacter() }
+	--characterRaycastFilter.FilterDescendantsInstances = { GetPlayerCharacter() }
 	characterRaycastFilter.FilterType = Enum.RaycastFilterType.Exclude
 
 	local function controlBindF()

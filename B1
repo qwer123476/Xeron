@@ -1712,12 +1712,8 @@ function controlBindF()
 
 			print(v393.Instance, _Parent5)
 
-			if _Parent5:FindFirstChildOfClass('Humanoid') then
-				if _Players:GetPlayerFromCharacter(_Parent5) and GetKey() ~= 'Xana' then
-					u33('Only premium users can control players! Buy premium in my discord server!')
-
-					return
-				end
+			
+	
 
 				controlCreature(_Parent5)
 			end
@@ -7442,10 +7438,7 @@ LagServerToggle = v1296:AddToggle({
 		laggg = p1297
 
 		while laggg do
-			if GetKey() ~= 'Xana' then
-				LagServerToggle:Set(false)
-				u33('Only for premium users! Buy premium in my discord server!')
-
+			
 				break
 			end
 

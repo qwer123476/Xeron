@@ -10147,216 +10147,223 @@ funTab:AddButton({
 funTab:AddSection({
 	Name = "조종"
 })
-local controlSoundEffect = Instance.new('Sound', _Workspace)
-controlSoundEffect.SoundId = 'rbxassetid://9126228625'
-controlSoundEffect.PlaybackSpeed = 1.25
+do
+	local controlSoundEffect = Instance.new('Sound', _Workspace)
+	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
+	controlSoundEffect.PlaybackSpeed = 1.25
 
-local controlColorCorrection = Instance.new('ColorCorrectionEffect', _Lighting)
-controlColorCorrection.Enabled = false
+	local controlColorCorrection = Instance.new('ColorCorrectionEffect', _Lighting)
+	controlColorCorrection.Enabled = false
 
-local cameraFovTween = _TweenService:Create(
-	_Workspace.CurrentCamera, 
-	TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
-	{ FieldOfView = 120 }
-)
-local colorTintTween = _TweenService:Create(
-	controlColorCorrection, 
-	TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
-	{ TintColor = Color3.fromRGB(210, 218, 255) }
-)
-local brightnessPulseTween = _TweenService:Create(
-	controlColorCorrection, 
-	TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
-	{ Brightness = -0.1 }
-)
-local resetColorTween = _TweenService:Create(
-	controlColorCorrection, 
-	TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
-	{ TintColor = Color3.new(1, 1, 1), Brightness = 0 }
-)
+	local cameraFovTween = _TweenService:Create(
+		_Workspace.CurrentCamera, 
+		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
+		{ FieldOfView = 120 }
+	)
+	local colorTintTween = _TweenService:Create(
+		controlColorCorrection, 
+		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
+		{ TintColor = Color3.fromRGB(210, 218, 255) }
+	)
+	local brightnessPulseTween = _TweenService:Create(
+		controlColorCorrection, 
+		TweenInfo.new(1, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true), 
+		{ Brightness = -0.1 }
+	)
+	local resetColorTween = _TweenService:Create(
+		controlColorCorrection, 
+		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), 
+		{ TintColor = Color3.new(1, 1, 1), Brightness = 0 }
+	)
 
-function playControlEffectIn()
-	controlColorCorrection.Enabled = true
-	controlColorCorrection.TintColor = Color3.new()
+	local function playControlEffectIn()
+		controlColorCorrection.Enabled = true
+		controlColorCorrection.TintColor = Color3.new()
 
-	cameraFovTween:Play()
-	colorTintTween:Play()
-	controlSoundEffect:Play()
+		cameraFovTween:Play()
+		colorTintTween:Play()
+		controlSoundEffect:Play()
 
-	colorTintTween.Completed:Once(function()
-		brightnessPulseTween:Play()
-	end)
-end
+		colorTintTween.Completed:Once(function()
+			brightnessPulseTween:Play()
+		end)
+	end
 
-function playControlEffectOut()
-	resetColorTween:Play()
-	resetColorTween.Completed:Once(function()
-		controlColorCorrection.Enabled = false
-	end)
-end
+	local function playControlEffectOut()
+		resetColorTween:Play()
+		resetColorTween.Completed:Once(function()
+			controlColorCorrection.Enabled = false
+		end)
+	end
 
-function controlCreature(targetModel)
-	if typeof(targetModel) == 'Instance' and targetModel:IsA('Model') then
-		local targetHumanoid = targetModel:FindFirstChildOfClass('Humanoid')
-		local targetRootPart = targetModel:FindFirstChild('HumanoidRootPart')
-		local targetHead = targetModel:FindFirstChild('Head')
+	local function controlCreature(targetModel)
+		if typeof(targetModel) == 'Instance' and targetModel:IsA('Model') then
+			local targetHumanoid = targetModel:FindFirstChildOfClass('Humanoid')
+			local targetRootPart = targetModel:FindFirstChild('HumanoidRootPart')
+			local targetHead = targetModel:FindFirstChild('Head')
 
-		local isSpecialNPC = (function()
-			if not _Players:GetPlayerFromCharacter(targetModel) and 
-			   (targetModel.Name == 'YouDecoy' or targetModel.Name == 'CreatureBlobman' or tostring(targetModel.Parent.Name) == 'Robloxians') then
-				return true
-			end
-		end)()
-
-		if targetModel and targetHumanoid and targetRootPart and not u54(targetModel) then
-			local activeConnections = {}
-
-			local function cleanupConnections()
-				for _, connection in pairs(activeConnections) do
-					if typeof(connection) == 'RBXScriptConnection' then
-						connection:Disconnect()
-					end
+			local isSpecialNPC = (function()
+				if not _Players:GetPlayerFromCharacter(targetModel) and 
+				   (targetModel.Name == 'YouDecoy' or targetModel.Name == 'CreatureBlobman' or tostring(targetModel.Parent.Name) == 'Robloxians') then
+					return true
 				end
-				table.clear(activeConnections)
-			end
+			end)()
 
-			_G.ControllingCreature = targetModel
-			targetHumanoid.WalkSpeed = 0
-			targetHumanoid.JumpPower = 24
-			targetHumanoid.CameraOffset = Vector3.new(0, 0, -0.7)
+			if targetModel and targetHumanoid and targetRootPart and not u54(targetModel) then
+				local activeConnections = {}
 
-			activeConnections[1] = targetHumanoid.Died:Connect(function()
-				_G.ControllingCreature = nil
-			end)
-
-			local targetBodyVelocity = Instance.new('BodyVelocity', targetRootPart)
-			local myBodyVelocity = Instance.new('BodyVelocity')
-
-			myBodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
-			myBodyVelocity.Velocity = Vector3.new()
-			targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
-
-			makeCharacterNotGrabbable(targetModel)
-
-			task.spawn(function()
-				u113()
-				while targetModel.Parent and _G.ControllingCreature ~= nil do
-					if isSpecialNPC then
-						SNOWshipOnceAndDelete(targetHead)
-					else
-						SNOWshipOnce(targetHead)
+				local function cleanupConnections()
+					for _, connection in pairs(activeConnections) do
+						if typeof(connection) == 'RBXScriptConnection' then
+							connection:Disconnect()
+						end
 					end
-					targetHumanoid.AutoRotate = true
-					task.wait()
+					table.clear(activeConnections)
 				end
-			end)
 
-			_Workspace.CurrentCamera.CameraSubject = targetHumanoid
-			playControlEffectIn()
+				_G.ControllingCreature = targetModel
+				targetHumanoid.WalkSpeed = 0
+				targetHumanoid.JumpPower = 24
+				targetHumanoid.CameraOffset = Vector3.new(0, 0, -0.7)
 
-			local myCharacter = GetPlayerCharacter()
-			local myRootPart, myHumanoid
-
-			if myCharacter then
-				myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
-				myRootPart = myCharacter:FindFirstChild('HumanoidRootPart')
-				myBodyVelocity.Parent = myRootPart
-
-				activeConnections[2] = myHumanoid.Died:Connect(function()
+				activeConnections[1] = targetHumanoid.Died:Connect(function()
 					_G.ControllingCreature = nil
 				end)
 
-				activeConnections[3] = _UserInputService.JumpRequest:Connect(function()
-					targetHumanoid:ChangeState('Jumping')
-				end)
+				local targetBodyVelocity = Instance.new('BodyVelocity', targetRootPart)
+				local myBodyVelocity = Instance.new('BodyVelocity')
 
-				activeConnections[5] = myHumanoid.Changed:Connect(function(property)
-					if property == 'MoveDirection' then
-						targetBodyVelocity.Velocity = myHumanoid.MoveDirection * 20
+				myBodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
+				myBodyVelocity.Velocity = Vector3.new()
+				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
+
+				makeCharacterNotGrabbable(targetModel)
+
+				task.spawn(function()
+					u113()
+					while targetModel.Parent and _G.ControllingCreature ~= nil do
+						if isSpecialNPC then
+							SNOWshipOnceAndDelete(targetHead)
+						else
+							SNOWshipOnce(targetHead)
+						end
+						targetHumanoid.AutoRotate = true
+						task.wait()
 					end
 				end)
 
-				activeConnections[6] = workspace.CurrentCamera.Changed:Connect(function(property)
-					if property == 'CameraSubject' then
-						_Workspace.CurrentCamera.CameraSubject = targetHumanoid
-					end
-				end)
+				_Workspace.CurrentCamera.CameraSubject = targetHumanoid
+				playControlEffectIn()
 
-				local lookVector = nil
-				activeConnections[7] = targetHead.Changed:Connect(function(property)
-					if property == 'CFrame' then
-						lookVector = _Workspace.CurrentCamera.CFrame.lookVector
-						targetHumanoid.CameraOffset = -Vector3.new(lookVector.X, 5, lookVector.Z) * 1.7
-					end
-				end)
+				local myCharacter = GetPlayerCharacter()
+				local myRootPart, myHumanoid
 
-				targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+				if myCharacter then
+					myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
+					myRootPart = myCharacter:FindFirstChild('HumanoidRootPart')
+					myBodyVelocity.Parent = myRootPart
+
+					activeConnections[2] = myHumanoid.Died:Connect(function()
+						_G.ControllingCreature = nil
+					end)
+
+					activeConnections[3] = _UserInputService.JumpRequest:Connect(function()
+						targetHumanoid:ChangeState('Jumping')
+					end)
+
+					activeConnections[5] = myHumanoid.Changed:Connect(function(property)
+						if property == 'MoveDirection' then
+							targetBodyVelocity.Velocity = myHumanoid.MoveDirection * 20
+						end
+					end)
+
+					activeConnections[6] = workspace.CurrentCamera.Changed:Connect(function(property)
+						if property == 'CameraSubject' then
+							_Workspace.CurrentCamera.CameraSubject = targetHumanoid
+						end
+					end)
+
+					local lookVector = nil
+					activeConnections[7] = targetHead.Changed:Connect(function(property)
+						if property == 'CFrame' then
+							lookVector = _Workspace.CurrentCamera.CFrame.lookVector
+							targetHumanoid.CameraOffset = -Vector3.new(lookVector.X, 5, lookVector.Z) * 1.7
+						end
+					end)
+
+					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
+				end
+
+				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
+					TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
+					task.wait()
+				end
+
+				cleanupConnections()
+				u114()
+				TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
+				makeCharacterGrabbable(targetModel)
+
+				targetBodyVelocity:Destroy()
+				myBodyVelocity:Destroy()
+
+				_Workspace.CurrentCamera.CameraSubject = myHumanoid
+				_G.ControllingCreature = nil
+				if myRootPart then
+					myRootPart.Velocity = Vector3.new()
+				end
+
+				playControlEffectOut()
 			end
-
-			while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-				TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(0, -10, 0)))
-				task.wait()
-			end
-
-			cleanupConnections()
-			u114()
-			TeleportPlayer(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
-			makeCharacterGrabbable(targetModel)
-
-			targetBodyVelocity:Destroy()
-			myBodyVelocity:Destroy()
-
-			_Workspace.CurrentCamera.CameraSubject = myHumanoid
-			_G.ControllingCreature = nil
-			if myRootPart then
-				myRootPart.Velocity = Vector3.new()
-			end
-
-			playControlEffectOut()
 		end
 	end
-end
 
-local characterRaycastFilter = RaycastParams.new()
-characterRaycastFilter.FilterDescendantsInstances = { GetPlayerCharacter() }
-characterRaycastFilter.FilterType = Enum.RaycastFilterType.Exclude
+	local characterRaycastFilter = RaycastParams.new()
+	characterRaycastFilter.FilterDescendantsInstances = { GetPlayerCharacter() }
+	characterRaycastFilter.FilterType = Enum.RaycastFilterType.Exclude
 
-function controlBindF()
-	local myCharacter = GetPlayerCharacter()
+	local function controlBindF()
+		local myCharacter = GetPlayerCharacter()
 
-	if myCharacter then
-		local myHead = myCharacter.Head
-		local currentCamera = _Workspace.CurrentCamera
-		local myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
-		
-		local raycastResult = _Workspace:Raycast(myHead.Position, currentCamera.CFrame.lookVector * 50, characterRaycastFilter)
+		if myCharacter then
+			local myHead = myCharacter.Head
+			local currentCamera = _Workspace.CurrentCamera
+			local myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
+			
+			local raycastResult = _Workspace:Raycast(myHead.Position, currentCamera.CFrame.lookVector * 50, characterRaycastFilter)
 
-		if raycastResult and myHumanoid and myHumanoid.Health > 0 then
-			local hitModel = raycastResult.Instance.Parent
+			if raycastResult and myHumanoid and myHumanoid.Health > 0 then
+				local hitModel = raycastResult.Instance.Parent
 
-			if hitModel:FindFirstChildOfClass('Humanoid') then
-				controlCreature(hitModel)
+				if hitModel:FindFirstChildOfClass('Humanoid') then
+					controlCreature(hitModel)
+				end
 			end
 		end
 	end
-end
 
+	local ControlSection = funTab:AddSection({
+		Name = "크리처 조종"
+	})
 
-local creatureControlToggle = {
-	Name = "케릭터 조종 (C키)",
-	Default = false,
-	Save = true,
-	Flag = "CreatureControlToggle",
-	Callback = function(Value)
-		if Value then
-			if not _G.ControllingCreature then
-				controlBindF()
+	ControlSection:AddToggle({
+		Name = "Control Creature",
+		Default = false,
+		Save = true,
+		Flag = "CreatureControlToggle",
+		Callback = function(Value)
+			if Value then
+				if not _G.ControllingCreature then
+					controlBindF()
+				end
+			else
+				_G.ControllingCreature = nil
 			end
-		else
-			_G.ControllingCreature = nil
 		end
-	end
-}
+	})
+
+	
+	
 
 bdTab:AddSection({
     Name = "배경"

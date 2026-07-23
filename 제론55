@@ -10194,7 +10194,7 @@ do
 		end
 	end
 
-	-- 내 캐릭터 노클립 설정/해제 함수
+	
 	local function setCharacterNoclip(character, noclipState)
 		if typeof(character) == "Instance" and character:IsA("Model") then
 			for _, part in ipairs(character:GetDescendants()) do
@@ -10205,7 +10205,7 @@ do
 		end
 	end
 
-	-- 빙의 사운드 효과
+
 	local controlSoundEffect = Instance.new('Sound', workspace)
 	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
 	controlSoundEffect.PlaybackSpeed = 1.25
@@ -10244,7 +10244,7 @@ do
 
 				makeCharacterNotGrabbable(targetModel)
 				
-				-- 사운드 재생
+				
 				controlSoundEffect:Play()
 
 				local myCharacter = safeGetCharacter()
@@ -10261,7 +10261,7 @@ do
 						end)
 					end
 
-					-- 1. 이동 속도 및 방향 매 프레임 정밀 동기화
+					
 					activeConnections[3] = RunService.Heartbeat:Connect(function()
 						if myHumanoid and targetBodyVelocity and targetHumanoid then
 							local moveDir = myHumanoid.MoveDirection
@@ -10274,9 +10274,8 @@ do
 						end
 					end)
 
-					-- 2. 완벽한 시점 고정 및 노클립(Noclip) 루프 적용
+					
 					activeConnections[4] = RunService.Stepped:Connect(function()
-						-- 내 캐릭터 완전 노클립 상태 유지
 						if myCharacter and myCharacter.Parent then
 							setCharacterNoclip(myCharacter, true)
 						end
@@ -10289,7 +10288,7 @@ do
 						end
 					end)
 
-					-- 점프 기능
+					
 					activeConnections[5] = UserInputService.JumpRequest:Connect(function()
 						if targetHumanoid then
 							targetHumanoid:ChangeState('Jumping')
@@ -10299,36 +10298,49 @@ do
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
-				-- 조종 중 내 실제 캐릭터 땅 밑 이동 처리
+			
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -12, 0)))
+					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -20, 0)))
 					task.wait()
 				end
 
-				-- 조종 종료 후 원래대로 복구
-				cleanupConnections()
+								cleanupConnections()
 
-				-- 내 캐릭터 노클립 해제 (충돌 원상복구)
+				
 				if myCharacter then
 					setCharacterNoclip(myCharacter, false)
 				end
 
+				
 				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(3, 3, 3)))
 				makeCharacterGrabbable(targetModel)
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
 
+			
+				if myHumanoid then
+					myHumanoid:Move(Vector3.new(0, 0, 0))
+					myHumanoid.CameraOffset = Vector3.new(0, 0, 0)
+				end
+
+				if myRootPart then
+					myRootPart.Velocity = Vector3.new(0, 0, 0)
+					myRootPart.RotVelocity = Vector3.new(0, 0, 0)
+					if myRootPart:IsA("BasePart") then
+						myRootPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						myRootPart.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
+					end
+				end
+
+				
 				local cam = workspace.CurrentCamera
 				if myHumanoid and cam then
+					cam.CameraType = Enum.CameraType.Custom
 					cam.CameraSubject = myHumanoid
-					myHumanoid.CameraOffset = Vector3.new(0, 0, 0)
 				end
 				
 				_G.ControllingCreature = nil
-				if myRootPart then
-					myRootPart.Velocity = Vector3.new()
-				end
 			end
 		end
 	end
@@ -10401,9 +10413,11 @@ do
 			controlBind('Control(C)', Enum.UserInputState.Begin)
 		end
 	end)
-
+funTab:AddSection({
+    Name = "조종"
+})
 	funTab:AddToggle({
-		Name = 'Control (C)',
+		Name = ' 컨트롤 (C키)',
 		Default = false,
 		Save = true,
 		Flag = 'controlbind_toggle',
@@ -10420,6 +10434,7 @@ do
 		end
 	})
 end
+
 
 
 

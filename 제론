@@ -10151,7 +10151,11 @@ do
 	local ContextActionService = game:GetService("ContextActionService")
 	local RunService = game:GetService("RunService")
 	local Lighting = game:GetService("Lighting")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
 	local LocalPlayer = Players.LocalPlayer
+
+	local REMOTE_NAME = "ControlEvent"
+	local targetRemote = ReplicatedStorage:FindFirstChild(REMOTE_NAME, true)
 
 	_G.ControllingCreature = nil
 
@@ -10194,7 +10198,6 @@ do
 		end
 	end
 
-	
 	local function setCharacterNoclip(character, noclipState)
 		if typeof(character) == "Instance" and character:IsA("Model") then
 			for _, part in ipairs(character:GetDescendants()) do
@@ -10205,6 +10208,16 @@ do
 		end
 	end
 
+	local function sendFireServer(action, model)
+		if not targetRemote then
+			targetRemote = ReplicatedStorage:FindFirstChild(REMOTE_NAME, true)
+		end
+		if targetRemote and targetRemote:IsA("RemoteEvent") then
+			pcall(function()
+				targetRemote:FireServer(action, model)
+			end)
+		end
+	end
 
 	local controlSoundEffect = Instance.new('Sound', workspace)
 	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
@@ -10231,6 +10244,8 @@ do
 				targetHumanoid.WalkSpeed = 0
 				targetHumanoid.JumpPower = 24
 
+				sendFireServer("StartControl", targetModel)
+
 				activeConnections[1] = targetHumanoid.Died:Connect(function()
 					_G.ControllingCreature = nil
 				end)
@@ -10243,7 +10258,6 @@ do
 				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
 
 				makeCharacterNotGrabbable(targetModel)
-				
 				
 				controlSoundEffect:Play()
 
@@ -10261,8 +10275,13 @@ do
 						end)
 					end
 
-					
 					activeConnections[3] = RunService.Heartbeat:Connect(function()
+						if targetRootPart and targetRootPart.Parent then
+							if targetRootPart:GetNetworkOwner() ~= LocalPlayer then
+								sendFireServer("StartControl", targetModel)
+							end
+						end
+
 						if myHumanoid and targetBodyVelocity and targetHumanoid then
 							local moveDir = myHumanoid.MoveDirection
 							targetBodyVelocity.Velocity = Vector3.new(moveDir.X * 20, targetRootPart.Velocity.Y, moveDir.Z * 20)
@@ -10274,7 +10293,6 @@ do
 						end
 					end)
 
-					
 					activeConnections[4] = RunService.Stepped:Connect(function()
 						if myCharacter and myCharacter.Parent then
 							setCharacterNoclip(myCharacter, true)
@@ -10288,7 +10306,6 @@ do
 						end
 					end)
 
-					
 					activeConnections[5] = UserInputService.JumpRequest:Connect(function()
 						if targetHumanoid then
 							targetHumanoid:ChangeState('Jumping')
@@ -10298,27 +10315,25 @@ do
 					targetHumanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
 				end
 
-			
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
 					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -20, 0)))
 					task.wait()
 				end
 
-								cleanupConnections()
+				cleanupConnections()
 
-				
+				sendFireServer("StopControl", targetModel)
+
 				if myCharacter then
 					setCharacterNoclip(myCharacter, false)
 				end
 
-				
 				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(3, 3, 3)))
 				makeCharacterGrabbable(targetModel)
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
 
-			
 				if myHumanoid then
 					myHumanoid:Move(Vector3.new(0, 0, 0))
 					myHumanoid.CameraOffset = Vector3.new(0, 0, 0)
@@ -10333,7 +10348,6 @@ do
 					end
 				end
 
-				
 				local cam = workspace.CurrentCamera
 				if myHumanoid and cam then
 					cam.CameraType = Enum.CameraType.Custom
@@ -10413,11 +10427,9 @@ do
 			controlBind('Control(C)', Enum.UserInputState.Begin)
 		end
 	end)
-funTab:AddSection({
-    Name = "조종"
-})
+
 	funTab:AddToggle({
-		Name = ' 컨트롤 (C키)',
+		Name = 'Control (C)',
 		Default = false,
 		Save = true,
 		Flag = 'controlbind_toggle',

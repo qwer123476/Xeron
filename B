@@ -7361,7 +7361,7 @@ WS_Section:AddToggle({
 WS_Section:AddSlider({
 	Name = 'Speed',
 	Min = 0.1,
-	Max = 5,
+	Max = 50,
 	Default = 0.1,
 	Color = Color3.fromRGB(255, 255, 255),
 	Increment = 0.01,
@@ -7474,7 +7474,7 @@ LagServerToggle = v1296:AddToggle({
 v1296:AddSlider({
 	Name = 'Lag Intensity',
 	Min = 1,
-	Max = 400,
+	Max = 40000,
 	Default = 150,
 	Color = Color3.fromRGB(255, 255, 255),
 	Increment = 1,

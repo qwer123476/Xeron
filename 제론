@@ -10145,15 +10145,17 @@ funTab:AddButton({
 })
 
 do
-	local controlSoundEffect = Instance.new('Sound', _Workspace)
+	local currentCam = workspace.CurrentCamera or workspace:WaitForChild("CurrentCamera")
+
+	local controlSoundEffect = Instance.new('Sound', workspace)
 	controlSoundEffect.SoundId = 'rbxassetid://9126228625'
 	controlSoundEffect.PlaybackSpeed = 1.25
 
-	local controlColorCorrection = Instance.new('ColorCorrectionEffect', _Lighting)
+	local controlColorCorrection = Instance.new('ColorCorrectionEffect', game:GetService('Lighting'))
 	controlColorCorrection.Enabled = false
 
 	local cameraFovTween = _TweenService:Create(
-		_Workspace.CurrentCamera, 
+		currentCam, 
 		TweenInfo.new(0.3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, 0, true), 
 		{ FieldOfView = 120 }
 	)
@@ -10249,7 +10251,7 @@ do
 					end
 				end)
 
-				_Workspace.CurrentCamera.CameraSubject = targetHumanoid
+				workspace.CurrentCamera.CameraSubject = targetHumanoid
 				playControlEffectIn()
 
 				local myCharacter = GetPlayerCharacter()
@@ -10276,14 +10278,14 @@ do
 
 					activeConnections[6] = workspace.CurrentCamera.Changed:Connect(function(property)
 						if property == 'CameraSubject' then
-							_Workspace.CurrentCamera.CameraSubject = targetHumanoid
+							workspace.CurrentCamera.CameraSubject = targetHumanoid
 						end
 					end)
 
 					local lookVector = nil
 					activeConnections[7] = targetHead.Changed:Connect(function(property)
 						if property == 'CFrame' then
-							lookVector = _Workspace.CurrentCamera.CFrame.lookVector
+							lookVector = workspace.CurrentCamera.CFrame.lookVector
 							targetHumanoid.CameraOffset = -Vector3.new(lookVector.X, 5, lookVector.Z) * 1.7
 						end
 					end)
@@ -10304,7 +10306,7 @@ do
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
 
-				_Workspace.CurrentCamera.CameraSubject = myHumanoid
+				workspace.CurrentCamera.CameraSubject = myHumanoid
 				_G.ControllingCreature = nil
 				if myRootPart then
 					myRootPart.Velocity = Vector3.new()
@@ -10324,10 +10326,10 @@ do
 
 		if myCharacter then
 			local myHead = myCharacter.Head
-			local currentCamera = _Workspace.CurrentCamera
+			local currentCamInst = workspace.CurrentCamera
 			local myHumanoid = myCharacter:FindFirstChildOfClass('Humanoid')
 			
-			local raycastResult = _Workspace:Raycast(myHead.Position, currentCamera.CFrame.lookVector * 50, characterRaycastFilter)
+			local raycastResult = workspace:Raycast(myHead.Position, currentCamInst.CFrame.lookVector * 50, characterRaycastFilter)
 
 			if raycastResult and myHumanoid and myHumanoid.Health > 0 then
 				local hitModel = raycastResult.Instance.Parent
@@ -10357,6 +10359,8 @@ do
 		end
 	})
 end
+
+
 
 
 bdTab:AddSection({

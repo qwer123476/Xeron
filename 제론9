@@ -10241,7 +10241,7 @@ do
 				end
 
 				_G.ControllingCreature = targetModel
-				targetHumanoid.WalkSpeed = 0
+				targetHumanoid.WalkSpeed = 24
 				targetHumanoid.JumpPower = 24
 
 				sendFireServer("StartControl", targetModel)

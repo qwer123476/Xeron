@@ -1523,7 +1523,7 @@ function makeCharacterGrabbable(p362)
 		end
 	end
 end
----[[
+
 controlsoundeffect = Instance.new('Sound', _Workspace)
 controlsoundeffect.SoundId = 'rbxassetid://9126228625'
 controlsoundeffect.PlaybackSpeed = 1.25
@@ -1729,7 +1729,7 @@ function controlBind(p395, p396, _)
 		end
 	end
 end
-]]
+
 _G.PlayerToLongGrab = nil
 _G.TargetAura = nil
 _G.SuperStrength = nil

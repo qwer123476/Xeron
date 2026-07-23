@@ -2608,7 +2608,7 @@ task.wait(0.1)
         end
     end
 end
-
+--[[
 function AntiGrabStickyF()
     local plr = game.Players.LocalPlayer
     
@@ -2726,7 +2726,7 @@ function AntiGrabStickyF()
         end
     end
 end
-
+]]
 RunService = game:GetService("RunService")
 isvs = false
 

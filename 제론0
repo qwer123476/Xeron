@@ -10316,7 +10316,7 @@ do
 				end
 
 				while targetModel.Parent and _G.ControllingCreature ~= nil and (myCharacter and myCharacter.Parent) do
-					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -20, 0)))
+					safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(0, -12, 0)))
 					task.wait()
 				end
 

@@ -10148,8 +10148,11 @@ do
 	local TweenService = game:GetService("TweenService")
 	local Players = game:GetService("Players")
 	local UserInputService = game:GetService("UserInputService")
+	local ContextActionService = game:GetService("ContextActionService")
 	local Lighting = game:GetService("Lighting")
 	local LocalPlayer = Players.LocalPlayer
+
+	_G.ControllingCreature = nil
 
 	local function safeGetCharacter()
 		if typeof(GetPlayerCharacter) == "function" then
@@ -10166,6 +10169,26 @@ do
 			local char = safeGetCharacter()
 			if char and char:FindFirstChild("HumanoidRootPart") then
 				char.HumanoidRootPart.CFrame = cframe
+			end
+		end
+	end
+
+	local function makeCharacterNotGrabbable(model)
+		if typeof(model) == "Instance" and model:IsA("Model") then
+			for _, child in ipairs(model:GetChildren()) do
+				if child:IsA("BasePart") then
+					child.CanQuery = false
+				end
+			end
+		end
+	end
+
+	local function makeCharacterGrabbable(model)
+		if typeof(model) == "Instance" and model:IsA("Model") then
+			for _, child in ipairs(model:GetChildren()) do
+				if child:IsA("BasePart") then
+					child.CanQuery = true
+				end
 			end
 		end
 	end
@@ -10226,14 +10249,6 @@ do
 			local targetRootPart = targetModel:FindFirstChild('HumanoidRootPart')
 			local targetHead = targetModel:FindFirstChild('Head')
 
-			local isSpecialNPC = (function()
-				local playerService = typeof(_Players) ~= "nil" and _Players or Players
-				if not playerService:GetPlayerFromCharacter(targetModel) and 
-				   (targetModel.Name == 'YouDecoy' or targetModel.Name == 'CreatureBlobman' or tostring(targetModel.Parent.Name) == 'Robloxians') then
-					return true
-				end
-			end)()
-
 			if targetModel and targetHumanoid and targetRootPart then
 				local activeConnections = {}
 
@@ -10261,6 +10276,8 @@ do
 				myBodyVelocity.MaxForce = Vector3.new(0, math.huge, 0)
 				myBodyVelocity.Velocity = Vector3.new()
 				targetBodyVelocity.MaxForce = Vector3.new(math.huge, 0, math.huge)
+
+				makeCharacterNotGrabbable(targetModel)
 
 				task.spawn(function()
 					while targetModel.Parent and _G.ControllingCreature ~= nil do
@@ -10296,8 +10313,7 @@ do
 						end)
 					end
 
-					local inputService = typeof(_UserInputService) ~= "nil" and _UserInputService or UserInputService
-					activeConnections[3] = inputService.JumpRequest:Connect(function()
+					activeConnections[3] = UserInputService.JumpRequest:Connect(function()
 						if targetHumanoid then
 							targetHumanoid:ChangeState('Jumping')
 						end
@@ -10329,6 +10345,7 @@ do
 
 				cleanupConnections()
 				safeTeleport(CFrame.new(targetRootPart.Position + Vector3.new(5, 15, 5)))
+				makeCharacterGrabbable(targetModel)
 
 				targetBodyVelocity:Destroy()
 				myBodyVelocity:Destroy()
@@ -10376,23 +10393,62 @@ do
 		end
 	end
 
-	funTab:AddSection({
-		Name = "크리처 조종"
-	}):AddToggle({
-		Name = "Control Creature",
+	local function controlBind(actionName, inputState, _)
+		if actionName == 'Control(C)' and inputState == Enum.UserInputState.Begin then
+			if _G.ControllingCreature then
+				_G.ControllingCreature = nil
+			else
+				controlBindF()
+			end
+		end
+	end
+
+	local gui2 = Instance.new('ScreenGui')
+	gui2.ResetOnSpawn = false
+	gui2.Name = 'CAG2'
+
+	if UserInputService.TouchEnabled then
+		gui2.Parent = LocalPlayer.PlayerGui
+	end
+
+	local imageButtonControl = Instance.new('ImageButton')
+	imageButtonControl.Size = UDim2.new(0, 50, 0, 50)
+	imageButtonControl.Position = UDim2.new(1, -378, 1, -80)
+	imageButtonControl.Image = 'rbxassetid://97166444'
+	imageButtonControl.BackgroundTransparency = 1
+	imageButtonControl.ImageTransparency = 0.2
+	imageButtonControl.ImageColor3 = Color3.fromRGB(142, 142, 142)
+	imageButtonControl.Parent = gui2
+
+	local imageCLabel = Instance.new('ImageLabel')
+	imageCLabel.Size = UDim2.new(1, 0, 1, 0)
+	imageCLabel.Image = 'rbxassetid://14436167187'
+	imageCLabel.BackgroundTransparency = 1
+	imageCLabel.Parent = imageButtonControl
+
+	imageButtonControl.InputBegan:Connect(function(input, processed)
+		if not processed and UserInputService.TouchEnabled and input.UserInputType == Enum.UserInputType.Touch then
+			controlBind('Control(C)', Enum.UserInputState.Begin)
+		end
+	end)
+
+	local creatureControlToggle = {
+		Name = 'Control (C)',
 		Default = false,
 		Save = true,
-		Flag = "CreatureControlToggle",
-		Callback = function(Value)
-			if Value then
-				if not _G.ControllingCreature then
-					controlBindF()
-				end
+		Flag = 'controlbind_toggle',
+		Callback = function(enabled)
+			imageButtonControl.Visible = enabled
+			imageButtonControl.Active = enabled
+
+			if enabled then
+				ContextActionService:BindAction('Control(C)', controlBind, false, Enum.KeyCode.C)
 			else
+				ContextActionService:UnbindAction('Control(C)')
 				_G.ControllingCreature = nil
 			end
 		end
-	})
+	}
 end
 
 

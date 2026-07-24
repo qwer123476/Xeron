@@ -247,7 +247,7 @@ end
 G = rs.GrabEvents
 G:WaitForChild("EndGrabEarly"):Destroy()
 Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
-
+--[[
 do
     local Players = game:GetService("Players")
     local RunService = game:GetService("RunService")
@@ -306,7 +306,7 @@ do
 
     
 end
-
+]]
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 local HttpService = game:GetService("HttpService")

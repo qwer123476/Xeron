@@ -7140,7 +7140,7 @@ do
         end
     end
 
-
+end)}
 
 LoopTab:AddSection({
     Name = "레이지봇킥"

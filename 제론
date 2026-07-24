@@ -6915,45 +6915,46 @@ LoopTab:AddToggle({
 
 
              do
-    local Players = game:GetService("Players")
-    local LocalPlayer = Players.LocalPlayer
-    
-    local HEIGHT_LIMIT = 5000
-    local TELEPORT_OFFSET = Vector3.new(0, 3, 0)
-    local targetCooldown = 0.1
-    
-    local blobLoopT = false
-    local loopKillVoidAdjusted = false
-    local playersInLoop2V = {}
-    local originalPositionSaved = nil
+    Players = game:GetService("Players")
+    LocalPlayer = Players.LocalPlayer
+    HEIGHT_LIMIT = 5000
+    TELEPORT_OFFSET = Vector3.new(0, 3, 0)
+    targetCooldown = 0.1
+    blobLoopT = false
+    loopKillVoidAdjusted = false
+    playersInLoop1V = playersInLoop1V or {}
+    playersInLoop2V = playersInLoop2V or {}
+    originalPositionSaved = nil
+end
 
-    local function isPlayerTooHigh(target)
+do
+    function isPlayerTooHigh(target)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
             return target.Character.HumanoidRootPart.Position.Y > HEIGHT_LIMIT
         end
         return false
     end
 
-    local function resetVelocity(char)
-        local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    function resetVelocity(char)
+        local hrp = char:FindFirstChild("HumanoidRootPart")
         if hrp then
             hrp.AssemblyLinearVelocity = Vector3.zero
             hrp.AssemblyAngularVelocity = Vector3.zero
         end
     end
 
-    local function saveCurrentPosition()
+    function saveCurrentPosition()
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
             originalPositionSaved = char.HumanoidRootPart.CFrame
         end
     end
 
-    local function getOriginalPosition()
+    function getOriginalPosition()
         return originalPositionSaved
     end
 
-    local function setCanCollideFalse(model)
+    function setCanCollideFalse(model)
         for _, part in ipairs(model:GetDescendants()) do
             if part:IsA("BasePart") then
                 part.CanCollide = false
@@ -6961,7 +6962,7 @@ LoopTab:AddToggle({
         end
     end
 
-    local function restorePosition(char, originalFallenHeight)
+    function restorePosition(char, originalFallenHeight)
         workspace.FallenPartsDestroyHeight = originalFallenHeight
         loopKillVoidAdjusted = false
         local orig = getOriginalPosition()
@@ -6970,142 +6971,139 @@ LoopTab:AddToggle({
         end
     end
 
-    local function modifyTarget(tRoot, tHum)
+    function modifyTarget(tRoot, tHum)
         if tHum then
-            pcall(function() tHum.Health = 0 end)
+            tHum.Health = 0
         end
     end
+end
 
-    local function loopPlayerBlobF()
+do
+    function loopPlayerBlobF()
         task.spawn(function()
             while blobLoopT do
                 for _, playerName in ipairs(playersInLoop2V) do
                     if not blobLoopT then break end
                     local target = Players:FindFirstChild(playerName)
-                    
                     if target and target.Character then
                         local tChar = target.Character
                         local tRoot = tChar:FindFirstChild("HumanoidRootPart")
                         local tHum = tChar:FindFirstChild("HumanoidByModel") or tChar:FindFirstChildOfClass("Humanoid")
+                        
                         local tHead = tChar:FindFirstChild("Head")
 
-                        if not (tRoot and tHum and tHead) or isPlayerTooHigh(target) or tHum:GetState() == Enum.HumanoidStateType.Dead then  
-                            continue  
-                        end  
+                        if not (tRoot and tHum and tHead) or isPlayerTooHigh(target) or tHum:GetState() == Enum.HumanoidStateType.Dead then    
+                            continue    
+                        end    
 
-                        local char = LocalPlayer.Character  
+                        local char = LocalPlayer.Character    
 
-                        if not (char and char:FindFirstChild("HumanoidRootPart")) then  
-                            return  
-                        end  
+                        if not (char and char:FindFirstChild("HumanoidRootPart")) then    
+                            return    
+                        end    
 
-                        if char:GetAttribute("SavingOriginalPos") then  
-                            saveCurrentPosition()  
-                        end  
+                        if char:GetAttribute("SavingOriginalPos") then    
+                            saveCurrentPosition()    
+                        end    
 
-                        char:SetAttribute("SavingOriginalPos", false)  
+                        char:SetAttribute("SavingOriginalPos", false)    
 
-                        local originalFallenHeight = workspace.FallenPartsDestroyHeight  
+                        local originalFallenHeight = workspace.FallenPartsDestroyHeight    
 
-                        workspace.FallenPartsDestroyHeight = -5000  
-                        loopKillVoidAdjusted = true  
+                        workspace.FallenPartsDestroyHeight = -5000    
+                        loopKillVoidAdjusted = true    
 
-                        if tRoot.Position.Y > HEIGHT_LIMIT then  
-                            resetVelocity(char)  
+                        if tRoot.Position.Y > HEIGHT_LIMIT then    
+                            resetVelocity(char)    
 
-                            local originalPosition = getOriginalPosition()  
+                            local originalPosition = getOriginalPosition()    
 
-                            if originalPosition then  
-                                char.HumanoidRootPart:PivotTo(originalPosition)  
-                            end  
+                            if originalPosition then    
+                                char.HumanoidRootPart:PivotTo(originalPosition)    
+                            end    
 
-                            workspace.FallenPartsDestroyHeight = originalFallenHeight  
-                            loopKillVoidAdjusted = false  
+                            workspace.FallenPartsDestroyHeight = originalFallenHeight    
+                            loopKillVoidAdjusted = false    
 
-                            char:SetAttribute("SavingOriginalPos", true)  
+                            char:SetAttribute("SavingOriginalPos", true)    
 
-                            continue  
-                        end  
+                            continue    
+                        end    
 
-                        pcall(function()  
-                            char.HumanoidRootPart:PivotTo(CFrame.new(tRoot.Position + TELEPORT_OFFSET))  
+                        pcall(function()    
+                            char.HumanoidRootPart:PivotTo(CFrame.new(tRoot.Position + TELEPORT_OFFSET))    
 
-                            setCanCollideFalse(tChar)  
+                            setCanCollideFalse(tChar)    
 
-                            if GrabEvents and GrabEvents.SetNetworkOwner then
-                                GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)  
-                            end
+                            GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)    
 
-                            task.wait(0.1)  
+                            task.wait(0.1)    
 
-                            if GrabEvents and GrabEvents.DestroyGrabLine then
-                                GrabEvents.DestroyGrabLine:FireServer(tRoot)  
-                            end
+                            GrabEvents.DestroyGrabLine:FireServer(tRoot)    
 
-                            task.wait(0.1)  
+                            task.wait(0.1)    
 
-                            if tHead:FindFirstChild("PartOwner") and tHead.PartOwner.Value == LocalPlayer.Name then  
-                                task.wait(0.05)  
-                                modifyTarget(tRoot, tHum)  
-                            end  
-                        end)  
+                            if tHead:FindFirstChild("PartOwner") and tHead.PartOwner.Value == LocalPlayer.Name then    
+                                task.wait(0.05)    
+                                modifyTarget(tRoot, tHum)    
+                            end    
+                        end)    
 
-                        restorePosition(char, originalFallenHeight)  
+                        restorePosition(char, originalFallenHeight)    
 
-                        char:SetAttribute("SavingOriginalPos", true)  
+                        char:SetAttribute("SavingOriginalPos", true)    
 
-                        task.wait(targetCooldown)  
+                        task.wait(targetCooldown)    
                     end
                 end
                 task.wait()
             end
         end)
     end
-
-    if LoopTab then
-        LoopTab:AddSection({  
-            Name = "루프킬 NEW"  
-        })  
-
-        LoopTab:AddToggle({  
-            Name = "루프 킬  <font color='#07FF00'>[오너쉽]</font>",  
-            Default = false,  
-            Flag = "21",  
-            Callback = function(Value)  
-                blobLoopT = Value  
-
-                if blobLoopT then  
-                    table.clear(playersInLoop2V)  
-                    
-                    if playersInLoop1V then
-                        for _, e in ipairs(playersInLoop1V) do  
-                            local nameOnly = e:match("^(.-) %(") or e  
-                            table.insert(playersInLoop2V, nameOnly)  
-                        end  
-                    end
-
-                    loopPlayerBlobF()  
-
-                else  
-                    blobLoopT = false  
-                    table.clear(playersInLoop2V)  
-
-                    for _, player in ipairs(Players:GetPlayers()) do  
-                        if player.Character then  
-                            local head = player.Character:FindFirstChild("Head")  
-                            if head then  
-                                local kick = head:FindFirstChild("Kick")  
-                                if kick and kick:IsA("BodyPosition") then  
-                                    kick:Destroy()  
-                                end  
-                            end  
-                        end  
-                    end  
-                end  
-            end  
-        })
-    end
 end
+
+do
+    LoopTab:AddSection({
+        Name = "루프킬 NEW"
+    })
+
+    LoopTab:AddToggle({
+        Name = "루프 킬  <font color='#07FF00'>[오너쉽]</font>",
+        Default = false,
+        Flag = "21",
+        Callback = function(Value)
+            blobLoopT = Value
+
+            if blobLoopT then    
+                table.clear(playersInLoop2V)    
+
+                for _, e in ipairs(playersInLoop1V) do    
+                    local nameOnly = e:match("^(.-) %(") or e    
+                    table.insert(playersInLoop2V, nameOnly)    
+                end    
+
+                loopPlayerBlobF()    
+
+            else    
+                blobLoopT = false    
+                table.clear(playersInLoop2V)    
+
+                for _, player in ipairs(game.Players:GetPlayers()) do    
+                    if player.Character then    
+                        local head = player.Character:FindFirstChild("Head")    
+                        if head then    
+                            local kick = head:FindFirstChild("Kick")    
+                            if kick and kick:IsA("BodyPosition") then    
+                                kick:Destroy()    
+                            end    
+                        end    
+                    end    
+                end    
+            end
+        end
+    })
+end
+
 
 
 LoopTab:AddSection({

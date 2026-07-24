@@ -7106,35 +7106,40 @@ do
 
 
     LoopTab:AddToggle({
-        Name = "루킬 <font color='#07FF00'>[오너쉽]</font>",
-        Default = false,
-        Callback = function(Value)
+    Name = "루프 킬  <font color='#07FF00'>[오너쉽]</font>",
+    Default = false,
+    Flag = "21",
+    Callback = function(Value)
+        blobLoopT = Value
 
-            loopKillEnabled = Value
-            currentTargetIndex = 1
+        if blobLoopT then
+            table.clear(playersInLoop2V)
 
-            if Value then
+            for _, e in ipairs(playersInLoop1V) do
+                local nameOnly = e:match("^(.-) %(") or e
+                table.insert(playersInLoop2V, nameOnly)
+            end
 
-                if heartbeatConnection then
-                    heartbeatConnection:Disconnect()
-                end
+            loopPlayerBlobF()
 
-                heartbeatConnection = RunService.Heartbeat:Connect(function()
-                    if loopKillEnabled then
-                        performKill()
+        else
+            blobLoopT = false
+            table.clear(playersInLoop2V)
+
+            for _, player in ipairs(game.Players:GetPlayers()) do
+                if player.Character then
+                    local head = player.Character:FindFirstChild("Head")
+                    if head then
+                        local kick = head:FindFirstChild("Kick")
+                        if kick and kick:IsA("BodyPosition") then
+                            kick:Destroy()
+                        end
                     end
-                end)
-
-            else
-
-                if heartbeatConnection then
-                    heartbeatConnection:Disconnect()
-                    heartbeatConnection = nil
                 end
-
             end
         end
-    })
+    end
+
 end
 
 LoopTab:AddSection({

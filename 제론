@@ -6917,7 +6917,7 @@ do
     Players = game:GetService("Players")
     LocalPlayer = Players.LocalPlayer
     HEIGHT_LIMIT = 5000
-    TELEPORT_OFFSET = Vector3.new(0, 3, 0)
+    TELEPORT_OFFSET = Vector3.new(0, -10, 0)
     
     getgenv().targetCooldown = 0.1
     getgenv().loopKillEnabled = false
@@ -7062,17 +7062,28 @@ do
                         continue
                     end
 
-                    pcall(function()
-                        char.HumanoidRootPart:PivotTo(CFrame.new(tRoot.Position + TELEPORT_OFFSET))
-                        setCanCollideFalse(tChar)
-                        GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)
-                        task.wait(0.1)
-                        GrabEvents.DestroyGrabLine:FireServer(tRoot)
-                        task.wait(0.1)
+                    local startTime = tick()
+                    while getgenv().loopKillEnabled and tHum.Health > 0 and tHum:GetState() ~= Enum.HumanoidStateType.Dead and tRoot and tRoot.Parent do
+                        pcall(function()
+                            char.HumanoidRootPart:PivotTo(CFrame.new(tRoot.Position + TELEPORT_OFFSET))
+                            setCanCollideFalse(tChar)
+                            GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)
+                        end)
+
                         if tHead:FindFirstChild("PartOwner") and tHead.PartOwner.Value == LocalPlayer.Name then
-                            task.wait(0.05)
                             modifyTarget(tRoot, tHum)
+                            break
                         end
+
+                        if tick() - startTime > 3 then
+                            break
+                        end
+
+                        task.wait(targetCooldown)
+                    end
+
+                    pcall(function()
+                        GrabEvents.DestroyGrabLine:FireServer(tRoot)
                     end)
 
                     task.spawn(function()

@@ -247,66 +247,7 @@ end
 G = rs.GrabEvents
 G:WaitForChild("EndGrabEarly"):Destroy()
 Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
---[[
-do
-    local Players = game:GetService("Players")
-    local RunService = game:GetService("RunService")
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Workspace = game:GetService("Workspace")
 
-    local LocalPlayer = Players.LocalPlayer
-
-    local function getChar()
-        local c = LocalPlayer.Character
-        if not c then c = LocalPlayer.CharacterAdded:Wait() end
-        return c
-    end
-
-    local function getHum()
-        local h = getChar():FindFirstChildOfClass("Humanoid")
-        if not h then h = getChar():WaitForChild("Humanoid") end
-        return h
-    end
-
-    local function getHRP()
-        local hrp = getChar():FindFirstChild("HumanoidRootPart")
-        if not hrp then hrp = getChar():WaitForChild("HumanoidRootPart") end
-        return hrp
-    end
-
-    local GrabEvents = ReplicatedStorage:WaitForChild("GrabEvents",5)
-    local MenuToys = ReplicatedStorage:WaitForChild("MenuToys",5)
-
-    local SetOwner = GrabEvents and GrabEvents:FindFirstChild("SetNetworkOwner")
-    local SpawnToy = MenuToys and MenuToys:FindFirstChild("SpawnToyRemoteFunction")
-
-    local blob, grab
-
-    
-
-
-    local function tp(cf)
-        local hrp = getHRP()
-        local hum = getHum()
-        hrp.CFrame = cf
-        if hum.SeatPart == nil then
-            hum.Sit = false
-        end
-    end
-
-    local function setNet(part)
-        if not part or not SetOwner then return end
-        local hrp = getHRP()
-        if (hrp.Position - part.Position).Magnitude <= 30 then
-            pcall(function()
-                SetOwner:FireServer(part, CFrame.new(hrp.Position, part.Position))
-            end)
-        end
-    end
-
-    
-end
-]]
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 local HttpService = game:GetService("HttpService")
@@ -2779,7 +2720,7 @@ function AntiBlobF()
     end)
 end
 
-
+--[[
 function AntiStickyGBF()
     if not AntiStickyGBT then
         return
@@ -2882,7 +2823,7 @@ function AntiStickyGBF()
         task.wait(0.05)
     end
 end
-
+]]
 function RagdollGrabF()
     if not RagdollGrabT then
         local deskToRemove = inv:FindFirstChild("RB")

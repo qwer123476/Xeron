@@ -282,28 +282,8 @@ do
 
     local blob, grab
 
-    local function setup()
-        local hrp = getHRP()
-        local toys = Workspace:FindFirstChild(LocalPlayer.Name.."SpawnedInToys")
-        if not toys then return end
+    
 
-        blob = toys:FindFirstChild("CreatureBlobman")
-        if not blob and SpawnToy then
-            pcall(function()
-                SpawnToy:InvokeServer("CreatureBlobman", hrp.CFrame, Vector3.new(0,-16,0))
-            end)
-            blob = toys:WaitForChild("CreatureBlobman",3)
-        end
-        if not blob then return end
-
-        grab = blob:FindFirstChild("BlobmanSeatAndOwnerScript") and blob.BlobmanSeatAndOwnerScript:FindFirstChild("CreatureGrab")
-
-        local seat = blob:FindFirstChildOfClass("VehicleSeat")
-        local hum = getHum()
-        if seat and hum then
-            seat:Sit(hum)
-        end
-    end
 
     local function tp(cf)
         local hrp = getHRP()
@@ -324,48 +304,7 @@ do
         end
     end
 
-    local running = false
-    local conn
-
-    local function start(targets)
-        if running then return end
-        running = true
-
-        if not blob then
-            setup()
-        end
-
-        conn = RunService.Heartbeat:Connect(function()
-            if not running then return end
-
-            for _,plr in ipairs(targets) do
-                if plr and plr ~= LocalPlayer and plr.Character then
-                    local t = plr.Character:FindFirstChild("HumanoidRootPart")
-                    if t then
-                        tp(t.CFrame + Vector3.new(0,2,0))
-                        if grab then
-                            pcall(function()
-                                grab:FireServer(t)
-                            end)
-                        end
-                    end
-                end
-            end
-        end)
-    end
-
-    local function stop()
-        running = false
-        if conn then
-            conn:Disconnect()
-            conn = nil
-        end
-    end
-
-    task.spawn(function()
-        task.wait(1)
-        setup()
-    end)
+    
 end
 
 local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()

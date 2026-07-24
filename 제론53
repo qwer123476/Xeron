@@ -12455,8 +12455,8 @@ bdTab:AddButton({
     end
 })
 
-bdTab:CreateButton({
-    Name = "Add",
+bdTab:AddButton({
+    Name = "섹스..",
     Callback = function()
         local Lighting = game:GetService("Lighting")
         for _, obj in ipairs(Lighting:GetChildren()) do

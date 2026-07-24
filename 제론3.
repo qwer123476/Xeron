@@ -6913,17 +6913,19 @@ LoopTab:AddToggle({
     end
 })
 
-do
-do
+
+             do
     local Players = game:GetService("Players")
     local LocalPlayer = Players.LocalPlayer
+    
     local HEIGHT_LIMIT = 5000
     local TELEPORT_OFFSET = Vector3.new(0, 3, 0)
     local targetCooldown = 0.1
+    
     local blobLoopT = false
     local loopKillVoidAdjusted = false
-    local playersInLoop1V = playersInLoop1V or {}
     local playersInLoop2V = {}
+    local originalPositionSaved = nil
 
     local function isPlayerTooHigh(target)
         if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
@@ -6940,7 +6942,6 @@ do
         end
     end
 
-    local originalPositionSaved = nil
     local function saveCurrentPosition()
         local char = LocalPlayer.Character
         if char and char:FindFirstChild("HumanoidRootPart") then
@@ -6969,33 +6970,9 @@ do
         end
     end
 
-    local GrabEvents = {
-        SetNetworkOwner = {
-            FireServer = function(self, ...)
-                local args = {...}
-                pcall(function()
-                    if args[1] and args[1]:IsA("BasePart") then
-                        args[1].AssemblyLinearVelocity = Vector3.zero
-                    end
-                end)
-            end
-        },
-        DestroyGrabLine = {
-            FireServer = function(self, ...)
-            end
-        }
-    }
-
     local function modifyTarget(tRoot, tHum)
         if tHum then
-            pcall(function()
-                tHum.Health = 0
-            end)
-        end
-        if tRoot then
-            pcall(function()
-                tRoot.AssemblyLinearVelocity = Vector3.new(0, -1000, 0)
-            end)
+            pcall(function() tHum.Health = 0 end)
         end
     end
 
@@ -7005,6 +6982,7 @@ do
                 for _, playerName in ipairs(playersInLoop2V) do
                     if not blobLoopT then break end
                     local target = Players:FindFirstChild(playerName)
+                    
                     if target and target.Character then
                         local tChar = target.Character
                         local tRoot = tChar:FindFirstChild("HumanoidRootPart")
@@ -7054,15 +7032,22 @@ do
 
                             setCanCollideFalse(tChar)  
 
-                            GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)  
+                            if GrabEvents and GrabEvents.SetNetworkOwner then
+                                GrabEvents.SetNetworkOwner:FireServer(tRoot, tRoot.CFrame)  
+                            end
 
-                            task.wait(0.05)  
+                            task.wait(0.1)  
 
-                            GrabEvents.DestroyGrabLine:FireServer(tRoot)  
+                            if GrabEvents and GrabEvents.DestroyGrabLine then
+                                GrabEvents.DestroyGrabLine:FireServer(tRoot)  
+                            end
 
-                            task.wait(0.05)  
+                            task.wait(0.1)  
 
-                            modifyTarget(tRoot, tHum)
+                            if tHead:FindFirstChild("PartOwner") and tHead.PartOwner.Value == LocalPlayer.Name then  
+                                task.wait(0.05)  
+                                modifyTarget(tRoot, tHum)  
+                            end  
                         end)  
 
                         restorePosition(char, originalFallenHeight)  
@@ -7077,54 +7062,51 @@ do
         end)
     end
 
-    LoopTab:AddSection({  
-        Name = "루프킬 NEW"  
-    })  
+    if LoopTab then
+        LoopTab:AddSection({  
+            Name = "루프킬 NEW"  
+        })  
 
-    LoopTab:AddToggle({  
-        Name = "루프 킬  <font color='#07FF00'>[오너쉽]</font>",  
-        Default = false,  
-        Flag = "21",  
-        Callback = function(Value)  
-            blobLoopT = Value  
+        LoopTab:AddToggle({  
+            Name = "루프 킬  <font color='#07FF00'>[오너쉽]</font>",  
+            Default = false,  
+            Flag = "21",  
+            Callback = function(Value)  
+                blobLoopT = Value  
 
-            if blobLoopT then  
-                table.clear(playersInLoop2V)  
-
-                if #playersInLoop1V == 0 then
-                    for _, p in ipairs(Players:GetPlayers()) do
-                        if p ~= LocalPlayer then
-                            table.insert(playersInLoop2V, p.Name)
-                        end
+                if blobLoopT then  
+                    table.clear(playersInLoop2V)  
+                    
+                    if playersInLoop1V then
+                        for _, e in ipairs(playersInLoop1V) do  
+                            local nameOnly = e:match("^(.-) %(") or e  
+                            table.insert(playersInLoop2V, nameOnly)  
+                        end  
                     end
-                else
-                    for _, e in ipairs(playersInLoop1V) do  
-                        local nameOnly = e:match("^(.-) %(") or e  
-                        table.insert(playersInLoop2V, nameOnly)  
-                    end  
-                end
 
-                loopPlayerBlobF()  
+                    loopPlayerBlobF()  
 
-            else  
-                blobLoopT = false  
-                table.clear(playersInLoop2V)  
+                else  
+                    blobLoopT = false  
+                    table.clear(playersInLoop2V)  
 
-                for _, player in ipairs(Players:GetPlayers()) do  
-                    if player.Character then  
-                        local head = player.Character:FindFirstChild("Head")  
-                        if head then  
-                            local kick = head:FindFirstChild("Kick")  
-                            if kick and kick:IsA("BodyPosition") then  
-                                kick:Destroy()  
+                    for _, player in ipairs(Players:GetPlayers()) do  
+                        if player.Character then  
+                            local head = player.Character:FindFirstChild("Head")  
+                            if head then  
+                                local kick = head:FindFirstChild("Kick")  
+                                if kick and kick:IsA("BodyPosition") then  
+                                    kick:Destroy()  
+                                end  
                             end  
                         end  
                     end  
                 end  
             end  
-        end  
-    })
+        })
+    end
 end
+
 
 LoopTab:AddSection({
     Name = "레이지봇킥"

@@ -124,7 +124,7 @@ local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
 local LockConnectionGacha = nil
 
 AutoTab:CreateButton({ Name = "1회 뽑기 설정", Callback = function() SelectedGachaCount = 1 end })
-AutoTab:CreateButton({ Name = "10회 뽑기 설정", Callback = function() SelectedGachaCount = 10 end })
+AutoTab:CreateButton({ Name = "10회 뽑기 설정", Callback = function() SelectedGachaCount = 100 end })
 AutoTab:CreateButton({ Name = "100회 뽑기 설정", Callback = function() SelectedGachaCount = 100 end })
 AutoTab:CreateButton({ Name = "500회 뽑기 설정", Callback = function() SelectedGachaCount = 500 end })
 
@@ -167,7 +167,7 @@ AutoTab:CreateToggle({
 })
 
 --------------------------------------------------------------------------------
--- 플레이어 탭 (스피드, 점프력, 노클립, 플라이, 무한점프)
+-- 플레이어 탭 (스피드, 점프력, 무한점프)
 --------------------------------------------------------------------------------
 PlayerTab:CreateSection("속도 및 점프")
 
@@ -179,17 +179,18 @@ local JumpPowerEnabled = false
 local JumpPowerValue = 50
 local DefaultJumpPower = 50
 
--- 캐릭터 스폰 시 원래 기본값 기억
-local function saveOriginalStats(char)
+-- 원본 값 저장 및 초기화
+local function setupHumanoid(char)
    local hum = char:WaitForChild("Humanoid", 5)
    if hum then
       DefaultWalkSpeed = hum.WalkSpeed
       DefaultJumpPower = hum.JumpPower
+      hum.UseJumpPower = true -- 점프파워 적용 필수 설정
    end
 end
 
-if LocalPlayer.Character then saveOriginalStats(LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(saveOriginalStats)
+if LocalPlayer.Character then setupHumanoid(LocalPlayer.Character) end
+LocalPlayer.CharacterAdded:Connect(setupHumanoid)
 
 PlayerTab:CreateToggle({
    Name = "플레이어 속도 활성화",
@@ -201,10 +202,9 @@ PlayerTab:CreateToggle({
       if character and character:FindFirstChildOfClass("Humanoid") then
          local hum = character:FindFirstChildOfClass("Humanoid")
          if not WalkSpeedEnabled then
-            -- 토글 OFF 시 게임 고유 원본 값으로 복구 및 속도 관성 제거
             hum.WalkSpeed = DefaultWalkSpeed
             if character:FindFirstChild("HumanoidRootPart") then
-               character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.zero
+               character.HumanoidRootPart.AssemblyLinearVelocity = Vector3.new(0, character.HumanoidRootPart.AssemblyLinearVelocity.Y, 0)
             end
          end
       end
@@ -232,9 +232,11 @@ PlayerTab:CreateToggle({
       local character = LocalPlayer.Character
       if character and character:FindFirstChildOfClass("Humanoid") then
          local hum = character:FindFirstChildOfClass("Humanoid")
+         hum.UseJumpPower = true
          if not JumpPowerEnabled then
-            -- 토글 OFF 시 게임 고유 원본 값으로 복구
             hum.JumpPower = DefaultJumpPower
+         else
+            hum.JumpPower = JumpPowerValue
          end
       end
    end,
@@ -249,23 +251,31 @@ PlayerTab:CreateSlider({
    Flag = "JumpPowerSlider",
    Callback = function(Value)
       JumpPowerValue = Value
+      if JumpPowerEnabled then
+         local character = LocalPlayer.Character
+         if character and character:FindFirstChildOfClass("Humanoid") then
+            character:FindFirstChildOfClass("Humanoid").JumpPower = JumpPowerValue
+         end
+      end
    end,
 })
 
--- 메인 루프: TP워크(관성 제어, 걷기 이모트 16 고정) & 점프파워 제어
-RunService.RenderStepped:Connect(function(dt)
+-- 메인 물리 루프 (관성 제어 & 카메라 이탈 방지)
+RunService.PreRender:Connect(function()
    local character = LocalPlayer.Character
    if character and character:FindFirstChildOfClass("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
       local hum = character:FindFirstChildOfClass("Humanoid")
       local hrp = character.HumanoidRootPart
       
-      -- 속도 제어
+      hum.UseJumpPower = true
+
+      -- 속도 물리 제어 (CFrame 대신 안전한 Velocity 제어로 카메라 이탈 방지)
       if WalkSpeedEnabled then
-         hum.WalkSpeed = 16 -- 걷는 모션(이모트)만 16으로 완전 고정
          if hum.MoveDirection.Magnitude > 0 then
-            hrp.CFrame = hrp.CFrame + (hum.MoveDirection * WalkSpeedValue * dt)
+            local moveVel = hum.MoveDirection * WalkSpeedValue
+            hrp.AssemblyLinearVelocity = Vector3.new(moveVel.X, hrp.AssemblyLinearVelocity.Y, moveVel.Z)
          else
-            -- 멈췄을 때 미끄러지는 관성 완전 제거
+            -- 입력 없을 때 관성 완전 제거
             hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
          end
       end
@@ -275,188 +285,18 @@ RunService.RenderStepped:Connect(function(dt)
          hum.JumpPower = JumpPowerValue
       end
 
-      -- 점프 미끄러짐/관성 완전 제거 (땅에 닿아있을 때 horizontal 관성 0)
-      if hum:GetState() == Enum.HumanoidStateType.Landed or (hum.FloorMaterial ~= Enum.Material.Air and hum.MoveDirection.Magnitude == 0) then
+      -- 착지 시 완전 정지 (미끄러짐 제로)
+      if hum.MoveDirection.Magnitude == 0 and hum:GetState() ~= Enum.HumanoidStateType.Freefall then
          hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
       end
    end
 end)
 
-PlayerTab:CreateSection("비행 & 노클립")
-
---------------------------------------------------------------------------------
--- 플라이 (Fly) 기능 - Rayfield 토글 + 슬라이더 연동
---------------------------------------------------------------------------------
-local FlyEnabled = false
-local FlySpeed = 50
-local BodyGyro = nil
-local BodyVelocity = nil
-
-PlayerTab:CreateToggle({
-   Name = "플라이 (Fly)",
-   CurrentValue = false,
-   Flag = "FlyToggle",
-   Callback = function(Value)
-      FlyEnabled = Value
-      local character = LocalPlayer.Character
-      if not character then return end
-      local root = character:FindFirstChild("HumanoidRootPart") or character:FindFirstChild("Torso") or character:FindFirstChild("UpperTorso")
-      local hum = character:FindFirstChildOfClass("Humanoid")
-      
-      if FlyEnabled and root and hum then
-         hum.PlatformStand = true
-
-         BodyGyro = Instance.new("BodyGyro")
-         BodyGyro.P = 9e4
-         BodyGyro.maxTorque = Vector3.new(9e9, 9e9, 9e9)
-         BodyGyro.cframe = root.CFrame
-         BodyGyro.Parent = root
-
-         BodyVelocity = Instance.new("BodyVelocity")
-         BodyVelocity.velocity = Vector3.zero
-         BodyVelocity.maxForce = Vector3.new(9e9, 9e9, 9e9)
-         BodyVelocity.Parent = root
-
-         task.spawn(function()
-            while FlyEnabled and character and character.Parent and hum.Health > 0 do
-               local camera = workspace.CurrentCamera
-               local moveDir = hum.MoveDirection
-
-               if moveDir.Magnitude > 0 then
-                  BodyVelocity.velocity = camera.CFrame:VectorToWorldSpace(CFrame.new(
-                     (userControls and userControls:GetMoveVector().X or 0),
-                     0,
-                     (userControls and userControls:GetMoveVector().Z or 0)
-                  ).Position) * FlySpeed
-                  
-                  -- 키보드/모바일 카메라 방향 연동 비행
-                  local camLook = camera.CFrame.LookVector
-                  BodyVelocity.velocity = camera.CFrame.Rotation * Vector3.new(
-                     hum.MoveDirection.X * FlySpeed,
-                     0,
-                     -hum.MoveDirection.Z * FlySpeed
-                  )
-                  
-                  -- 직관적인 카메라 방향 비행 계산
-                  local flyDir = Vector3.zero
-                  if hum.MoveDirection.Magnitude > 0 then
-                     flyDir = (camera.CFrame.Rotation * hum.MoveDirection).Unit * FlySpeed
-                  end
-                  BodyVelocity.velocity = flyDir
-               else
-                  BodyVelocity.velocity = Vector3.zero
-               end
-               
-               BodyGyro.cframe = camera.CFrame
-               RunService.RenderStepped:Wait()
-            end
-
-            -- 플라이 종료 시 정리
-            if BodyGyro then BodyGyro:Destroy() BodyGyro = nil end
-            if BodyVelocity then BodyVelocity:Destroy() BodyVelocity = nil end
-            if hum then hum.PlatformStand = false end
-            if root then root.AssemblyLinearVelocity = Vector3.zero end
-         end)
-      else
-         if BodyGyro then BodyGyro:Destroy() BodyGyro = nil end
-         if BodyVelocity then BodyVelocity:Destroy() BodyVelocity = nil end
-         if hum then hum.PlatformStand = false end
-         if root then root.AssemblyLinearVelocity = Vector3.zero end
-      end
-   end,
-})
-
-PlayerTab:CreateSlider({
-   Name = "플라이 속도",
-   Range = {10, 300},
-   Increment = 5,
-   Suffix = "속도",
-   CurrentValue = 50,
-   Flag = "FlySpeedSlider",
-   Callback = function(Value)
-      FlySpeed = Value
-   end,
-})
-
---------------------------------------------------------------------------------
--- 노클립 (NoClip) - 요청하신 전용 코드
---------------------------------------------------------------------------------
-local plr = LocalPlayer
-local noClipT = false
-local noClipConnection = nil
-local NO_CLIP_PARTS = {"Head", "Torso", "UpperTorso", "LowerTorso", "LeftArm", "RightArm", "LeftLeg", "RightLeg", "LeftUpperLeg", "LeftLowerLeg", "LeftFoot", "RightUpperLeg", "RightLowerLeg", "RightFoot"}
-
-local function restoreCollision(char)
-    if char then
-        for _, partName in ipairs(NO_CLIP_PARTS) do
-            local part = char:FindFirstChild(partName)
-            if part and part:IsA("BasePart") then
-                part.CanCollide = true
-            end
-        end
-    end
-end
-
-local function updateNoClipF()
-    local char = plr.Character
-    if not char then return end
-
-    if noClipConnection then
-        noClipConnection:Disconnect()
-        noClipConnection = nil
-    end
-
-    if not noClipT then
-        restoreCollision(char)
-        return
-    end
-    
-    noClipConnection = RunService.Stepped:Connect(function()
-        if not noClipT or not char or not char.Parent then
-            if noClipConnection then
-                noClipConnection:Disconnect()
-                noClipConnection = nil
-            end
-            return
-        end
-
-        for _, partName in ipairs(NO_CLIP_PARTS) do
-            local part = char:FindFirstChild(partName)
-            if part and part:IsA("BasePart") then
-                part.CanCollide = false
-            end
-        end
-    end)
-end
-
-PlayerTab:CreateToggle({
-   Name = "노클립",
-   CurrentValue = false,
-   Flag = "NoclipToggle",
-   Callback = function(Value)
-      noClipT = Value
-      updateNoClipF()
-   end,
-})
-
-plr.CharacterAdded:Connect(function(char)
-    char:WaitForChild("HumanoidRootPart")
-    task.wait(0.5)
-    if noClipT then
-        updateNoClipF()
-    end
-end)
-
-if plr.Character then
-    task.wait(1)
-    if noClipT then
-        updateNoClipF()
-    end
-end
-
 --------------------------------------------------------------------------------
 -- 무한 점프
 --------------------------------------------------------------------------------
+PlayerTab:CreateSection("기타")
+
 local InfiniteJumpEnabled = false
 PlayerTab:CreateToggle({
    Name = "무한점프",

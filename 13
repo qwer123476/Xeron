@@ -1,16 +1,66 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "텔레포트 & 오토 & 플레이어 & PVP",
-   LoadingTitle = "로딩 중...",
-   LoadingSubtitle = "",
-   ConfigurationSaving = { Enabled = false },
-   KeySystem = false
+    Name = "알수없는 시뮬레이터", 
+    Icon = 0, 
+    Theme = AAA, 
+    ToggleUIKeybind = "T",
+    ConfigurationSaving = {
+        Enabled = false,       
+        FolderName = nil,
+        FileName = "NP_Config"
+    }
 })
+local AAA = {
+    TextColor = Color3.fromRGB(240, 240, 240),
+
+    Background = Color3.fromRGB(10, 10, 10),
+    Topbar = Color3.fromRGB(15, 15, 15),
+    Shadow = Color3.fromRGB(0, 0, 0),
+
+    NotificationBackground = Color3.fromRGB(18, 18, 18),
+    NotificationActionsBackground = Color3.fromRGB(28, 28, 28),
+
+    TabBackground = Color3.fromRGB(20, 20, 20),
+    TabStroke = Color3.fromRGB(35, 35, 35),
+    TabBackgroundSelected = Color3.fromRGB(32, 32, 32),
+    TabTextColor = Color3.fromRGB(160, 160, 160),
+    SelectedTabTextColor = Color3.fromRGB(255, 60, 60),
+
+    ElementBackground = Color3.fromRGB(18, 18, 18),
+    ElementBackgroundHover = Color3.fromRGB(28, 28, 28),
+    SecondaryElementBackground = Color3.fromRGB(14, 14, 14),
+    ElementStroke = Color3.fromRGB(35, 35, 35),
+    SecondaryElementStroke = Color3.fromRGB(25, 25, 25),
+
+    SliderBackground = Color3.fromRGB(25, 25, 25),
+    SliderProgress = Color3.fromRGB(220, 30, 30),
+    SliderStroke = Color3.fromRGB(150, 20, 20),
+
+    ToggleBackground = Color3.fromRGB(18, 18, 18),
+
+    ToggleEnabled = Color3.fromRGB(220, 30, 30),
+    ToggleEnabledStroke = Color3.fromRGB(255, 80, 80),
+    ToggleEnabledOuterStroke = Color3.fromRGB(120, 15, 15),
+
+    ToggleDisabled = Color3.fromRGB(40, 40, 40),
+    ToggleDisabledStroke = Color3.fromRGB(60, 60, 60),
+    ToggleDisabledOuterStroke = Color3.fromRGB(25, 25, 25),
+
+    DropdownSelected = Color3.fromRGB(28, 28, 28),
+    DropdownUnselected = Color3.fromRGB(18, 18, 18),
+
+    InputBackground = Color3.fromRGB(15, 15, 15),
+    InputStroke = Color3.fromRGB(35, 35, 35),
+    PlaceholderColor = Color3.fromRGB(100, 100, 100),
+}
 
 local LocalPlayer = game.Players.LocalPlayer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
+local Lighting = game:GetService("Lighting")
+local UserInputService = game:GetService("UserInputService")
+local VirtualUser = game:GetService("VirtualUser")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
 local function TeleportTo(coordinate)
@@ -19,10 +69,11 @@ local function TeleportTo(coordinate)
     end
 end
 
-local TeleportTab = Window:CreateTab("텔레포트", 4483362458)
-local AutoTab = Window:CreateTab("오토", 4483362458)
-local PlayerTab = Window:CreateTab("플레이어", 4483362458)
-local PVPTab = Window:CreateTab("PVP", 4483362458)
+local TeleportTab = Window:CreateTab("이동", 4483362458)
+local AutoTab = Window:CreateTab("자동", 4483362458)
+local PlayerTab = Window:CreateTab("캐릭터", 4483362458)
+local PVPTab = Window:CreateTab("결투", 4483362458)
+local UtilityTab = Window:CreateTab("편의", 4483362458)
 
 TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
@@ -39,31 +90,31 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-AutoTab:CreateSection("무기 오토")
+AutoTab:CreateSection("무기 설정")
 
 local SelectedWeapon = ""
-local AttackDelay = 0.1
+local AttackDelay = 0.0001
 local AutoAttackEnabled = false
 
 AutoTab:CreateButton({
-   Name = "현재 들고 있는 무기 등록",
+   Name = "오토팜 무기 등록(장착한 무기)",
    Callback = function()
       local character = LocalPlayer.Character
       if character then
          local tool = character:FindFirstChildOfClass("Tool")
          if tool then
             SelectedWeapon = tool.Name
-            Rayfield:Notify({ Title = "무기 등록 완료", Content = "등록된 무기: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
+            Rayfield:Notify({ Title = "완료", Content = "무기: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
          else
-            Rayfield:Notify({ Title = "등록 실패", Content = "손에 무기를 들고 눌러주세요.", Duration = 2.5, Image = 4483362458 })
+            Rayfield:Notify({ Title = "실패", Content = "무기를 장착해주세요.", Duration = 2.5, Image = 4483362458 })
          end
       end
    end,
 })
 
 AutoTab:CreateInput({
-   Name = "공격 속도 설정 (초)",
-   PlaceholderText = "기본값: 0.1",
+   Name = "오토팜 딜레이",
+   PlaceholderText = "0.1",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       local num = tonumber(Text)
@@ -72,7 +123,7 @@ AutoTab:CreateInput({
 })
 
 AutoTab:CreateToggle({
-   Name = "무기 오토 시작",
+   Name = "오토팜",
    CurrentValue = false,
    Flag = "AutoAttackToggle",
    Callback = function(Value)
@@ -90,20 +141,20 @@ AutoTab:CreateToggle({
    end,
 })
 
-AutoTab:CreateSection("뽑기 오토")
+AutoTab:CreateSection("뽑기 설정")
 
 local SelectedGachaCount = 1
 local AutoGachaEnabled = false
 local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
 local LockConnectionGacha = nil
 
-AutoTab:CreateButton({ Name = "1회 뽑기 설정", Callback = function() SelectedGachaCount = 1 end })
-AutoTab:CreateButton({ Name = "10회 뽑기 설정", Callback = function() SelectedGachaCount = 10 end })
-AutoTab:CreateButton({ Name = "100회 뽑기 설정", Callback = function() SelectedGachaCount = 100 end })
-AutoTab:CreateButton({ Name = "500회 뽑기 설정", Callback = function() SelectedGachaCount = 500 end })
+AutoTab:CreateButton({ Name = "1회", Callback = function() SelectedGachaCount = 1 end })
+AutoTab:CreateButton({ Name = "10회", Callback = function() SelectedGachaCount = 10 end })
+AutoTab:CreateButton({ Name = "100회", Callback = function() SelectedGachaCount = 100 end })
+AutoTab:CreateButton({ Name = "500회", Callback = function() SelectedGachaCount = 500 end })
 
 AutoTab:CreateToggle({
-   Name = "오토 뽑기 시작 (위치 고정)",
+   Name = "오토 뽑기",
    CurrentValue = false,
    Flag = "AutoGachaToggle",
    Callback = function(Value)
@@ -131,7 +182,7 @@ AutoTab:CreateToggle({
    end,
 })
 
-PlayerTab:CreateSection("속도 및 점프")
+PlayerTab:CreateSection("플레이어 상태")
 
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
@@ -153,7 +204,7 @@ if LocalPlayer.Character then setupHumanoid(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(setupHumanoid)
 
 PlayerTab:CreateToggle({
-   Name = "플레이어 속도 활성화",
+   Name = "속도 조절",
    CurrentValue = false,
    Flag = "WalkSpeedToggle",
    Callback = function(Value)
@@ -172,17 +223,17 @@ PlayerTab:CreateToggle({
 })
 
 PlayerTab:CreateSlider({
-   Name = "플레이어 속도",
+   Name = "이동 속도",
    Range = {16, 200},
    Increment = 1,
-   Suffix = "속도",
+   Suffix = "",
    CurrentValue = 16,
    Flag = "WalkSpeedSlider",
    Callback = function(Value) WalkSpeedValue = Value end,
 })
 
 PlayerTab:CreateToggle({
-   Name = "점프파워 활성화",
+   Name = "점프 조절",
    CurrentValue = false,
    Flag = "JumpPowerToggle",
    Callback = function(Value)
@@ -197,10 +248,10 @@ PlayerTab:CreateToggle({
 })
 
 PlayerTab:CreateSlider({
-   Name = "점프파워",
+   Name = "점프력",
    Range = {50, 300},
    Increment = 1,
-   Suffix = "파워",
+   Suffix = "",
    CurrentValue = 50,
    Flag = "JumpPowerSlider",
    Callback = function(Value)
@@ -238,17 +289,17 @@ RunService.PreRender:Connect(function()
    end
 end)
 
-PlayerTab:CreateSection("기타")
+PlayerTab:CreateSection("기타 기능")
 
 local InfiniteJumpEnabled = false
 PlayerTab:CreateToggle({
-   Name = "무한점프",
+   Name = "무한 점프",
    CurrentValue = false,
    Flag = "InfiniteJumpToggle",
    Callback = function(Value) InfiniteJumpEnabled = Value end,
 })
 
-game:GetService("UserInputService").JumpRequest:Connect(function()
+UserInputService.JumpRequest:Connect(function()
    if InfiniteJumpEnabled then
       local character = LocalPlayer.Character
       if character and character:FindFirstChildOfClass("Humanoid") then
@@ -257,7 +308,7 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
    end
 end)
 
-PVPTab:CreateSection("PVP 오토")
+PVPTab:CreateSection("PVP")
 
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
@@ -299,7 +350,7 @@ local function GetPvpTarget()
 end
 
 PVPTab:CreateToggle({
-   Name = "PVP 아우라",
+   Name = "펀치 아우라 (잘되는지 모름)",
    CurrentValue = false,
    Flag = "PvpAuraToggle",
    Callback = function(Value)
@@ -309,7 +360,7 @@ PVPTab:CreateToggle({
          task.spawn(function()
             while PvpAuraEnabled do
                CentralEvent:FireServer("PunchRequest", 22)
-               task.wait(0.1)
+               task.wait()
             end
          end)
       end
@@ -317,7 +368,7 @@ PVPTab:CreateToggle({
 })
 
 PVPTab:CreateToggle({
-   Name = "킬 오토팡 (TP 펀치)",
+   Name = "PVP 오토팜(잘되는지 모름)",
    CurrentValue = false,
    Flag = "KillAutoBangToggle",
    Callback = function(Value)
@@ -341,8 +392,8 @@ PVPTab:CreateToggle({
                else
                   if not notifiedNoTarget then
                      Rayfield:Notify({
-                        Title = "PVP 대상 없음",
-                        Content = "PVP 상태인 유저가 존재하지 않습니다. 대기 중...",
+                        Title = "알림",
+                        Content = "대상 플레이어가 없습니다.",
                         Duration = 3,
                         Image = 4483362458,
                      })
@@ -352,6 +403,123 @@ PVPTab:CreateToggle({
                RunService.RenderStepped:Wait()
             end
          end)
+      end
+   end,
+})
+
+UtilityTab:CreateSection("최적화 및 보안")
+
+local AntiLagEnabled = false
+local BackupLighting = {
+   GlobalShadows = Lighting.GlobalShadows,
+   Brightness = Lighting.Brightness,
+   FogEnd = Lighting.FogEnd,
+   OutdoorAmbient = Lighting.OutdoorAmbient
+}
+local Conns = {}
+
+UtilityTab:CreateToggle({
+   Name = "안티 렉",
+   CurrentValue = false,
+   Flag = "AntiLagToggle",
+   Callback = function(Value)
+      AntiLagEnabled = Value
+      if AntiLagEnabled then
+         Lighting.GlobalShadows = false
+         Lighting.Brightness = 2
+         Lighting.FogEnd = 9e9
+         
+         for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") then
+               obj.Material = Enum.Material.SmoothPlastic
+               obj.Reflectance = 0
+            elseif obj:IsA("Decal") or obj:IsA("Texture") then
+               obj.Transparency = 1
+            elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+               obj.Enabled = false
+            end
+         end
+
+         table.insert(Conns, workspace.DescendantAdded:Connect(function(obj)
+            if AntiLagEnabled then
+               if obj:IsA("BasePart") then
+                  obj.Material = Enum.Material.SmoothPlastic
+                  obj.Reflectance = 0
+               elseif obj:IsA("Decal") or obj:IsA("Texture") then
+                  obj.Transparency = 1
+               elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
+                  obj.Enabled = false
+               end
+            end
+         end))
+      else
+         Lighting.GlobalShadows = BackupLighting.GlobalShadows
+         Lighting.Brightness = BackupLighting.Brightness
+         Lighting.FogEnd = BackupLighting.FogEnd
+         Lighting.OutdoorAmbient = BackupLighting.OutdoorAmbient
+
+         for _, conn in ipairs(Conns) do
+            conn:Disconnect()
+         end
+         Conns = {}
+      end
+   end,
+})
+
+local AntiAfkEnabled = false
+local AfkConnection = nil
+
+UtilityTab:CreateToggle({
+   Name = "안티 AFK",
+   CurrentValue = false,
+   Flag = "AntiAfkToggle",
+   Callback = function(Value)
+      AntiAfkEnabled = Value
+      if AntiAfkEnabled then
+         AfkConnection = LocalPlayer.Idled:Connect(function()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new(0,0))
+         end)
+         
+         task.spawn(function()
+            while AntiAfkEnabled do
+               local character = LocalPlayer.Character
+               if character and character:FindFirstChildOfClass("Humanoid") then
+                  character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+               end
+               task.wait(300)
+            end
+         end)
+      else
+         if AfkConnection then
+            AfkConnection:Disconnect()
+            AfkConnection = nil
+         end
+      end
+   end,
+})
+
+local AntiKickEnabled = false
+local KickConnection = nil
+
+UtilityTab:CreateToggle({
+   Name = "안티 킥(로컬)",
+   CurrentValue = false,
+   Flag = "AntiKickToggle",
+   Callback = function(Value)
+      AntiKickEnabled = Value
+      if AntiKickEnabled then
+         local mt = getrawmetatable(game)
+         setreadonly(mt, false)
+         local old = mt.__namecall
+         mt.__namecall = newcclosure(function(self, ...)
+            local method = getnamecallmethod()
+            if AntiKickEnabled and method == "Kick" and self == LocalPlayer then
+               return
+            end
+            return old(self, ...)
+         end)
+         setreadonly(mt, true)
       end
    end,
 })

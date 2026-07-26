@@ -3,15 +3,15 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 local Window = Rayfield:CreateWindow({
     Name = "알수없는 시뮬레이터", 
     Icon = 0, 
-    Theme = AAA, 
+    Theme = ApA, 
     ToggleUIKeybind = "T",
     ConfigurationSaving = {
         Enabled = false,       
         FolderName = nil,
-        FileName = "NP_Config"
+        FileName = "Config"
     }
 })
-local AAA = {
+local ApA = {
     TextColor = Color3.fromRGB(240, 240, 240),
 
     Background = Color3.fromRGB(10, 10, 10),

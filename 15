@@ -91,11 +91,50 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
+AutoTab:CreateLabel("모든 오토팜은 딜레이가 제거되어있으니 주의하세요!")
+
 AutoTab:CreateSection("무기 설정")
 
 local SelectedWeapon = ""
 local AttackDelay = 0
 local AutoAttackEnabled = false
+
+local function bypassCooldowns(obj)
+    if obj:IsA("NumberValue") or obj:IsA("IntValue") or obj:IsA("DoubleConstrainedValue") then
+        local nameLower = obj.Name:lower()
+        if nameLower:find("cooldown") or nameLower:find("cd") or nameLower:find("delay") or nameLower:find("time") then
+            obj.Value = 0
+        end
+    elseif obj:IsA("Folder") or obj:IsA("Model") then
+        for _, child in ipairs(obj:GetChildren()) do
+            bypassCooldowns(child)
+        end
+    end
+end
+
+for _, obj in ipairs(workspace:GetDescendants()) do
+    bypassCooldowns(obj)
+end
+workspace.DescendantAdded:Connect(function(obj)
+    bypassCooldowns(obj)
+end)
+
+if LocalPlayer.Character then
+    for _, obj in ipairs(LocalPlayer.Character:GetDescendants()) do
+        bypassCooldowns(obj)
+    end
+    LocalPlayer.Character.DescendantAdded:Connect(function(obj)
+        bypassCooldowns(obj)
+    end)
+end
+LocalPlayer.CharacterAdded:Connect(function(char)
+    for _, obj in ipairs(char:GetDescendants()) do
+        bypassCooldowns(obj)
+    end
+    char.DescendantAdded:Connect(function(obj)
+        bypassCooldowns(obj)
+    end)
+end)
 
 AutoTab:CreateButton({
    Name = "오토팜 무기 등록(장착한 무기)",
@@ -105,6 +144,9 @@ AutoTab:CreateButton({
          local tool = character:FindFirstChildOfClass("Tool")
          if tool then
             SelectedWeapon = tool.Name
+            for _, obj in ipairs(tool:GetDescendants()) do
+                bypassCooldowns(obj)
+            end
             Rayfield:Notify({ Title = "완료", Content = "무기: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
          else
             Rayfield:Notify({ Title = "실패", Content = "무기를 장착해주세요.", Duration = 2.5, Image = 4483362458 })
@@ -151,6 +193,7 @@ AutoTab:CreateToggle({
 AutoTab:CreateSection("뽑기 설정")
 
 local SelectedGachaCount = 1
+local GachaDelay = 0.1
 local AutoGachaEnabled = false
 local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
 local LockConnectionGacha = nil
@@ -159,6 +202,16 @@ AutoTab:CreateButton({ Name = "1회", Callback = function() SelectedGachaCount =
 AutoTab:CreateButton({ Name = "10회", Callback = function() SelectedGachaCount = 10 end })
 AutoTab:CreateButton({ Name = "100회", Callback = function() SelectedGachaCount = 100 end })
 AutoTab:CreateButton({ Name = "500회", Callback = function() SelectedGachaCount = 500 end })
+
+AutoTab:CreateInput({
+   Name = "뽑기 속도 (딜레이)",
+   PlaceholderText = "0.1",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local num = tonumber(Text)
+      if num and num >= 0 then GachaDelay = num else GachaDelay = 0.1 end
+   end,
+})
 
 AutoTab:CreateToggle({
    Name = "오토 뽑기",
@@ -179,10 +232,12 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGachaEnabled do
-               for i = 1, 5 do
-                  CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
+               CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
+               if GachaDelay > 0 then
+                  task.wait(GachaDelay)
+               else
+                  RunService.RenderStepped:Wait()
                end
-               RunService.RenderStepped:Wait()
             end
          end)
       else

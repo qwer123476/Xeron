@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "텔레포트 & 오토 & 플레이어",
+   Name = "텔레포트 & 오토 & 플레이어 & PVP",
    LoadingTitle = "로딩 중...",
    LoadingSubtitle = "",
    ConfigurationSaving = { Enabled = false },
@@ -9,6 +9,7 @@ local Window = Rayfield:CreateWindow({
 })
 
 local LocalPlayer = game.Players.LocalPlayer
+local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
@@ -24,6 +25,7 @@ end
 local TeleportTab = Window:CreateTab("텔레포트", 4483362458)
 local AutoTab = Window:CreateTab("오토", 4483362458)
 local PlayerTab = Window:CreateTab("플레이어", 4483362458)
+local PVPTab = Window:CreateTab("PVP", 4483362458)
 
 --------------------------------------------------------------------------------
 -- 텔레포트 탭
@@ -124,7 +126,7 @@ local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
 local LockConnectionGacha = nil
 
 AutoTab:CreateButton({ Name = "1회 뽑기 설정", Callback = function() SelectedGachaCount = 1 end })
-AutoTab:CreateButton({ Name = "10회 뽑기 설정", Callback = function() SelectedGachaCount = 100 end })
+AutoTab:CreateButton({ Name = "10회 뽑기 설정", Callback = function() SelectedGachaCount = 10 end })
 AutoTab:CreateButton({ Name = "100회 뽑기 설정", Callback = function() SelectedGachaCount = 100 end })
 AutoTab:CreateButton({ Name = "500회 뽑기 설정", Callback = function() SelectedGachaCount = 500 end })
 
@@ -179,13 +181,12 @@ local JumpPowerEnabled = false
 local JumpPowerValue = 50
 local DefaultJumpPower = 50
 
--- 원본 값 저장 및 초기화
 local function setupHumanoid(char)
    local hum = char:WaitForChild("Humanoid", 5)
    if hum then
       DefaultWalkSpeed = hum.WalkSpeed
       DefaultJumpPower = hum.JumpPower
-      hum.UseJumpPower = true -- 점프파워 적용 필수 설정
+      hum.UseJumpPower = true
    end
 end
 
@@ -260,7 +261,6 @@ PlayerTab:CreateSlider({
    end,
 })
 
--- 메인 물리 루프 (관성 제어 & 카메라 이탈 방지)
 RunService.PreRender:Connect(function()
    local character = LocalPlayer.Character
    if character and character:FindFirstChildOfClass("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
@@ -269,32 +269,25 @@ RunService.PreRender:Connect(function()
       
       hum.UseJumpPower = true
 
-      -- 속도 물리 제어 (CFrame 대신 안전한 Velocity 제어로 카메라 이탈 방지)
       if WalkSpeedEnabled then
          if hum.MoveDirection.Magnitude > 0 then
             local moveVel = hum.MoveDirection * WalkSpeedValue
             hrp.AssemblyLinearVelocity = Vector3.new(moveVel.X, hrp.AssemblyLinearVelocity.Y, moveVel.Z)
          else
-            -- 입력 없을 때 관성 완전 제거
             hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
          end
       end
 
-      -- 점프파워 제어
       if JumpPowerEnabled then
          hum.JumpPower = JumpPowerValue
       end
 
-      -- 착지 시 완전 정지 (미끄러짐 제로)
       if hum.MoveDirection.Magnitude == 0 and hum:GetState() ~= Enum.HumanoidStateType.Freefall then
          hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
       end
    end
 end)
 
---------------------------------------------------------------------------------
--- 무한 점프
---------------------------------------------------------------------------------
 PlayerTab:CreateSection("기타")
 
 local InfiniteJumpEnabled = false
@@ -315,3 +308,121 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
       end
    end
 end)
+
+--------------------------------------------------------------------------------
+-- PVP 탭 (PVP 아우라 & 킬 오토팡)
+--------------------------------------------------------------------------------
+PVPTab:CreateSection("PVP 오토")
+
+local PvpAuraEnabled = false
+local KillAutoBangEnabled = false
+
+-- PVP 상태 확인 함수
+local function IsPvpActive(targetPlayer)
+   if not targetPlayer or targetPlayer == LocalPlayer then return false end
+   
+   -- 1. 캐릭터 살아있는지 확인
+   local char = targetPlayer.Character
+   if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then
+      return false
+   end
+   if not char:FindFirstChild("HumanoidRootPart") then return false end
+
+   -- 2. PVP 상태 체크 (속성값 혹은 플레이어 상태값 확인)
+   local pvpState = targetPlayer:GetAttribute("PVP") or targetPlayer:GetAttribute("PvpState") or targetPlayer:GetAttribute("PVPState")
+   if pvpState ~= nil then
+      return pvpState == true
+   end
+   
+   if char:GetAttribute("PVP") ~= nil then
+      return char:GetAttribute("PVP") == true
+   end
+
+   -- 게임마다 설정된 PVP 상태 판별 기준이 없을 경우 기본적으로 타겟 유효 처리
+   return true
+end
+
+-- PVP 대상 찾는 함수
+local function GetPvpTarget()
+   for _, plr in ipairs(Players:GetPlayers()) do
+      if IsPvpActive(plr) then
+         return plr
+      end
+   end
+   return nil
+end
+
+-- 1. PVP 아우라
+PVPTab:CreateToggle({
+   Name = "PVP 아우라",
+   CurrentValue = false,
+   Flag = "PvpAuraToggle",
+   Callback = function(Value)
+      PvpAuraEnabled = Value
+      if PvpAuraEnabled then
+         -- PVP 상태 활성화 리모트 전송 (1회)
+         CentralEvent:FireServer("SetPVPState", true)
+
+         task.spawn(function()
+            while PvpAuraEnabled do
+               -- 0.1초마다 펀치 리모트 전송
+               CentralEvent:FireServer("PunchRequest", 22)
+               task.wait(0.1)
+            end
+         end)
+      end
+   end,
+})
+
+-- 2. 킬 오토팡
+PVPTab:CreateToggle({
+   Name = "킬 오토팡 (TP 펀치)",
+   CurrentValue = false,
+   Flag = "KillAutoBangToggle",
+   Callback = function(Value)
+      KillAutoBangEnabled = Value
+
+      if KillAutoBangEnabled then
+         -- PVP 상태 활성화 리모트 전송 (1회)
+         CentralEvent:FireServer("SetPVPState", true)
+
+         task.spawn(function()
+            local notifiedNoTarget = false
+
+            while KillAutoBangEnabled do
+               local target = GetPvpTarget()
+
+               if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+                  notifiedNoTarget = false
+                  local targetHRP = target.Character.HumanoidRootPart
+                  local myChar = LocalPlayer.Character
+
+                  if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                     local myHRP = myChar.HumanoidRootPart
+
+                     -- 타겟 등 뒤 5스터드로 TP 이동 (관성 제거 포함)
+                     myHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 5)
+                     myHRP.AssemblyLinearVelocity = Vector3.zero
+
+                     -- 딜레이 없이 펀치 리모트 전송
+                     CentralEvent:FireServer("PunchRequest", 22)
+                  end
+               else
+                  -- PVP 유저가 없을 때 알림 표시 후 대기
+                  if not notifiedNoTarget then
+                     Rayfield:Notify({
+                        Title = "PVP 대상 없음",
+                        Content = "PVP 상태인 유저가 존재하지 않습니다. 대기 중...",
+                        Duration = 3,
+                        Image = 4483362458,
+                     })
+                     notifiedNoTarget = true
+                  end
+               end
+
+               RunService.RenderStepped:Wait()
+            end
+         end)
+      end
+   end,
+})

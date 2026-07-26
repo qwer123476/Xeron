@@ -167,8 +167,8 @@ AutoTab:CreateSection("뽑기 오토")
 
 local SelectedGachaCount = 1
 local AutoGachaEnabled = false
-local LockPosition = Vector3.new(-13.59, 10.44, -34.07)
-local LockConnection = nil
+local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
+local LockConnectionGacha = nil
 
 AutoTab:CreateButton({
    Name = "1회 뽑기 설정",
@@ -230,18 +230,16 @@ AutoTab:CreateToggle({
       AutoGachaEnabled = Value
       
       if AutoGachaEnabled then
-         -- 매 프레임 위치 및 속도 고정
-         LockConnection = RunService.RenderStepped:Connect(function()
+         LockConnectionGacha = RunService.RenderStepped:Connect(function()
             local character = LocalPlayer.Character
             if character and character:FindFirstChild("HumanoidRootPart") then
                local hrp = character.HumanoidRootPart
-               hrp.CFrame = CFrame.new(LockPosition)
+               hrp.CFrame = CFrame.new(LockPositionGacha)
                hrp.AssemblyLinearVelocity = Vector3.zero
                hrp.AssemblyAngularVelocity = Vector3.zero
             end
          end)
 
-         -- 오토 뽑기 루프
          task.spawn(function()
             while AutoGachaEnabled do
                local args = {
@@ -254,10 +252,70 @@ AutoTab:CreateToggle({
             end
          end)
       else
-         -- 토글 off 시 고정 해제
-         if LockConnection then
-            LockConnection:Disconnect()
-            LockConnection = nil
+         if LockConnectionGacha then
+            LockConnectionGacha:Disconnect()
+            LockConnectionGacha = nil
+         end
+      end
+   end,
+})
+
+---------------------------------------------------------
+-- [인챈트 오토 섹션]
+---------------------------------------------------------
+AutoTab:CreateSection("인챈트 오토")
+
+local AutoEnchantEnabled = false
+local LockPositionEnchant = Vector3.new(257.84, -373.26, 12.43)
+local LockConnectionEnchant = nil
+
+AutoTab:CreateToggle({
+   Name = "오토 인챈트 시작 (위치 고정 & 대화)",
+   CurrentValue = false,
+   Flag = "AutoEnchantToggle",
+   Callback = function(Value)
+      AutoEnchantEnabled = Value
+      
+      if AutoEnchantEnabled then
+         -- 위치 고정
+         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+               local hrp = character.HumanoidRootPart
+               hrp.CFrame = CFrame.new(LockPositionEnchant)
+               hrp.AssemblyLinearVelocity = Vector3.zero
+               hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+         end)
+
+         -- 대화 인터랙션 및 리모트 송신 루프
+         task.spawn(function()
+            while AutoEnchantEnabled do
+               -- 주변 ProximityPrompt 전부 감지 후 강제 실행
+               for _, prompt in ipairs(workspace:GetDescendants()) do
+                  if prompt:IsA("ProximityPrompt") then
+                     if fireproximityprompt then
+                        fireproximityprompt(prompt)
+                     end
+                  end
+               end
+
+               -- 인챈트 대화 선택 리모트 요청
+               local args = {
+                  "NPCDialogue_Choose",
+                  {
+                     choiceIndex = 1
+                  }
+               }
+               CentralEvent:FireServer(unpack(args))
+
+               task.wait(0.2)
+            end
+         end)
+      else
+         if LockConnectionEnchant then
+            LockConnectionEnchant:Disconnect()
+            LockConnectionEnchant = nil
          end
       end
    end,

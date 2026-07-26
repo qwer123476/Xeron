@@ -9,6 +9,8 @@ local Window = Rayfield:CreateWindow({
 })
 
 local LocalPlayer = game.Players.LocalPlayer
+local RunService = game:GetService("RunService")
+local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -83,8 +85,6 @@ TeleportTab:CreateButton({
    Name = "컷씬 2",
    Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end,
 })
-
-local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
 ---------------------------------------------------------
 -- [무기 오토 섹션]
@@ -167,6 +167,8 @@ AutoTab:CreateSection("뽑기 오토")
 
 local SelectedGachaCount = 1
 local AutoGachaEnabled = false
+local LockPosition = Vector3.new(-13.59, 10.44, -34.07)
+local LockConnection = nil
 
 AutoTab:CreateButton({
    Name = "1회 뽑기 설정",
@@ -221,12 +223,25 @@ AutoTab:CreateButton({
 })
 
 AutoTab:CreateToggle({
-   Name = "오토 뽑기 시작 (0.1초)",
+   Name = "오토 뽑기 시작 (위치 고정)",
    CurrentValue = false,
    Flag = "AutoGachaToggle",
    Callback = function(Value)
       AutoGachaEnabled = Value
+      
       if AutoGachaEnabled then
+         -- 매 프레임 위치 및 속도 고정
+         LockConnection = RunService.RenderStepped:Connect(function()
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+               local hrp = character.HumanoidRootPart
+               hrp.CFrame = CFrame.new(LockPosition)
+               hrp.AssemblyLinearVelocity = Vector3.zero
+               hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+         end)
+
+         -- 오토 뽑기 루프
          task.spawn(function()
             while AutoGachaEnabled do
                local args = {
@@ -238,6 +253,12 @@ AutoTab:CreateToggle({
                task.wait(0.1)
             end
          end)
+      else
+         -- 토글 off 시 고정 해제
+         if LockConnection then
+            LockConnection:Disconnect()
+            LockConnection = nil
+         end
       end
    end,
 })

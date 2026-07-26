@@ -19,17 +19,11 @@ local function TeleportTo(coordinate)
     end
 end
 
---------------------------------------------------------------------------------
--- 탭 생성
---------------------------------------------------------------------------------
 local TeleportTab = Window:CreateTab("텔레포트", 4483362458)
 local AutoTab = Window:CreateTab("오토", 4483362458)
 local PlayerTab = Window:CreateTab("플레이어", 4483362458)
 local PVPTab = Window:CreateTab("PVP", 4483362458)
 
---------------------------------------------------------------------------------
--- 텔레포트 탭
---------------------------------------------------------------------------------
 TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
 TeleportTab:CreateButton({ Name = "황금 뽑기", Callback = function() TeleportTo(Vector3.new(239.81, -373.26, 151.77)) end })
@@ -38,15 +32,13 @@ TeleportTab:CreateButton({ Name = "인챈트", Callback = function() TeleportTo(
 TeleportTab:CreateButton({ Name = "인챈트북", Callback = function() TeleportTo(Vector3.new(10.90, 70.61, -109.39)) end })
 TeleportTab:CreateButton({ Name = "물약", Callback = function() TeleportTo(Vector3.new(465.21, -393.05, 7.59)) end })
 TeleportTab:CreateButton({ Name = "물건조합소", Callback = function() TeleportTo(Vector3.new(227.33, -373.26, 291.81)) end })
+TeleportTab:CreateButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
 TeleportTab:CreateButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
 TeleportTab:CreateButton({ Name = "병원 지하", Callback = function() TeleportTo(Vector3.new(214.79, -375.10, 935.49)) end })
 TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
---------------------------------------------------------------------------------
--- 오토 탭
---------------------------------------------------------------------------------
 AutoTab:CreateSection("무기 오토")
 
 local SelectedWeapon = ""
@@ -61,19 +53,9 @@ AutoTab:CreateButton({
          local tool = character:FindFirstChildOfClass("Tool")
          if tool then
             SelectedWeapon = tool.Name
-            Rayfield:Notify({
-               Title = "무기 등록 완료",
-               Content = "등록된 무기: " .. SelectedWeapon,
-               Duration = 2.5,
-               Image = 4483362458,
-            })
+            Rayfield:Notify({ Title = "무기 등록 완료", Content = "등록된 무기: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
          else
-            Rayfield:Notify({
-               Title = "등록 실패",
-               Content = "손에 무기를 들고 눌러주세요.",
-               Duration = 2.5,
-               Image = 4483362458,
-            })
+            Rayfield:Notify({ Title = "등록 실패", Content = "손에 무기를 들고 눌러주세요.", Duration = 2.5, Image = 4483362458 })
          end
       end
    end,
@@ -85,11 +67,7 @@ AutoTab:CreateInput({
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       local num = tonumber(Text)
-      if num and num > 0 then
-         AttackDelay = num
-      else
-         AttackDelay = 0.1
-      end
+      if num and num > 0 then AttackDelay = num else AttackDelay = 0.1 end
    end,
 })
 
@@ -103,13 +81,7 @@ AutoTab:CreateToggle({
          task.spawn(function()
             while AutoAttackEnabled do
                if SelectedWeapon ~= "" then
-                  local args = {
-                     "ToolClick",
-                     SelectedWeapon,
-                     1,
-                     workspace:GetServerTimeNow()
-                  }
-                  CentralEvent:FireServer(unpack(args))
+                  CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
                end
                task.wait(AttackDelay)
             end
@@ -136,7 +108,6 @@ AutoTab:CreateToggle({
    Flag = "AutoGachaToggle",
    Callback = function(Value)
       AutoGachaEnabled = Value
-      
       if AutoGachaEnabled then
          LockConnectionGacha = RunService.RenderStepped:Connect(function()
             local character = LocalPlayer.Character
@@ -150,33 +121,21 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGachaEnabled do
-               local args = {
-                  "GachaRequest",
-                  "\236\178\152\236\157\140\235\189\145\234\184\176",
-                  SelectedGachaCount
-               }
-               CentralEvent:FireServer(unpack(args))
+               CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
                task.wait(0.1)
             end
          end)
       else
-         if LockConnectionGacha then
-            LockConnectionGacha:Disconnect()
-            LockConnectionGacha = nil
-         end
+         if LockConnectionGacha then LockConnectionGacha:Disconnect(); LockConnectionGacha = nil end
       end
    end,
 })
 
---------------------------------------------------------------------------------
--- 플레이어 탭 (스피드, 점프력, 무한점프)
---------------------------------------------------------------------------------
 PlayerTab:CreateSection("속도 및 점프")
 
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
 local DefaultWalkSpeed = 16
-
 local JumpPowerEnabled = false
 local JumpPowerValue = 50
 local DefaultJumpPower = 50
@@ -219,9 +178,7 @@ PlayerTab:CreateSlider({
    Suffix = "속도",
    CurrentValue = 16,
    Flag = "WalkSpeedSlider",
-   Callback = function(Value)
-      WalkSpeedValue = Value
-   end,
+   Callback = function(Value) WalkSpeedValue = Value end,
 })
 
 PlayerTab:CreateToggle({
@@ -234,11 +191,7 @@ PlayerTab:CreateToggle({
       if character and character:FindFirstChildOfClass("Humanoid") then
          local hum = character:FindFirstChildOfClass("Humanoid")
          hum.UseJumpPower = true
-         if not JumpPowerEnabled then
-            hum.JumpPower = DefaultJumpPower
-         else
-            hum.JumpPower = JumpPowerValue
-         end
+         if not JumpPowerEnabled then hum.JumpPower = DefaultJumpPower else hum.JumpPower = JumpPowerValue end
       end
    end,
 })
@@ -266,7 +219,6 @@ RunService.PreRender:Connect(function()
    if character and character:FindFirstChildOfClass("Humanoid") and character:FindFirstChild("HumanoidRootPart") then
       local hum = character:FindFirstChildOfClass("Humanoid")
       local hrp = character.HumanoidRootPart
-      
       hum.UseJumpPower = true
 
       if WalkSpeedEnabled then
@@ -278,9 +230,7 @@ RunService.PreRender:Connect(function()
          end
       end
 
-      if JumpPowerEnabled then
-         hum.JumpPower = JumpPowerValue
-      end
+      if JumpPowerEnabled then hum.JumpPower = JumpPowerValue end
 
       if hum.MoveDirection.Magnitude == 0 and hum:GetState() ~= Enum.HumanoidStateType.Freefall then
          hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
@@ -295,9 +245,7 @@ PlayerTab:CreateToggle({
    Name = "무한점프",
    CurrentValue = false,
    Flag = "InfiniteJumpToggle",
-   Callback = function(Value)
-      InfiniteJumpEnabled = Value
-   end,
+   Callback = function(Value) InfiniteJumpEnabled = Value end,
 })
 
 game:GetService("UserInputService").JumpRequest:Connect(function()
@@ -309,40 +257,38 @@ game:GetService("UserInputService").JumpRequest:Connect(function()
    end
 end)
 
---------------------------------------------------------------------------------
--- PVP 탭 (PVP 아우라 & 킬 오토팡)
---------------------------------------------------------------------------------
 PVPTab:CreateSection("PVP 오토")
 
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
 
--- PVP 상태 확인 함수
 local function IsPvpActive(targetPlayer)
    if not targetPlayer or targetPlayer == LocalPlayer then return false end
    
-   -- 1. 캐릭터 살아있는지 확인
    local char = targetPlayer.Character
-   if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then
-      return false
-   end
+   if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then return false end
    if not char:FindFirstChild("HumanoidRootPart") then return false end
 
-   -- 2. PVP 상태 체크 (속성값 혹은 플레이어 상태값 확인)
    local pvpState = targetPlayer:GetAttribute("PVP") or targetPlayer:GetAttribute("PvpState") or targetPlayer:GetAttribute("PVPState")
    if pvpState ~= nil then
       return pvpState == true
    end
    
-   if char:GetAttribute("PVP") ~= nil then
-      return char:GetAttribute("PVP") == true
+   if char:GetAttribute("PVP") ~= nil or char:GetAttribute("PvpState") ~= nil then
+      return (char:GetAttribute("PVP") == true) or (char:GetAttribute("PvpState") == true)
    end
 
-   -- 게임마다 설정된 PVP 상태 판별 기준이 없을 경우 기본적으로 타겟 유효 처리
-   return true
+   local folderPath = workspace:FindFirstChild("Players") or workspace:FindFirstChild("Characters")
+   if folderPath then
+      local targetFolder = folderPath:FindFirstChild(targetPlayer.Name)
+      if targetFolder and (targetFolder:GetAttribute("PVP") == true or targetFolder:GetAttribute("PvpState") == true) then
+         return true
+      end
+   end
+
+   return false
 end
 
--- PVP 대상 찾는 함수
 local function GetPvpTarget()
    for _, plr in ipairs(Players:GetPlayers()) do
       if IsPvpActive(plr) then
@@ -352,7 +298,6 @@ local function GetPvpTarget()
    return nil
 end
 
--- 1. PVP 아우라
 PVPTab:CreateToggle({
    Name = "PVP 아우라",
    CurrentValue = false,
@@ -360,12 +305,9 @@ PVPTab:CreateToggle({
    Callback = function(Value)
       PvpAuraEnabled = Value
       if PvpAuraEnabled then
-         -- PVP 상태 활성화 리모트 전송 (1회)
          CentralEvent:FireServer("SetPVPState", true)
-
          task.spawn(function()
             while PvpAuraEnabled do
-               -- 0.1초마다 펀치 리모트 전송
                CentralEvent:FireServer("PunchRequest", 22)
                task.wait(0.1)
             end
@@ -374,41 +316,29 @@ PVPTab:CreateToggle({
    end,
 })
 
--- 2. 킬 오토팡
 PVPTab:CreateToggle({
    Name = "킬 오토팡 (TP 펀치)",
    CurrentValue = false,
    Flag = "KillAutoBangToggle",
    Callback = function(Value)
       KillAutoBangEnabled = Value
-
       if KillAutoBangEnabled then
-         -- PVP 상태 활성화 리모트 전송 (1회)
          CentralEvent:FireServer("SetPVPState", true)
-
          task.spawn(function()
             local notifiedNoTarget = false
-
             while KillAutoBangEnabled do
                local target = GetPvpTarget()
-
                if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
                   notifiedNoTarget = false
                   local targetHRP = target.Character.HumanoidRootPart
                   local myChar = LocalPlayer.Character
-
                   if myChar and myChar:FindFirstChild("HumanoidRootPart") then
                      local myHRP = myChar.HumanoidRootPart
-
-                     -- 타겟 등 뒤 5스터드로 TP 이동 (관성 제거 포함)
                      myHRP.CFrame = targetHRP.CFrame * CFrame.new(0, 0, 5)
                      myHRP.AssemblyLinearVelocity = Vector3.zero
-
-                     -- 딜레이 없이 펀치 리모트 전송
                      CentralEvent:FireServer("PunchRequest", 22)
                   end
                else
-                  -- PVP 유저가 없을 때 알림 표시 후 대기
                   if not notifiedNoTarget then
                      Rayfield:Notify({
                         Title = "PVP 대상 없음",
@@ -419,7 +349,6 @@ PVPTab:CreateToggle({
                      notifiedNoTarget = true
                   end
                end
-
                RunService.RenderStepped:Wait()
             end
          end)

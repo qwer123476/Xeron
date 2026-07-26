@@ -1,16 +1,5 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local Window = Rayfield:CreateWindow({
-    Name = "알수없는 시뮬레이터", 
-    Icon = 0, 
-    Theme = ApA, 
-    ToggleUIKeybind = "T",
-    ConfigurationSaving = {
-        Enabled = false,       
-        FolderName = nil,
-        FileName = "Config"
-    }
-})
 local ApA = {
     TextColor = Color3.fromRGB(240, 240, 240),
 
@@ -55,6 +44,18 @@ local ApA = {
     PlaceholderColor = Color3.fromRGB(100, 100, 100),
 }
 
+local Window = Rayfield:CreateWindow({
+    Name = "알수없는 시뮬레이터", 
+    Icon = 0, 
+    Theme = ApA, 
+    ToggleUIKeybind = "T",
+    ConfigurationSaving = {
+        Enabled = false,       
+        FolderName = nil,
+        FileName = "Config"
+    }
+})
+
 local LocalPlayer = game.Players.LocalPlayer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -93,7 +94,7 @@ TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(V
 AutoTab:CreateSection("무기 설정")
 
 local SelectedWeapon = ""
-local AttackDelay = 0.0001
+local AttackDelay = 0
 local AutoAttackEnabled = false
 
 AutoTab:CreateButton({
@@ -114,11 +115,11 @@ AutoTab:CreateButton({
 
 AutoTab:CreateInput({
    Name = "오토팜 딜레이",
-   PlaceholderText = "0.1",
+   PlaceholderText = "0",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
       local num = tonumber(Text)
-      if num and num > 0 then AttackDelay = num else AttackDelay = 0.1 end
+      if num and num >= 0 then AttackDelay = num else AttackDelay = 0 end
    end,
 })
 
@@ -132,9 +133,15 @@ AutoTab:CreateToggle({
          task.spawn(function()
             while AutoAttackEnabled do
                if SelectedWeapon ~= "" then
-                  CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
+                  for i = 1, 10 do
+                     CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
+                  end
                end
-               task.wait(AttackDelay)
+               if AttackDelay > 0 then
+                  task.wait(AttackDelay)
+               else
+                  RunService.RenderStepped:Wait()
+               end
             end
          end)
       end
@@ -172,8 +179,10 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGachaEnabled do
-               CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
-               task.wait(0.1)
+               for i = 1, 5 do
+                  CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
+               end
+               RunService.RenderStepped:Wait()
             end
          end)
       else

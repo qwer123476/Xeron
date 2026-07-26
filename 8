@@ -1,7 +1,7 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
-   Name = "텔레포트 & 오토",
+   Name = "텔레포트 & 오토 & 플레이어",
    LoadingTitle = "로딩 중...",
    LoadingSubtitle = "",
    ConfigurationSaving = { Enabled = false },
@@ -20,6 +20,7 @@ end
 
 local TeleportTab = Window:CreateTab("텔레포트", 4483362458)
 local AutoTab = Window:CreateTab("오토", 4483362458)
+local PlayerTab = Window:CreateTab("플레이어", 4483362458)
 
 TeleportTab:CreateButton({
    Name = "스폰",
@@ -86,9 +87,6 @@ TeleportTab:CreateButton({
    Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end,
 })
 
----------------------------------------------------------
--- [무기 오토 섹션]
----------------------------------------------------------
 AutoTab:CreateSection("무기 오토")
 
 local SelectedWeapon = ""
@@ -160,9 +158,6 @@ AutoTab:CreateToggle({
    end,
 })
 
----------------------------------------------------------
--- [뽑기 오토 섹션]
----------------------------------------------------------
 AutoTab:CreateSection("뽑기 오토")
 
 local SelectedGachaCount = 1
@@ -260,63 +255,109 @@ AutoTab:CreateToggle({
    end,
 })
 
----------------------------------------------------------
--- [인챈트 오토 섹션]
----------------------------------------------------------
-AutoTab:CreateSection("인챈트 오토")
+PlayerTab:CreateSection("속도 및 점프")
 
-local AutoEnchantEnabled = false
-local LockPositionEnchant = Vector3.new(257.84, -373.26, 12.43)
-local LockConnectionEnchant = nil
+local WalkSpeedEnabled = false
+local WalkSpeedValue = 16
 
-AutoTab:CreateToggle({
-   Name = "오토 인챈트 시작 (위치 고정 & 대화)",
+PlayerTab:CreateToggle({
+   Name = "플레이어 속도 활성화",
    CurrentValue = false,
-   Flag = "AutoEnchantToggle",
+   Flag = "WalkSpeedToggle",
    Callback = function(Value)
-      AutoEnchantEnabled = Value
-      
-      if AutoEnchantEnabled then
-         -- 위치 고정
-         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
-            local character = LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-               local hrp = character.HumanoidRootPart
-               hrp.CFrame = CFrame.new(LockPositionEnchant)
-               hrp.AssemblyLinearVelocity = Vector3.zero
-               hrp.AssemblyAngularVelocity = Vector3.zero
-            end
-         end)
-
-         -- 대화 인터랙션 및 리모트 송신 루프
-         task.spawn(function()
-            while AutoEnchantEnabled do
-               -- 주변 ProximityPrompt 전부 감지 후 강제 실행
-               for _, prompt in ipairs(workspace:GetDescendants()) do
-                  if prompt:IsA("ProximityPrompt") then
-                     if fireproximityprompt then
-                        fireproximityprompt(prompt)
-                     end
-                  end
-               end
-
-               -- 인챈트 대화 선택 리모트 요청
-               local args = {
-                  "NPCDialogue_Choose",
-                  {
-                     choiceIndex = 1
-                  }
-               }
-               CentralEvent:FireServer(unpack(args))
-
-               task.wait(0.2)
-            end
-         end)
-      else
-         if LockConnectionEnchant then
-            LockConnectionEnchant:Disconnect()
-            LockConnectionEnchant = nil
-         end
-      end
+      WalkSpeedEnabled = Value
    end,
 })
+
+PlayerTab:CreateSlider({
+   Name = "플레이어 속도",
+   Range = {16, 200},
+   Increment = 1,
+   Suffix = "속도",
+   CurrentValue = 16,
+   Flag = "WalkSpeedSlider",
+   Callback = function(Value)
+      WalkSpeedValue = Value
+   end,
+})
+
+local JumpPowerEnabled = false
+local JumpPowerValue = 50
+
+PlayerTab:CreateToggle({
+   Name = "점프파워 활성화",
+   CurrentValue = false,
+   Flag = "JumpPowerToggle",
+   Callback = function(Value)
+      JumpPowerEnabled = Value
+   end,
+})
+
+PlayerTab:CreateSlider({
+   Name = "점프파워",
+   Range = {50, 300},
+   Increment = 1,
+   Suffix = "파워",
+   CurrentValue = 50,
+   Flag = "JumpPowerSlider",
+   Callback = function(Value)
+      JumpPowerValue = Value
+   end,
+})
+
+RunService.RenderStepped:Connect(function()
+   local character = LocalPlayer.Character
+   if character and character:FindFirstChildOfClass("Humanoid") then
+      local humanoid = character:FindFirstChildOfClass("Humanoid")
+      if WalkSpeedEnabled then
+         humanoid.WalkSpeed = WalkSpeedValue
+      end
+      if JumpPowerEnabled then
+         humanoid.JumpPower = JumpPowerValue
+      end
+   end
+end)
+
+PlayerTab:CreateSection("기타 기능")
+
+local NoclipEnabled = false
+PlayerTab:CreateToggle({
+   Name = "노클립",
+   CurrentValue = false,
+   Flag = "NoclipToggle",
+   Callback = function(Value)
+      NoclipEnabled = Value
+   end,
+})
+
+RunService.Stepped:Connect(function()
+   if NoclipEnabled then
+      local character = LocalPlayer.Character
+      if character then
+         for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+               part.CanCollide = false
+            end
+         end
+      end
+   end
+end)
+
+local InfiniteJumpEnabled = false
+PlayerTab:CreateToggle({
+   Name = "무한점프",
+   CurrentValue = false,
+   Flag = "InfiniteJumpToggle",
+   Callback = function(Value)
+      InfiniteJumpEnabled = Value
+   end,
+})
+
+game:GetService("UserInputService").JumpRequest:Connect(function()
+   if InfiniteJumpEnabled then
+      local character = LocalPlayer.Character
+      if character and character:FindFirstChildOfClass("Humanoid") then
+         character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
+      end
+   end
+end)

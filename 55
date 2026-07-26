@@ -1,0 +1,856 @@
+-- [[ 1. GUI ìƒì„±ë¶€ (V106 ë””ìžì¸ ë² ì´ìŠ¤) ]]
+local plr = game:GetService("Players").LocalPlayer
+local mouse = plr:GetMouse()
+local uis = game:GetService("UserInputService")
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SmartMissile_V107_Clean"
+ScreenGui.ResetOnSpawn = false
+ScreenGui.IgnoreGuiInset = true 
+ScreenGui.DisplayOrder = 999
+
+pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
+if not ScreenGui.Parent then ScreenGui.Parent = plr:WaitForChild("PlayerGui") end
+
+-- ë©”ì¸ í”„ë ˆìž„
+local Main = Instance.new("Frame", ScreenGui)
+Main.Size = UDim2.new(0, 260, 0, 900)
+Main.Position = UDim2.new(0.1, 0, 0.15, 0)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 10) 
+Main.Active = true
+Main.Draggable = true
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
+
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, 0, 0, 45)
+Title.Text = "FUNNEL V107 (CLEAN)" 
+Title.TextColor3 = Color3.fromRGB(255, 255, 255) 
+Title.BackgroundColor3 = Color3.fromRGB(25, 25, 20)
+Title.Font = Enum.Font.GothamBlack
+Title.TextSize = 16
+Instance.new("UICorner", Title).CornerRadius = UDim.new(0, 12)
+
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -38, 0, 7)
+CloseBtn.Text = "X"
+CloseBtn.TextColor3 = Color3.new(1, 1, 1)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200, 50, 50)
+CloseBtn.Font = Enum.Font.GothamBold
+Instance.new("UICorner", CloseBtn).CornerRadius = UDim.new(0, 8)
+
+-- ë¦¬ìŠ¤íŠ¸ ë°°ê²½
+local ScrollBg = Instance.new("Frame", Main)
+ScrollBg.Size = UDim2.new(1, -20, 0, 200) 
+ScrollBg.Position = UDim2.new(0, 10, 0, 55)
+ScrollBg.BackgroundColor3 = Color3.fromRGB(25, 25, 20)
+Instance.new("UICorner", ScrollBg).CornerRadius = UDim.new(0, 10)
+
+local Scroll = Instance.new("ScrollingFrame", ScrollBg)
+Scroll.Size = UDim2.new(1, -10, 1, -10)
+Scroll.Position = UDim2.new(0, 5, 0, 5)
+Scroll.BackgroundTransparency = 1
+Scroll.BorderSizePixel = 0
+Scroll.ScrollBarThickness = 6
+Scroll.AutomaticCanvasSize = Enum.AutomaticSize.Y 
+Scroll.CanvasSize = UDim2.new(0, 0, 0, 0)
+
+local UIList = Instance.new("UIListLayout", Scroll)
+UIList.Padding = UDim.new(0, 5)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+
+-- [[ 2. ì„œë¹„ìŠ¤ ë° ë³€ìˆ˜ ]]
+local players = game:GetService("Players")
+local rs2 = game:GetService("RunService")
+local rep = game:GetService("ReplicatedStorage")
+local workspace = game:GetService("Workspace")
+
+-- ë§ˆìš°ìŠ¤ ì¶”ì ìš©
+local MouseAtt = Instance.new("Attachment")
+MouseAtt.Name = "MouseTrackerAtt"
+MouseAtt.Parent = workspace:FindFirstChild("Terrain")
+
+local State = { 
+    Target = nil, 
+    MissileSpeed = 85, 
+    NavConstant = 4.0,    
+    TurnRate = 0.15,      
+    ScanRange = 45,       
+    AuraEnabled = false,
+    RandomMode = false, 
+    PredictionEnabled = true,
+    AutoSpawnEnabled = false, 
+    AuraRange = 50,       
+    ProcessedBombs = {},  
+    OrbitEnabled = false, 
+    OrbitList = {},       
+    OrbitRadius = 8,      
+    OrbitSpeed = 2,
+    IsSpinning = true,
+    RotationOffset = 0,
+    SpreadEnabled = true, 
+    SpreadForce = 60,
+    TracerEnabled = true
+}
+
+-- [[ 3. í•˜ë‹¨ UI ]]
+local BottomContainer = Instance.new("Frame", Main)
+BottomContainer.Size = UDim2.new(1, -20, 0, 610) 
+BottomContainer.Position = UDim2.new(0, 10, 0, 265)
+BottomContainer.BackgroundTransparency = 1
+
+local SpeedLabel = Instance.new("TextLabel", BottomContainer)
+SpeedLabel.Size = UDim2.new(1, 0, 0, 20)
+SpeedLabel.Text = "Speed: 85"
+SpeedLabel.TextColor3 = Color3.fromRGB(200, 200, 200)
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Font = Enum.Font.GothamBold
+
+local SpeedSliderBg = Instance.new("Frame", BottomContainer)
+SpeedSliderBg.Size = UDim2.new(1, 0, 0, 6)
+SpeedSliderBg.Position = UDim2.new(0, 0, 0, 25)
+SpeedSliderBg.BackgroundColor3 = Color3.fromRGB(50, 50, 40)
+Instance.new("UICorner", SpeedSliderBg).CornerRadius = UDim.new(1, 0)
+
+local SpeedSliderFill = Instance.new("Frame", SpeedSliderBg)
+SpeedSliderFill.Size = UDim2.new(0.4, 0, 1, 0)
+SpeedSliderFill.BackgroundColor3 = Color3.fromRGB(255, 150, 50)
+Instance.new("UICorner", SpeedSliderFill).CornerRadius = UDim.new(1, 0)
+
+local SpeedBtn = Instance.new("TextButton", SpeedSliderBg)
+SpeedBtn.Size = UDim2.new(1, 0, 1, 0)
+SpeedBtn.BackgroundTransparency = 1
+SpeedBtn.Text = ""
+
+SpeedBtn.MouseButton1Down:Connect(function()
+    local inputConn
+    inputConn = game:GetService("UserInputService").InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            local relativeX = math.clamp((input.Position.X - SpeedSliderBg.AbsolutePosition.X) / SpeedSliderBg.AbsoluteSize.X, 0, 1)
+            State.MissileSpeed = math.floor(relativeX * 250) + 10 
+            SpeedLabel.Text = "Speed: " .. State.MissileSpeed
+            SpeedSliderFill.Size = UDim2.new(relativeX, 0, 1, 0)
+        end
+    end)
+    game:GetService("UserInputService").InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            if inputConn then inputConn:Disconnect() end
+        end
+    end)
+end)
+
+-- [ë²„íŠ¼ 1] Aura
+local AuraBtn = Instance.new("TextButton", BottomContainer)
+AuraBtn.Size = UDim2.new(1, 0, 0, 35)
+AuraBtn.Position = UDim2.new(0, 0, 0, 45)
+AuraBtn.Text = "AURA DETECTION: OFF"
+AuraBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+AuraBtn.TextColor3 = Color3.fromRGB(255, 100, 100) 
+AuraBtn.Font = Enum.Font.GothamBold
+AuraBtn.TextSize = 14
+Instance.new("UICorner", AuraBtn).CornerRadius = UDim.new(0, 8)
+
+AuraBtn.MouseButton1Click:Connect(function()
+    if State.RandomMode then return end 
+    State.AuraEnabled = not State.AuraEnabled
+    if State.AuraEnabled then
+        AuraBtn.Text = "AURA DETECTION: ON"
+        AuraBtn.TextColor3 = Color3.fromRGB(100, 255, 100) 
+        AuraBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 40)
+    else
+        AuraBtn.Text = "AURA DETECTION: OFF"
+        AuraBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+        AuraBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- [ë²„íŠ¼ 2] Random
+local RandomBtn = Instance.new("TextButton", BottomContainer)
+RandomBtn.Size = UDim2.new(1, 0, 0, 35)
+RandomBtn.Position = UDim2.new(0, 0, 0, 85)
+RandomBtn.Text = "RANDOM TARGET: OFF"
+RandomBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+RandomBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+RandomBtn.Font = Enum.Font.GothamBold
+RandomBtn.TextSize = 14
+Instance.new("UICorner", RandomBtn).CornerRadius = UDim.new(0, 8)
+
+RandomBtn.MouseButton1Click:Connect(function()
+    State.RandomMode = not State.RandomMode
+    if State.RandomMode then
+        RandomBtn.Text = "RANDOM TARGET: ON"
+        RandomBtn.TextColor3 = Color3.fromRGB(255, 50, 255) 
+        RandomBtn.BackgroundColor3 = Color3.fromRGB(60, 40, 60)
+        State.AuraEnabled = true
+        AuraBtn.Text = "AURA: ON (LOCKED)"
+        AuraBtn.TextColor3 = Color3.fromRGB(150, 255, 150)
+        AuraBtn.BackgroundColor3 = Color3.fromRGB(30, 50, 30)
+    else
+        RandomBtn.Text = "RANDOM TARGET: OFF"
+        RandomBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        RandomBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        AuraBtn.Text = "AURA DETECTION: ON"
+        AuraBtn.TextColor3 = Color3.fromRGB(100, 255, 100) 
+        AuraBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 40)
+    end
+end)
+
+-- [ë²„íŠ¼ 3] Prediction
+local PredBtn = Instance.new("TextButton", BottomContainer)
+PredBtn.Size = UDim2.new(1, 0, 0, 35)
+PredBtn.Position = UDim2.new(0, 0, 0, 125)
+PredBtn.Text = "PREDICTION: ON"
+PredBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 80)
+PredBtn.TextColor3 = Color3.fromRGB(100, 200, 255) 
+PredBtn.Font = Enum.Font.GothamBold
+PredBtn.TextSize = 14
+Instance.new("UICorner", PredBtn).CornerRadius = UDim.new(0, 8)
+
+PredBtn.MouseButton1Click:Connect(function()
+    State.PredictionEnabled = not State.PredictionEnabled
+    if State.PredictionEnabled then
+        PredBtn.Text = "PREDICTION: ON"
+        PredBtn.TextColor3 = Color3.fromRGB(100, 200, 255) 
+        PredBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 80)
+    else
+        PredBtn.Text = "PREDICTION: OFF"
+        PredBtn.TextColor3 = Color3.fromRGB(255, 200, 100)
+        PredBtn.BackgroundColor3 = Color3.fromRGB(80, 60, 40)
+    end
+end)
+
+-- [ë²„íŠ¼ 4] BOMB ORBIT
+local OrbitBtn = Instance.new("TextButton", BottomContainer)
+OrbitBtn.Size = UDim2.new(1, 0, 0, 35)
+OrbitBtn.Position = UDim2.new(0, 0, 0, 165)
+OrbitBtn.Text = "BOMB ORBIT: OFF"
+OrbitBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+OrbitBtn.TextColor3 = Color3.fromRGB(0, 255, 100) 
+OrbitBtn.Font = Enum.Font.GothamBold
+OrbitBtn.TextSize = 14
+Instance.new("UICorner", OrbitBtn).CornerRadius = UDim.new(0, 8)
+
+OrbitBtn.MouseButton1Click:Connect(function()
+    State.OrbitEnabled = not State.OrbitEnabled
+    if State.OrbitEnabled then
+        OrbitBtn.Text = "BOMB ORBIT: ON (Q / R)"
+        OrbitBtn.BackgroundColor3 = Color3.fromRGB(0, 100, 50)
+        OrbitBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+        if not State.AuraEnabled then
+            State.AuraEnabled = true
+            AuraBtn.Text = "AURA DETECTION: ON"
+            AuraBtn.TextColor3 = Color3.fromRGB(100, 255, 100)
+            AuraBtn.BackgroundColor3 = Color3.fromRGB(40, 60, 40)
+        end
+    else
+        OrbitBtn.Text = "BOMB ORBIT: OFF"
+        OrbitBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+        OrbitBtn.TextColor3 = Color3.fromRGB(0, 255, 100)
+        State.OrbitList = {}
+    end
+end)
+
+-- [ë²„íŠ¼ 5] STOP SPIN
+local SpinBtn = Instance.new("TextButton", BottomContainer)
+SpinBtn.Size = UDim2.new(1, 0, 0, 35)
+SpinBtn.Position = UDim2.new(0, 0, 0, 205)
+SpinBtn.Text = "SPIN: ON"
+SpinBtn.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+SpinBtn.TextColor3 = Color3.fromRGB(100, 200, 255) 
+SpinBtn.Font = Enum.Font.GothamBold
+SpinBtn.TextSize = 14
+Instance.new("UICorner", SpinBtn).CornerRadius = UDim.new(0, 8)
+
+SpinBtn.MouseButton1Click:Connect(function()
+    State.IsSpinning = not State.IsSpinning
+    if State.IsSpinning then
+        SpinBtn.Text = "SPIN: ON"
+        SpinBtn.TextColor3 = Color3.fromRGB(100, 200, 255)
+        SpinBtn.BackgroundColor3 = Color3.fromRGB(0, 50, 100)
+    else
+        SpinBtn.Text = "SPIN: PAUSED"
+        SpinBtn.TextColor3 = Color3.fromRGB(255, 100, 100)
+        SpinBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 50)
+    end
+end)
+
+-- [ë²„íŠ¼ 6] SPREAD
+local SpreadBtn = Instance.new("TextButton", BottomContainer)
+SpreadBtn.Size = UDim2.new(1, 0, 0, 35)
+SpreadBtn.Position = UDim2.new(0, 0, 0, 245)
+SpreadBtn.Text = "SPREAD: ON (Anti-Collide)"
+SpreadBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 0)
+SpreadBtn.TextColor3 = Color3.fromRGB(255, 150, 50) 
+SpreadBtn.Font = Enum.Font.GothamBold
+SpreadBtn.TextSize = 14
+Instance.new("UICorner", SpreadBtn).CornerRadius = UDim.new(0, 8)
+
+SpreadBtn.MouseButton1Click:Connect(function()
+    State.SpreadEnabled = not State.SpreadEnabled
+    if State.SpreadEnabled then
+        SpreadBtn.Text = "SPREAD: ON (Anti-Collide)"
+        SpreadBtn.TextColor3 = Color3.fromRGB(255, 150, 50)
+        SpreadBtn.BackgroundColor3 = Color3.fromRGB(100, 50, 0)
+    else
+        SpreadBtn.Text = "SPREAD: OFF"
+        SpreadBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+        SpreadBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- [ë²„íŠ¼ 7] TRACER ESP
+local EspBtn = Instance.new("TextButton", BottomContainer)
+EspBtn.Size = UDim2.new(1, 0, 0, 35)
+EspBtn.Position = UDim2.new(0, 0, 0, 285)
+EspBtn.Text = "TRACER ESP: ON (Hyper)"
+EspBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0) 
+EspBtn.TextColor3 = Color3.fromRGB(255, 0, 0) 
+EspBtn.Font = Enum.Font.GothamBold
+EspBtn.TextSize = 14
+Instance.new("UICorner", EspBtn).CornerRadius = UDim.new(0, 8)
+
+EspBtn.MouseButton1Click:Connect(function()
+    State.TracerEnabled = not State.TracerEnabled
+    if State.TracerEnabled then
+        EspBtn.Text = "TRACER ESP: ON (Hyper)"
+        EspBtn.TextColor3 = Color3.fromRGB(255, 0, 0)
+        EspBtn.BackgroundColor3 = Color3.fromRGB(100, 0, 0)
+    else
+        EspBtn.Text = "TRACER ESP: OFF"
+        EspBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
+        EspBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- [ë²„íŠ¼ 8] ALL FIRE (R Key)
+local AllFireBtn = Instance.new("TextButton", BottomContainer)
+AllFireBtn.Size = UDim2.new(1, 0, 0, 40)
+AllFireBtn.Position = UDim2.new(0, 0, 0, 325)
+AllFireBtn.Text = "ðŸ”¥ ALL FIRE (Press R) ðŸ”¥"
+AllFireBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 0)
+AllFireBtn.TextColor3 = Color3.new(1, 1, 1)
+AllFireBtn.Font = Enum.Font.GothamBlack
+AllFireBtn.TextSize = 16
+Instance.new("UICorner", AllFireBtn).CornerRadius = UDim.new(0, 8)
+
+-- [ë²„íŠ¼ 9] Auto Spawn
+local AutoSpawnBtn = Instance.new("TextButton", BottomContainer)
+AutoSpawnBtn.Size = UDim2.new(1, 0, 0, 35)
+AutoSpawnBtn.Position = UDim2.new(0, 0, 0, 370)
+AutoSpawnBtn.Text = "AUTO SPAWN: OFF"
+AutoSpawnBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+AutoSpawnBtn.TextColor3 = Color3.fromRGB(255, 255, 100) 
+AutoSpawnBtn.Font = Enum.Font.GothamBold
+AutoSpawnBtn.TextSize = 14
+Instance.new("UICorner", AutoSpawnBtn).CornerRadius = UDim.new(0, 8)
+
+AutoSpawnBtn.MouseButton1Click:Connect(function()
+    State.AutoSpawnEnabled = not State.AutoSpawnEnabled
+    if State.AutoSpawnEnabled then
+        AutoSpawnBtn.Text = "AUTO SPAWN: ON (0.2s)" 
+        AutoSpawnBtn.TextColor3 = Color3.fromRGB(255, 255, 0) 
+        AutoSpawnBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 20)
+    else
+        AutoSpawnBtn.Text = "AUTO SPAWN: OFF"
+        AutoSpawnBtn.TextColor3 = Color3.fromRGB(255, 255, 100)
+        AutoSpawnBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+    end
+end)
+
+-- [ë²„íŠ¼ 10] Manual Fire
+local LaunchBtn = Instance.new("TextButton", BottomContainer)
+LaunchBtn.Size = UDim2.new(1, 0, 0, 50)
+LaunchBtn.Position = UDim2.new(0, 0, 0, 415)
+LaunchBtn.Text = "MANUAL FIRE"
+LaunchBtn.BackgroundColor3 = Color3.fromRGB(150, 80, 0)
+LaunchBtn.TextColor3 = Color3.new(1, 1, 1)
+LaunchBtn.Font = Enum.Font.GothamBlack
+LaunchBtn.TextSize = 20
+Instance.new("UICorner", LaunchBtn).CornerRadius = UDim.new(0, 8)
+
+local StatusLabel = Instance.new("TextLabel", BottomContainer)
+StatusLabel.Size = UDim2.new(1, 0, 0, 30)
+StatusLabel.Position = UDim2.new(0, 0, 0, 480)
+StatusLabel.Text = "Status: Ready"
+StatusLabel.TextColor3 = Color3.fromRGB(150, 150, 150)
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Font = Enum.Font.Gotham
+
+-- [[ 4. GNC SYSTEM ]]
+
+local function UpdateTargetState(targetBody, lastVel, dt)
+    local currentPos = targetBody.Position
+    local currentVel = targetBody.AssemblyLinearVelocity
+    local estimatedAccel = Vector3.zero
+    if lastVel then estimatedAccel = (currentVel - lastVel) / dt end
+    return currentPos, currentVel, estimatedAccel
+end
+
+local function GetGuidanceCommand(missilePos, missileVel, targetPos, targetVel, targetAccel)
+    local relPos = targetPos - missilePos
+    local relVel = targetVel - missileVel
+    local range = relPos.Magnitude
+    local LOS = relPos.Unit
+    local omega = relPos:Cross(relVel) / (range * range)
+    local Vc = -relVel:Dot(LOS)
+    local pnCommand = State.NavConstant * Vc * (omega:Cross(LOS))
+    local apnTerm = targetAccel * (State.NavConstant / 2)
+    return pnCommand + apnTerm
+end
+
+local function GetAvoidanceField(pos, dir, ignoreModel)
+    local repulsion = Vector3.zero
+    local params = RaycastParams.new()
+    params.FilterType = Enum.RaycastFilterType.Exclude
+    params.FilterDescendantsInstances = {ignoreModel, plr.Character, State.Target and State.Target.Character}
+    params.IgnoreWater = true
+    local sensors = {
+        dir, (dir + Vector3.new(0, 0.5, 0)).Unit, (dir + Vector3.new(0, -0.5, 0)).Unit,
+        CFrame.Angles(0, 1, 0):VectorToWorldSpace(dir), CFrame.Angles(0, -1, 0):VectorToWorldSpace(dir)
+    }
+    for _, sensorDir in pairs(sensors) do
+        local result = workspace:Spherecast(pos, 4, sensorDir * State.ScanRange, params)
+        if result then
+            local urgency = (1 - (result.Distance / State.ScanRange)) ^ 2
+            repulsion = repulsion + (result.Normal * urgency * 150)
+        end
+    end
+    return repulsion
+end
+
+local function GetRandomTarget()
+    local candidates = {}
+    for _, p in pairs(players:GetPlayers()) do
+        if p ~= plr and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+            table.insert(candidates, p)
+        end
+    end
+    if #candidates > 0 then return candidates[math.random(1, #candidates)] end
+    return nil
+end
+
+-- [[ 5. ë¦¬ëª¨íŠ¸ ë° ìœ í‹¸ë¦¬í‹° ]]
+local function GetRemote(name)
+    if name == "Spawn" then return rep:WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction") end
+    if name == "CreateGrab" then return rep:WaitForChild("GrabEvents"):WaitForChild("CreateGrabLine") end
+    if name == "DestroyGrab" then return rep:WaitForChild("GrabEvents"):WaitForChild("DestroyGrabLine") end
+    if name == "SetOwner" then return rep:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner") end
+    if name == "Explode" then return rep:FindFirstChild("BombEvents"):FindFirstChild("BombExplode") end
+    return nil
+end
+
+-- [Hyper Tracer] (ESP)
+local function UpdateTracer(missile, target)
+    if not missile then return end
+    
+    if not State.TracerEnabled then
+        if missile:FindFirstChild("TracerBeam") then
+            missile.TracerBeam:Destroy()
+        end
+        return
+    end
+    
+    local beam = missile:FindFirstChild("TracerBeam")
+    local att0 = missile:FindFirstChild("NoseAtt")
+    
+    if not beam then
+        att0 = Instance.new("Attachment", missile)
+        att0.Name = "NoseAtt"
+        if missile:IsA("BasePart") then
+            att0.Position = Vector3.new(0, 0, -missile.Size.Z / 2)
+        end
+        
+        beam = Instance.new("Beam", missile)
+        beam.Name = "TracerBeam"
+        beam.Attachment0 = att0
+        beam.Color = ColorSequence.new(Color3.fromRGB(255, 0, 0)) 
+        beam.Width0 = 1.5 
+        beam.Width1 = 1.5
+        beam.FaceCamera = true
+        beam.Texture = "rbxassetid://446111271" 
+        beam.TextureSpeed = 3
+        beam.LightEmission = 1 
+        beam.LightInfluence = 0
+        beam.Transparency = NumberSequence.new(0) 
+    end
+    
+    -- íƒ€ê²Ÿ ì—°ê²° (íƒ€ê²Ÿ ì—†ìœ¼ë©´ ë§ˆìš°ìŠ¤)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        local hrp = target.Character.HumanoidRootPart
+        local att1 = hrp:FindFirstChild("MissileTargetAtt")
+        if not att1 then
+            att1 = Instance.new("Attachment", hrp)
+            att1.Name = "MissileTargetAtt"
+        end
+        beam.Attachment1 = att1
+    else
+        beam.Attachment1 = MouseAtt
+    end
+end
+
+local function TriggerExplosion(bombModel, bombPart)
+    local args = {
+        [1] = {
+            ["Radius"] = 17.5, ["TimeLength"] = 0.5, ["Hitbox"] = bombPart, ["ExplodesByFire"] = true,
+            ["MaxForcePerStudSquared"] = 225, ["Model"] = bombModel, ["ImpactSpeed"] = 20,
+            ["ExplodesByPointy"] = false, ["DestroysModel"] = true, ["PositionPart"] = bombPart
+        },
+        [2] = bombPart.Position 
+    }
+    GetRemote("Explode"):FireServer(unpack(args))
+end
+
+-- [ë©”ì¸ ë¹„í–‰ ë¡œì§]
+local function RunMissileLogic(bombModel)
+    local launchTarget = State.Target
+    
+    if State.RandomMode then
+        local rndTarget = GetRandomTarget()
+        if rndTarget then
+            launchTarget = rndTarget
+            StatusLabel.Text = "ðŸŽ² Roulette: " .. rndTarget.DisplayName
+        end
+    end
+
+    if not launchTarget or not launchTarget.Character then 
+        StatusLabel.Text = "Target Error"
+        return 
+    end
+    
+    local bombPart = bombModel:FindFirstChild("Wedge", 3) or bombModel:FindFirstChild("SoundPart") or bombModel:FindFirstChild("Thruster") or bombModel:FindFirstChild("Body")
+    if not bombPart then return end
+    
+    -- ë°œì‚¬ ì‹œì—ë„ Tracer ìœ ì§€
+    UpdateTracer(bombPart, launchTarget)
+    
+    task.delay(0.2, function()
+        if bombPart and bombPart.Parent then bombPart.CanCollide = true end
+    end)
+    
+    local rCreate = GetRemote("CreateGrab")
+    local rOwner = GetRemote("SetOwner")
+    local rDestroy = GetRemote("DestroyGrab")
+    
+    if rCreate and rOwner and rDestroy then
+        rCreate:FireServer(bombPart, bombPart.CFrame) 
+        rOwner:FireServer(bombPart, bombPart.CFrame)
+        rDestroy:FireServer(bombPart) 
+    end
+    
+    if not State.RandomMode then
+        StatusLabel.Text = "GNC ACTIVE: " .. launchTarget.DisplayName
+    end
+    
+    local spreadVector = Vector3.zero
+    if State.SpreadEnabled and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") then
+        local direction = (bombPart.Position - plr.Character.HumanoidRootPart.Position).Unit
+        spreadVector = direction * State.SpreadForce
+    end
+    
+    task.spawn(function()
+        local startTime = tick()
+        local currentVelocity = Vector3.new(0, 60, 0)
+        local lastTargetVel = Vector3.zero
+        
+        local targetChar = launchTarget.Character
+        local targetBody = targetChar:FindFirstChild("UpperTorso") or targetChar:FindFirstChild("Torso") or targetChar:FindFirstChild("HumanoidRootPart")
+        if not targetBody then return end
+
+        while bombModel.Parent and targetBody.Parent do
+            local dt = rs2.Heartbeat:Wait()
+            local myPos = bombPart.Position
+            local targetPos = targetBody.Position
+            local distToTarget = (targetPos - myPos).Magnitude
+            
+            if distToTarget < 6 then
+                TriggerExplosion(bombModel, bombPart)
+                break
+            end
+
+            local tPos, tVel, tAccel = UpdateTargetState(targetBody, lastTargetVel, dt)
+            lastTargetVel = tVel
+
+            local commandDir = Vector3.zero
+            local activeSpeed = State.MissileSpeed
+            local steeringPower = State.TurnRate
+            local elapsedTime = tick() - startTime
+
+            if elapsedTime < 0.3 then
+                commandDir = Vector3.new(0, 1, 0)
+                activeSpeed = 100
+                steeringPower = 0.5
+            elseif State.SpreadEnabled and elapsedTime < 0.8 then
+                commandDir = (spreadVector + Vector3.new(0, 20, 0)).Unit
+                activeSpeed = 80
+                steeringPower = 0.8
+            elseif distToTarget < 40 then
+                if State.PredictionEnabled then
+                    local accCmd = GetGuidanceCommand(myPos, currentVelocity, tPos, tVel, tAccel)
+                    commandDir = (currentVelocity + accCmd).Unit
+                else
+                    commandDir = (tPos - myPos).Unit
+                end
+                activeSpeed = State.MissileSpeed * 1.5
+                steeringPower = 1.0 
+            else
+                local guideVec
+                if State.PredictionEnabled then
+                    local accCmd = GetGuidanceCommand(myPos, currentVelocity, tPos, tVel, tAccel)
+                    guideVec = (currentVelocity + accCmd).Unit
+                else
+                    guideVec = (tPos - myPos).Unit
+                end
+                local avoidVec = GetAvoidanceField(myPos, currentVelocity.Unit, bombModel)
+                commandDir = (guideVec * 2.0 + avoidVec * 1.5).Unit
+            end
+            
+            local newDir = currentVelocity.Unit:Lerp(commandDir, steeringPower)
+            currentVelocity = newDir * activeSpeed
+            bombPart.AssemblyLinearVelocity = currentVelocity
+            
+            local lookCFrame = CFrame.new(myPos, myPos + currentVelocity) * CFrame.Angles(math.rad(90), 0, 0)
+            bombPart.CFrame = bombPart.CFrame:Lerp(lookCFrame, 0.5)
+            bombPart.AssemblyAngularVelocity = Vector3.zero
+        end
+    end)
+end
+
+-- [[ 6. ì˜¤ë¦¬ë¹— & Q/R ë°œì‚¬ ]]
+
+rs2.Heartbeat:Connect(function(dt)
+    if MouseAtt and mouse then
+        MouseAtt.WorldPosition = mouse.Hit.Position
+    end
+
+    if not State.OrbitEnabled or not plr.Character or not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+    
+    local myRoot = plr.Character.HumanoidRootPart
+    
+    if State.IsSpinning then
+        State.RotationOffset = State.RotationOffset + (State.OrbitSpeed * dt)
+    end
+    
+    local lookPoint = nil
+    if State.Target and State.Target.Character and State.Target.Character:FindFirstChild("HumanoidRootPart") then
+        lookPoint = State.Target.Character.HumanoidRootPart.Position
+    else
+        lookPoint = mouse.Hit.Position
+    end
+    
+    for i = #State.OrbitList, 1, -1 do
+        local bomb = State.OrbitList[i]
+        
+        if bomb and bomb.Parent then
+            local part = bomb:FindFirstChild("Thruster") or bomb:FindFirstChild("Body") or bomb:FindFirstChild("Main") or bomb:FindFirstChild("Wedge")
+            
+            if part then
+                part.CanCollide = false 
+                
+                -- [CLEAN: Highlight removed, Tracer only]
+                UpdateTracer(part, State.Target)
+                
+                local count = #State.OrbitList
+                local angle = (i / count) * (math.pi * 2) + State.RotationOffset
+                local offX = math.cos(angle) * State.OrbitRadius
+                local offZ = math.sin(angle) * State.OrbitRadius
+                
+                part.AssemblyLinearVelocity = Vector3.zero
+                part.AssemblyAngularVelocity = Vector3.zero
+                
+                local bounce = math.sin(tick() * 2 + i) 
+                local orbitPos = myRoot.CFrame * CFrame.new(offX, 5 + bounce, offZ)
+                
+                if lookPoint then
+                    part.CFrame = CFrame.lookAt(orbitPos.Position, lookPoint) * CFrame.Angles(0, math.rad(-90), 0)
+                else
+                    part.CFrame = CFrame.new(orbitPos.Position) * CFrame.Angles(0, math.rad(-90), 0)
+                end
+            end
+        else
+            table.remove(State.OrbitList, i)
+        end
+    end
+    
+    StatusLabel.Text = "Orbit: " .. #State.OrbitList .. " | Spin: " .. (State.IsSpinning and "ON" or "OFF")
+end)
+
+local function FireOneBomb()
+    if #State.OrbitList > 0 then
+        local bombToFire = table.remove(State.OrbitList, 1)
+        if bombToFire and bombToFire.Parent then
+            -- Highlight ì œê±° ì½”ë“œëŠ” ë‚¨ê²¨ë‘¬ë„ ë¬´ë°© (ì–´ì°¨í”¼ ì—†ìœ¼ë¯€ë¡œ ë¬´ì‹œë¨)
+            if bombToFire:FindFirstChild("Highlight") then bombToFire.Highlight:Destroy() end
+            State.ProcessedBombs[bombToFire] = true
+            
+            local part = bombToFire:FindFirstChild("Thruster") or bombToFire:FindFirstChild("Body")
+            if part then part.CFrame = part.CFrame * CFrame.new(0, 4, 0) end
+            
+            RunMissileLogic(bombToFire)
+            StatusLabel.Text = "FIRING!"
+        end
+    end
+end
+
+local function FireAllBombs()
+    if #State.OrbitList == 0 then return end
+    StatusLabel.Text = "âš ï¸ ALL FIRE! âš ï¸"
+    
+    local bombsToFire = {}
+    for _, b in ipairs(State.OrbitList) do table.insert(bombsToFire, b) end
+    State.OrbitList = {} 
+    
+    for _, bomb in ipairs(bombsToFire) do
+        if bomb and bomb.Parent then
+            if bomb:FindFirstChild("Highlight") then bomb.Highlight:Destroy() end
+            State.ProcessedBombs[bomb] = true
+            
+            local part = bomb:FindFirstChild("Thruster") or bomb:FindFirstChild("Body")
+            if part then part.CFrame = part.CFrame * CFrame.new(0, 4, 0) end
+            
+            task.spawn(function()
+                RunMissileLogic(bomb)
+            end)
+        end
+    end
+end
+
+uis.InputBegan:Connect(function(input, processed)
+    if processed then return end
+    
+    if State.OrbitEnabled then
+        if not State.Target and not State.RandomMode then
+            StatusLabel.Text = "Target Error!"
+            return
+        end
+        
+        if input.KeyCode == Enum.KeyCode.Q then
+            FireOneBomb()
+        elseif input.KeyCode == Enum.KeyCode.R then
+            FireAllBombs()
+        end
+    end
+end)
+
+AllFireBtn.MouseButton1Click:Connect(function()
+    if State.OrbitEnabled then
+        FireAllBombs()
+    else
+        StatusLabel.Text = "Enable Orbit First!"
+    end
+end)
+
+-- [[ 7. Aura (Clean Version) ]]
+task.spawn(function()
+    while true do
+        task.wait(0.1)
+        if State.AuraEnabled and (State.Target or State.RandomMode) and plr.Character then
+            local myPos = plr.Character.HumanoidRootPart.Position
+            local toyFolder = workspace:FindFirstChild(plr.Name .. "SpawnedInToys")
+            if toyFolder then
+                for _, bomb in pairs(toyFolder:GetChildren()) do
+                    if bomb.Name == "BombMissile" and not State.ProcessedBombs[bomb] then
+                        local part = bomb:FindFirstChild("Wedge") or bomb:FindFirstChild("SoundPart") or bomb:FindFirstChild("Thruster") or bomb:FindFirstChild("Body")
+                        
+                        if part and (part.Position - myPos).Magnitude <= State.AuraRange then
+                            if State.OrbitEnabled then
+                                local alreadyIn = false
+                                for _, b in pairs(State.OrbitList) do if b == bomb then alreadyIn = true end end
+                                
+                                if not alreadyIn then
+                                    table.insert(State.OrbitList, bomb)
+                                    local rCreate = GetRemote("CreateGrab")
+                                    local rOwner = GetRemote("SetOwner")
+                                    local rDestroy = GetRemote("DestroyGrab")
+                                    if rCreate and rOwner and rDestroy then
+                                        rCreate:FireServer(part, part.CFrame) 
+                                        rOwner:FireServer(part, part.CFrame)
+                                        rDestroy:FireServer(part) 
+                                    end
+                                    
+                                    -- [REMOVED] Highlight (Mint Chams) removal
+                                    -- [ADDED] Tracer immediately (Optional, but looks cool)
+                                    UpdateTracer(part, State.Target)
+                                end
+                            else
+                                State.ProcessedBombs[bomb] = true
+                                task.spawn(function()
+                                    task.wait(0.2) 
+                                    RunMissileLogic(bomb) 
+                                end)
+                            end
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- ìžë™ ì†Œí™˜
+task.spawn(function()
+    while true do
+        if State.AutoSpawnEnabled and plr.Character then
+            local rSpawn = GetRemote("Spawn")
+            if rSpawn then
+                rSpawn:InvokeServer("BombMissile", plr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0), Vector3.zero)
+            end
+        end
+        task.wait(0.2)
+    end
+end)
+
+-- ìˆ˜ë™ ë°œì‚¬ (Fixed)
+LaunchBtn.MouseButton1Click:Connect(function()
+    local rSpawn = GetRemote("Spawn")
+    if rSpawn and plr.Character then
+        rSpawn:InvokeServer("BombMissile", plr.Character.HumanoidRootPart.CFrame * CFrame.new(0, 15, 0), Vector3.zero)
+    end
+    
+    if not State.OrbitEnabled then
+        if not State.Target and not State.RandomMode then 
+            StatusLabel.Text = "Select Target First!" 
+            return 
+        end
+        
+        task.spawn(function()
+            task.wait(0.5) 
+            local folder = workspace:FindFirstChild(plr.Name .. "SpawnedInToys")
+            if folder then
+                for _, bomb in pairs(folder:GetChildren()) do
+                    if bomb.Name == "BombMissile" and not State.ProcessedBombs[bomb] then
+                        State.ProcessedBombs[bomb] = true
+                        RunMissileLogic(bomb)
+                    end
+                end
+            end
+        end)
+    end
+end)
+
+-- ë¦¬ìŠ¤íŠ¸
+local function RefreshList()
+    for _, v in pairs(Scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
+    for _, p in pairs(players:GetPlayers()) do
+        if p ~= plr then 
+            local b = Instance.new("TextButton", Scroll)
+            b.Size = UDim2.new(1, -10, 0, 40)
+            b.Text = p.DisplayName
+            b.BackgroundColor3 = (State.Target == p) and Color3.fromRGB(0, 150, 200) or Color3.fromRGB(45, 45, 55)
+            b.TextColor3 = Color3.new(1, 1, 1)
+            b.Font = Enum.Font.GothamBold
+            b.TextSize = 16
+            Instance.new("UICorner", b).CornerRadius = UDim.new(0, 8)
+            b.MouseButton1Click:Connect(function() 
+                State.Target = p 
+                StatusLabel.Text = "Target: " .. p.DisplayName
+                RefreshList() 
+            end)
+        end
+    end
+end
+
+players.PlayerAdded:Connect(RefreshList)
+players.PlayerRemoving:Connect(RefreshList)
+CloseBtn.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
+
+RefreshList()

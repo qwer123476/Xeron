@@ -70,11 +70,12 @@ local function TeleportTo(coordinate)
     end
 end
 
-local TeleportTab = Window:CreateTab("이동", 4483362458)
-local AutoTab = Window:CreateTab("자동", 4483362458)
-local PlayerTab = Window:CreateTab("캐릭터", 4483362458)
-local PVPTab = Window:CreateTab("결투", 4483362458)
-local UtilityTab = Window:CreateTab("편의", 4483362458)
+local TeleportTab = Window:CreateTab("TP", 4483362458)
+local AutoTab = Window:CreateTab("오토팜", 4483362458)
+local PlayerTab = Window:CreateTab("플레이어", 4483362458)
+local PVPTab = Window:CreateTab("PVP", 4483362458)
+local UtilityTab = Window:CreateTab("안전", 4483362458)
+TeleportTab:CreateLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
 
 TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
@@ -91,7 +92,6 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-AutoTab:CreateLabel("모든 오토팜은 딜레이가 제거되어있으니 주의하세요!")
 
 AutoTab:CreateSection("무기 설정")
 
@@ -217,7 +217,8 @@ AutoTab:CreateToggle({
    end,
 })
 
-AutoTab:CreateSection("뽑기 설정")
+AutoTab:CreateSection("일반 뽑기 설정")
+AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
@@ -225,13 +226,18 @@ local AutoGachaEnabled = false
 local LockPositionGacha = Vector3.new(-13.59, 10.44, -34.07)
 local LockConnectionGacha = nil
 
-AutoTab:CreateButton({ Name = "1회", Callback = function() SelectedGachaCount = 1 end })
-AutoTab:CreateButton({ Name = "10회", Callback = function() SelectedGachaCount = 10 end })
-AutoTab:CreateButton({ Name = "100회", Callback = function() SelectedGachaCount = 100 end })
-AutoTab:CreateButton({ Name = "500회", Callback = function() SelectedGachaCount = 500 end })
+local function SetGachaCount(count)
+   SelectedGachaCount = count
+   Rayfield:Notify({ Title = "알림", Content = "일반 뽑기 횟수: " .. count .. "회 설정됨", Duration = 2, Image = 4483362458 })
+end
+
+AutoTab:CreateButton({ Name = "1회", Callback = function() SetGachaCount(1) end })
+AutoTab:CreateButton({ Name = "10회", Callback = function() SetGachaCount(10) end })
+AutoTab:CreateButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
+AutoTab:CreateButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
 
 AutoTab:CreateInput({
-   Name = "뽑기 속도 (딜레이)",
+   Name = "일반 뽑기 속도 (딜레이)",
    PlaceholderText = "0.1",
    RemoveTextAfterFocusLost = false,
    Callback = function(Text)
@@ -241,7 +247,7 @@ AutoTab:CreateInput({
 })
 
 AutoTab:CreateToggle({
-   Name = "오토 뽑기",
+   Name = "오토 일반 뽑기",
    CurrentValue = false,
    Flag = "AutoGachaToggle",
    Callback = function(Value)
@@ -269,6 +275,67 @@ AutoTab:CreateToggle({
          end)
       else
          if LockConnectionGacha then LockConnectionGacha:Disconnect(); LockConnectionGacha = nil end
+      end
+   end,
+})
+
+AutoTab:CreateSection("골든 뽑기 설정")
+
+local SelectedGoldenGachaCount = 1
+local GoldenGachaDelay = 0.1
+local AutoGoldenGachaEnabled = false
+local LockPositionGoldenGacha = Vector3.new(252.78, -375.19, 154.25)
+local LockConnectionGoldenGacha = nil
+
+local function SetGoldenGachaCount(count)
+   SelectedGoldenGachaCount = count
+   Rayfield:Notify({ Title = "알림", Content = "골든 뽑기 횟수: " .. count .. "회 설정됨", Duration = 2, Image = 4483362458 })
+end
+
+AutoTab:CreateButton({ Name = "골든 1회", Callback = function() SetGoldenGachaCount(1) end })
+AutoTab:CreateButton({ Name = "골든 10회", Callback = function() SetGoldenGachaCount(10) end })
+AutoTab:CreateButton({ Name = "골든 100회", Callback = function() SetGoldenGachaCount(100) end })
+AutoTab:CreateButton({ Name = "골든 500회", Callback = function() SetGoldenGachaCount(500) end })
+
+AutoTab:CreateInput({
+   Name = "골든 뽑기 속도 (딜레이)",
+   PlaceholderText = "0.1",
+   RemoveTextAfterFocusLost = false,
+   Callback = function(Text)
+      local num = tonumber(Text)
+      if num and num >= 0 then GoldenGachaDelay = num else GoldenGachaDelay = 0.1 end
+   end,
+})
+
+AutoTab:CreateToggle({
+   Name = "오토 골든 뽑기",
+   CurrentValue = false,
+   Flag = "AutoGoldenGachaToggle",
+   Callback = function(Value)
+      AutoGoldenGachaEnabled = Value
+      if AutoGoldenGachaEnabled then
+         LockConnectionGoldenGacha = RunService.RenderStepped:Connect(function()
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+               local hrp = character.HumanoidRootPart
+               hrp.CFrame = CFrame.new(LockPositionGoldenGacha)
+               hrp.AssemblyLinearVelocity = Vector3.zero
+               hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+         end)
+
+         task.spawn(function()
+            while AutoGoldenGachaEnabled do
+               CentralEvent:FireServer("GachaRequest", "\234\179\168\235\147\160\235\189\145\234\184\176", SelectedGoldenGachaCount)
+               if GoldenGachaDelay > 0 then
+                  task.wait(GoldenGachaDelay)
+               else
+                  RunService.RenderStepped:Wait()
+               end
+            end
+         end)
+      else
+         if LockConnectionGoldenGacha then LockConnectionGoldenGacha:Disconnect(); LockConnectionGoldenGacha = nil end
       end
    end,
 })

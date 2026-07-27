@@ -217,6 +217,39 @@ AutoTab:CreateToggle({
    end,
 })
 
+local ClientStatSpoofEnabled = false
+AutoTab:CreateToggle({
+   Name = "클라이언트 모듈/스탯 후킹 (라이벌 우회 방식)",
+   CurrentValue = false,
+   Flag = "ClientModuleSpoof",
+   Callback = function(Value)
+      ClientStatSpoofEnabled = Value
+      if ClientStatSpoofEnabled then
+         task.spawn(function()
+            while ClientStatSpoofEnabled do
+               -- 게임 내 메모리(GC)를 스캔하여 모듈 테이블의 수치를 실시간으로 강제 조작
+               for _, v in pairs(getgc(true)) do
+                  if type(v) == "table" then
+                     pcall(function()
+                        if rawget(v, "ShootCooldown") then rawset(v, "ShootCooldown", 0) end
+                        if rawget(v, "QuickShotCooldown") then rawset(v, "QuickShotCooldown", 0) end
+                        if rawget(v, "Cooldown") then rawset(v, "Cooldown", 0) end
+                        if rawget(v, "Delay") then rawset(v, "Delay", 0) end
+                        if rawget(v, "AttackDelay") then rawset(v, "AttackDelay", 0) end
+                        if rawget(v, "ShootSpread") then rawset(v, "ShootSpread", 0) end
+                        if rawget(v, "ShootRecoil") then rawset(v, "ShootRecoil", 0) end
+                        if rawget(v, "ProjectileSpeed") then rawset(v, "ProjectileSpeed", 99999999) end
+                     end)
+                  end
+               end
+               task.wait(2) -- 무기가 새로 장착되거나 새 모듈이 로드될 때를 대비해 주기적으로 덮어씌움
+            end
+         end)
+         Rayfield:Notify({Title="모듈 후킹 켜짐", Content="메모리 내의 무기 스탯(쿨타임, 반동 등)을 강제 변조합니다.", Duration=3, Image=4483362458})
+      end
+   end,
+})
+
 AutoTab:CreateSection("일반 뽑기 설정")
 AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 
@@ -645,7 +678,7 @@ UtilityTab:CreateToggle({
                if character and character:FindFirstChildOfClass("Humanoid") then
                   character:FindFirstChildOfClass("Humanoid"):ChangeState(Enum.HumanoidStateType.Jumping)
                end
-               task.wait(300)
+               task.wait(180)
             end
          end)
       else

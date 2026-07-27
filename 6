@@ -42,7 +42,7 @@ local Window = Rayfield:CreateWindow({
     ConfigurationSaving = { Enabled = false, FolderName = nil, FileName = "Config" }
 })
 
-local LocalPlayer = game.Players.LocalPlayer
+local LocalPlayer = game:GetService("Players").LocalPlayer
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Lighting = game:GetService("Lighting")
@@ -51,32 +51,26 @@ local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
-pcall(function()
-    local oldFireServer
-    oldFireServer = hookfunction(CentralEvent.FireServer, function(self, ...)
-        local args = {...}
-        if self == CentralEvent and args[1] == "ToolClick" then
-            args[3] = 0
-            args[4] = 0
-        end
-        return oldFireServer(self, unpack(args))
-    end)
-end)
-
-pcall(function()
-    local mt; mt = hookmetamethod(game, "__namecall", function(self, ...)
-        local method = getnamecallmethod()
-        if self == CentralEvent and method == "FireServer" then
-            local args = {...}
-            if args[1] == "ToolClick" then
-                args[3] = 0
-                args[4] = 0
+-- 클라이언트 측 쿨타임 변수 무력화 (서버 검증은 통과하도록 변조 없이 로컬 제한만 해제)
+local function BypassLocalCooldowns(tool)
+    if not tool then return end
+    for _, obj in ipairs(tool:GetDescendants()) do
+        if obj:IsA("ValueBase") then
+            local n = obj.Name:lower()
+            if n:find("cooldown") or n:find("cd") or n:find("delay") or n:find("time") or n:find("wait") then
+                pcall(function() obj.Value = 0 end)
             end
-            return mt(self, unpack(args))
         end
-        return mt(self, ...)
-    end)
-end)
+        pcall(function()
+            for attr, _ in pairs(obj:GetAttributes()) do
+                local al = attr:lower()
+                if al:find("cooldown") or al:find("cd") or al:find("delay") or al:find("time") then
+                    obj:SetAttribute(attr, 0)
+                end
+            end
+        end)
+    end
+end
 
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -105,6 +99,8 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
+AutoTab:CreateLabel("안전한 정밀 타격 오토팜 (서버 밴 방지)")
+
 AutoTab:CreateSection("무기 설정")
 
 local SelectedWeapon = ""
@@ -119,6 +115,7 @@ AutoTab:CreateButton({
          local tool = character:FindFirstChildOfClass("Tool")
          if tool then
             SelectedWeapon = tool.Name
+            BypassLocalCooldowns(tool) -- 로컬 쿨타임 무력화
             Rayfield:Notify({ Title = "완료", Content = "무기 등록됨: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
          else
             Rayfield:Notify({ Title = "실패", Content = "무기를 장착해주세요.", Duration = 2.5, Image = 4483362458 })
@@ -138,7 +135,7 @@ AutoTab:CreateInput({
 })
 
 AutoTab:CreateToggle({
-   Name = "오토팜",
+   Name = "안전 오토팜 (Tool:Activate + 리모트 연사)",
    CurrentValue = false,
    Flag = "AutoAttackToggle",
    Callback = function(Value)
@@ -147,9 +144,18 @@ AutoTab:CreateToggle({
          task.spawn(function()
             while AutoAttackEnabled do
                if SelectedWeapon ~= "" then
-                  pcall(function()
-                     CentralEvent:FireServer("ToolClick", SelectedWeapon, 0, 0)
-                  end)
+                  local character = LocalPlayer.Character
+                  if character then
+                     local tool = character:FindFirstChild(SelectedWeapon)
+                     if tool then
+                        -- 서버에서 인정하는 가장 안전하고 빠른 타격 방법
+                        tool:Activate()
+                        pcall(function()
+                           -- 변조된 값이 아닌 정상적인 구조로 리모트를 전송하여 돈이 들어오게 유도
+                           CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
+                        end)
+                     end
+                  end
                end
                if AttackDelay > 0 then
                   task.wait(AttackDelay)
@@ -209,7 +215,9 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGachaEnabled do
-               CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
+               pcall(function()
+                  CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
+               end)
                if GachaDelay > 0 then
                   task.wait(GachaDelay)
                else
@@ -270,12 +278,14 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGoldenGachaEnabled do
-               local args = {
-                  "GachaRequest",
-                  "\234\179\168\235\147\160\235\189\145\234\184\176",
-                  SelectedGoldenGachaCount
-               }
-               CentralEvent:FireServer(unpack(args))
+               pcall(function()
+                  local args = {
+                     "GachaRequest",
+                     "\234\179\168\235\147\160\235\189\145\234\184\176",
+                     SelectedGoldenGachaCount
+                  }
+                  CentralEvent:FireServer(unpack(args))
+               end)
                if GoldenGachaDelay > 0 then
                   task.wait(GoldenGachaDelay)
                else

@@ -51,6 +51,33 @@ local VirtualUser = game:GetService("VirtualUser")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
+pcall(function()
+    local oldFireServer
+    oldFireServer = hookfunction(CentralEvent.FireServer, function(self, ...)
+        local args = {...}
+        if self == CentralEvent and args[1] == "ToolClick" then
+            args[3] = 0
+            args[4] = 0
+        end
+        return oldFireServer(self, unpack(args))
+    end)
+end)
+
+pcall(function()
+    local mt; mt = hookmetamethod(game, "__namecall", function(self, ...)
+        local method = getnamecallmethod()
+        if self == CentralEvent and method == "FireServer" then
+            local args = {...}
+            if args[1] == "ToolClick" then
+                args[3] = 0
+                args[4] = 0
+            end
+            return mt(self, unpack(args))
+        end
+        return mt(self, ...)
+    end)
+end)
+
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coordinate)
@@ -78,102 +105,11 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-AutoTab:CreateLabel("서버 쿨타임 강제 우회 및 무력화 적용됨")
-
 AutoTab:CreateSection("무기 설정")
 
 local SelectedWeapon = ""
 local AttackDelay = 0.1
 local AutoAttackEnabled = false
-
-local function deepBypass(obj)
-    if not obj then return end
-    pcall(function()
-        if obj:IsA("ValueBase") then
-            local n = obj.Name:lower()
-            if n:find("cooldown") or n:find("cd") or n:find("delay") or n:find("time") or n:find("wait") or n:find("last") then
-                obj.Value = 0
-            end
-        elseif obj:IsA("TextLabel") or obj:IsA("TextBox") then
-            if obj.Text:find("쿨타임") or obj:IsA("TextLabel") then
-                obj.Text = "쿨타임: 0초"
-            end
-        end
-        for _, attr in ipairs({obj:GetAttributes()}) do
-            for k, _ in pairs(attr) do
-                local kl = k:lower()
-                if kl:find("cooldown") or kl:find("cd") or kl:find("delay") or kl:find("time") or kl:find("last") then
-                    obj:SetAttribute(k, 0)
-                end
-            end
-        end
-    end)
-end
-
-local function scanAll(parent)
-    if not parent then return end
-    deepBypass(parent)
-    for _, child in ipairs(parent:GetDescendants()) do
-        deepBypass(child)
-    end
-end
-
-scanAll(workspace)
-scanAll(ReplicatedStorage)
-if LocalPlayer:FindFirstChild("PlayerGui") then scanAll(LocalPlayer.PlayerGui) end
-if LocalPlayer.Character then scanAll(LocalPlayer.Character) end
-
-workspace.DescendantAdded:Connect(deepBypass)
-ReplicatedStorage.DescendantAdded:Connect(deepBypass)
-if LocalPlayer:FindFirstChild("PlayerGui") then
-    LocalPlayer.PlayerGui.DescendantAdded:Connect(deepBypass)
-end
-LocalPlayer.CharacterAdded:Connect(function(char)
-    scanAll(char)
-    char.DescendantAdded:Connect(deepBypass)
-end)
-
-local realFireServer = nil
-local mtHook; mtHook = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    if rawequal(self, CentralEvent) and method == "FireServer" then
-        local args = {...}
-        if args[1] == "ToolClick" then
-            args[3] = 999999
-            args[4] = 0
-        end
-        return mtHook(self, unpack(args))
-    end
-    return mtHook(self, ...)
-end)
-
-local oldIndex; oldIndex = hookmetamethod(game, "__index", function(self, k)
-    if rawequal(self, CentralEvent) and k == "FireServer" then
-        return function(_, ...)
-            local args = {...}
-            if args[1] == "ToolClick" then
-                args[3] = 999999
-                args[4] = 0
-            end
-            return realFireServer(CentralEvent, unpack(args))
-        end
-    end
-    return oldIndex(self, k)
-end)
-
-pcall(function()
-    realFireServer = hookfunction(CentralEvent.FireServer, function(self, ...)
-        if rawequal(self, CentralEvent) then
-            local args = {...}
-            if args[1] == "ToolClick" then
-                args[3] = 999999
-                args[4] = 0
-            end
-            return realFireServer(self, unpack(args))
-        end
-        return realFireServer(self, ...)
-    end)
-end)
 
 AutoTab:CreateButton({
    Name = "오토팜 무기 등록(장착한 무기)",
@@ -183,7 +119,6 @@ AutoTab:CreateButton({
          local tool = character:FindFirstChildOfClass("Tool")
          if tool then
             SelectedWeapon = tool.Name
-            scanAll(tool)
             Rayfield:Notify({ Title = "완료", Content = "무기 등록됨: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
          else
             Rayfield:Notify({ Title = "실패", Content = "무기를 장착해주세요.", Duration = 2.5, Image = 4483362458 })
@@ -212,13 +147,8 @@ AutoTab:CreateToggle({
          task.spawn(function()
             while AutoAttackEnabled do
                if SelectedWeapon ~= "" then
-                  local myChar = LocalPlayer.Character
-                  if myChar then
-                     local tool = myChar:FindFirstChild(SelectedWeapon)
-                     if tool then scanAll(tool) end
-                  end
                   pcall(function()
-                     CentralEvent:FireServer("ToolClick", SelectedWeapon, 999999, 0)
+                     CentralEvent:FireServer("ToolClick", SelectedWeapon, 0, 0)
                   end)
                end
                if AttackDelay > 0 then
@@ -340,7 +270,12 @@ AutoTab:CreateToggle({
 
          task.spawn(function()
             while AutoGoldenGachaEnabled do
-               CentralEvent:FireServer("GachaRequest", "\234\179\168\235\147\160\235\189\145\234\184\176", SelectedGoldenGachaCount)
+               local args = {
+                  "GachaRequest",
+                  "\234\179\168\235\147\160\235\189\145\234\184\176",
+                  SelectedGoldenGachaCount
+               }
+               CentralEvent:FireServer(unpack(args))
                if GoldenGachaDelay > 0 then
                   task.wait(GoldenGachaDelay)
                else
@@ -560,7 +495,6 @@ local BackupLighting = {
    FogEnd = Lighting.FogEnd,
    OutdoorAmbient = Lighting.OutdoorAmbient
 }
-local Conns = {}
 
 UtilityTab:CreateToggle({
    Name = "안티 렉",

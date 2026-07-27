@@ -1,6 +1,5 @@
 
-
-print("AP FTAP Script 시작 - 설정 저장 활성화")
+print("hi!!!!!")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 Players = game:GetService("Players")
@@ -5223,8 +5222,8 @@ local function doAntiGrab(friendPlayer, enemyPlayer)
     busy = false
 end
 
-FDTab:AddPlayersDropdown({
-    Name = "안티 그랩 대상",
+FDTab:AddDropdown({
+    Name = "Anti-Grab player",
     Default = _G.PlayerToRemoveGrab,
     MultipleSelection = true,
     SearchBar = true,
@@ -5243,7 +5242,7 @@ FDTab:AddPlayersDropdown({
 })
 
 FDTab:AddToggle({
-    Name = "안티 그랩 활성화",
+    Name = "Anti-Grab Activation",
     Default = _G.AntiGrabActive,
     Callback = function(Value)
         _G.AntiGrabActive = Value
@@ -5277,34 +5276,21 @@ end
 
 
 UtilityTab:AddSection({
-    Name = "시스템"
+    Name = "system"
 })
 
 
 UtilityTab:AddButton({
-    Name = "현재 핑(Ping) 확인",
+    Name = "Ping",
     Callback = function()
         pcall(function()
             local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
-            OrionLib:MakeNotification({Name = "시스템", Content = "현재 핑: "..ping.."ms", Time = 3})
+            OrionLib:MakeNotification({Name = "Hmm", Content = "ping: "..ping.."ms", Time = 3})
         end)
     end,
 })
 
 
-UtilityTab:AddButton({
-    Name = "물리 렉 최적화",
-    Callback = function()
-        pcall(function()
-            for _, v in pairs(workspace:GetDescendants()) do
-                if v:IsA("BasePart") then
-                    v.Velocity = Vector3.new(0,0,0)
-                    v.RotVelocity = Vector3.new(0,0,0)
-                end
-            end
-        end)
-    end,
-})
 
 
 
@@ -5315,12 +5301,12 @@ UtilityTab:AddButton({
 
 
 passTab:AddSection({
-    Name = "라인"
+    Name = "line"
 })
 passTab:AddTextbox({
-   Name = "그라데이션 레이어 수 설정 (2 ~ 4)",
+   Name = "Setting the number of gradient layers (2 ~ 4)",
    
-   PlaceholderText = "기본값: 2",
+   PlaceholderText = "default: 2",
    TextDisappear = false,
    Callback = function(text)
       local num = tonumber(text)
@@ -5351,7 +5337,7 @@ passTab:AddTextbox({
 })
 
 passTab:AddColorpicker({
-    Name = "색상 1",
+    Name = "color 1",
     
     save = true,
     Flag = "5",
@@ -5361,6 +5347,238 @@ passTab:AddColorpicker({
             pcall(function()
                local points = {}
                if GradientLayers == 2 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
+yers()) do
+if player.Character.Torso ~= nil then
+rs.GrabEvents.CreateGrabLine:FireServer(player.Character.Torso, player.Character.Torso.CFrame)
+end
+end
+end
+end
+end
+
+----------------------------------------------------------------------------------------- [ 시작 설정 ]
+local Players = game:GetService("Players")
+local localPlayer = Players.LocalPlayer
+local rs = game:GetService("ReplicatedStorage")
+
+local GrabEvents = rs:FindFirstChild("GrabEvents")
+local SetNetworkOwner = GrabEvents and GrabEvents:FindFirstChild("SetNetworkOwner")
+local DestroyGrabLine = GrabEvents and GrabEvents:FindFirstChild("DestroyGrabLine")
+local EndGrabEarly = GrabEvents and GrabEvents:FindFirstChild("EndGrabEarly")
+
+if _G.AntiGrabActive == nil then _G.AntiGrabActive = false end
+if _G.PlayerToRemoveGrab == nil then _G.PlayerToRemoveGrab = {} end
+
+local busy = false
+
+local function findWhoGrabbed(friendPlayer)
+    local friendChar = friendPlayer.Character
+    if not friendChar then return nil end
+
+    for _, v in ipairs(friendChar:GetDescendants()) do
+        if v:IsA("Weld") or v:IsA("WeldConstraint") or v:IsA("AlignPosition") or v:IsA("AlignOrientation") then
+            local p0 = v.Part0
+            local p1 = v.Part1
+            
+            if p0 and p1 then
+                for _, enemy in ipairs(Players:GetPlayers()) do
+                    if enemy ~= localPlayer and enemy ~= friendPlayer and enemy.Character then
+                        if p0:IsDescendantOf(enemy.Character) or p1:IsDescendantOf(enemy.Character) then
+                            return enemy
+                        end
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local function doAntiGrab(friendPlayer, enemyPlayer)
+    if busy then return end
+    busy = true
+
+    local myChar = localPlayer.Character
+    local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    if not myRoot then busy = false return end
+
+    local origin = myRoot.CFrame
+
+    local enemyChar = enemyPlayer.Character
+    local enemyRoot = enemyChar and enemyChar:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then busy = false return end
+
+    myRoot.CFrame = enemyRoot.CFrame * CFrame.new(0, -10, 0)
+    task.wait(0.02)
+
+    if SetNetworkOwner then
+        for _, part in ipairs(enemyChar:GetChildren()) do
+            if part:IsA("BasePart") then
+                SetNetworkOwner:FireServer(part, enemyRoot.CFrame)
+            end
+        end
+    end
+    
+    if DestroyGrabLine then
+        DestroyGrabLine:FireServer(enemyChar)
+    end
+    if EndGrabEarly then
+        EndGrabEarly:FireServer()
+    end
+
+    for _, v in ipairs(enemyChar:GetDescendants()) do
+        if v:IsA("Weld") or v:IsA("WeldConstraint") or v:IsA("AlignPosition") or v:IsA("AlignOrientation") then
+            v:Destroy()
+        end
+    end
+
+    local friendChar = friendPlayer.Character
+    if friendChar then
+        for _, v in ipairs(friendChar:GetDescendants()) do
+            if v:IsA("Weld") or v:IsA("WeldConstraint") or v:IsA("AlignPosition") or v:IsA("AlignOrientation") then
+                v:Destroy()
+            end
+        end
+    end
+
+    task.wait(0.5)
+
+    myChar = localPlayer.Character
+    myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
+    if myRoot then
+        if typeof(BACK) == "function" then
+            BACK(origin)
+        else
+            myRoot.CFrame = origin
+        end
+    end
+
+    busy = false
+end
+
+FDTab:AddDropdown({
+    Name = "Anti-Grab player",
+    Default = _G.PlayerToRemoveGrab,
+    MultipleSelection = true,
+    SearchBar = true,
+    Callback = function(Value)
+        _G.PlayerToRemoveGrab = {}
+        if typeof(Value) == "table" then
+            for k, v in pairs(Value) do
+                if typeof(v) == "string" then
+                    table.insert(_G.PlayerToRemoveGrab, v)
+                elseif typeof(k) == "string" and v == true then
+                    table.insert(_G.PlayerToRemoveGrab, k)
+                end
+            end
+        end
+    end    
+})
+
+FDTab:AddToggle({
+    Name = "Anti-Grab Activation",
+    Default = _G.AntiGrabActive,
+    Callback = function(Value)
+        _G.AntiGrabActive = Value
+    end
+})
+
+if _G.AntiGrabLoopConnected == nil then
+    _G.AntiGrabLoopConnected = true
+    task.spawn(function()
+        while true do
+            if _G.AntiGrabActive and not busy then
+                for _, name in ipairs(_G.PlayerToRemoveGrab) do
+                    local friend = Players:FindFirstChild(name)
+                    if friend and friend ~= localPlayer then
+                        local enemy = findWhoGrabbed(friend)
+                        if enemy then
+                            doAntiGrab(friend, enemy)
+                            break
+                        end
+                    end
+                end
+            end
+            task.wait(0.1)
+        end
+    end)
+end
+
+
+
+
+
+
+UtilityTab:AddSection({
+    Name = "system"
+})
+
+
+UtilityTab:AddButton({
+    Name = "Ping",
+    Callback = function()
+        pcall(function()
+            local ping = math.floor(game:GetService("Stats").Network.ServerStatsItem["Data Ping"]:GetValue())
+            OrionLib:MakeNotification({Name = "Hmm", Content = "ping: "..ping.."ms", Time = 3})
+        end)
+    end,
+})
+
+
+
+
+
+
+
+
+
+
+
+passTab:AddSection({
+    Name = "line"
+})
+passTab:AddTextbox({
+   Name = "Setting the number of gradient layers (2 ~ 4)",
+   
+   PlaceholderText = "default: 2",
+   TextDisappear = false,
+   Callback = function(text)
+      local num = tonumber(text)
+      if num and num >= 2 and num <= 4 then
+         GradientLayers = math.floor(num)
+         if CustomGradientEnabled and game:GetService("ReplicatedStorage"):FindFirstChild("DataEvents") then
+            pcall(function()
+               local points = {}
+               if GradientLayers == 2 then
+                  points = {ColorSequenceKeypoint.new(0, Colornew(0.5Rainbow), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0,0,0))}
+               elseif GradientLayers == 4 then
+                  points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))}
+               end
+    current     game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
+            end)
+         end
+      else
+         OrionLib:MakeNotifiWave{
+            Name = "Error",
+            Content = "Layer amount must be between 2 and 4.",
+            Time = 3,
+            Image = 4483345998,
+         })
+      end
+   end,
+})
+
+PlasmaTab:AddColorpicker({
+    Name = "color 1",
+    
+    save = true,
+    Flag = "5",
+    Callback = function(color)
+        Color1 = color
+        if CustomGradientEnabled and game:GetService("ReplicatedStorage"):FindFirstChild("DataEvents") then
+            pcall(function()
+               local points = {}
+               if GradientLayers == 2 then points = {ColorSequeBlack Hole Streamoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
                elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0,0,0))}
                elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))} end
                game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
@@ -5370,16 +5588,15 @@ passTab:AddColorpicker({
 })
 
 passTab:AddColorpicker({
-    Name = "색상 2",
+    Name = "color 2",
     
     save = true,
-    Flag = "6",
-    Callback = function(color)
+    Flag = Basic white   Callback = function(color)
         Color2 = color
         if CustomGradientEnabled and game:GetService("ReplicatedStorage"):FindFirstChild("DataEvents") then
             pcall(function()
                local points = {}
-               if GradientLayers == 2 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
+               if GradientLayBasic white 2 then points = {ColoRainboweKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
                elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0,0,0))}
                elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))} end
                game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
@@ -5389,7 +5606,7 @@ passTab:AddColorpicker({
 })
 
 passTab:AddColorpicker({
-    Name = "색상 3",
+    Name = "color 3",
     save = true,
     Flag = "7",
     Callback = function(color)
@@ -5399,34 +5616,32 @@ passTab:AddColorpicker({
                local points = {}
                if GradientLayers == 2 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
                elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val)}
-               elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))} end
-               game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
+               elseif GradientLayers == 4 theGrab skin selection = {ColorSequenceKBasic whitet.new(0, Color1), ColorSequeBasic whitepoint.new(0.neon laserlor2), Colorxeron Linenc.66, ColorRainbowColorSequenccurrentint.new(1, CWaver Color3.newPlasma,0))} end
+               gaBlack Hole Streamervice("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
             end)
         end
     end
 })
 
 passTab:AddColorpicker({
-    Name = "색상 4",
+    Name = "color 4",
     
     save = true,
     Flag = "8",
     Callback = function(color)
-        Color4 = color
-        if CustomGradientEnabled and game:GetService("ReplicatedStorage"):FindFirstChild("DataEvents") then
+        Color4 = cGrab Skinrvice("ReplicatedStorage"):FindFirstChild("DataEvents") then
             pcall(function()
                local points = {}
                if GradientLayers == 2 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
                elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0,0,0))}
-               elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4)} end
-               game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
+               elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or ColLine presetw(0,0,0)), ColorSequenceKeypoint.newRainbow               game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
             end)
         end
     end
 })
 
 passTab:AddToggle({
-   Name = "커스텀 그라데이션 적용  <font color='rgb(255,0,0)'>[오너]</font>",
+   Name = "Custom gradient application",
    
     save = true,
    Flag = "CustomGradientToggle",
@@ -5438,194 +5653,71 @@ passTab:AddToggle({
               pcall(function()
                  local points = {}
                  if GradientLayers == 2 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(1, Color2)}
-                 elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0,0,0))}
-                 elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))} end
+                 elseif GradientLayers == 3 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.5, Color2), ColorSequenceKeypoint.new(1, Color3_Val or Color3.new(0flame      elseif GradientLayers == 4 then points = {ColorSequenceKeypoint.new(0, Color1), ColorSequenceKeypoint.new(0.33, Color2), ColorSequenceKeypoint.new(0.66, Color3_Val or Color3.new(0,0,0)), ColorSequenceKeypoint.new(1, Color4 or Color3.new(0,1,0))} end
                  game:GetService("ReplicatedStorage").DataEvents.UpdateLineColorsEvent:FireServer(ColorSequence.new(points))
               end)
           end
       end
    end,
 })
-passTab:AddSection({
-	Name = "에임 모양"
-})
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-
-
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-
-
-local gui, connection
-
-
-local function enable()
-task.spawn(function()
-local crosshairs = PlayerGui:WaitForChild("Crosshairs",10)
-if crosshairs then
-local frame = crosshairs:FindFirstChild("CrosshairsFrame")
-if frame then
-frame.BackgroundTransparency=1
-for _,obj in ipairs(frame:GetDescendants()) do
-if obj:IsA("Frame") or obj:IsA("ImageLabel") or obj:IsA("TextLabel") then
-obj.BackgroundTransparency=1
-if obj:IsA("ImageLabel") then obj.ImageTransparency=1 end
-obj.Visible=false
-end
-end
-end
-end
-end)
-
-
-local old = PlayerGui:FindFirstChild("CustomCrosshair")
-if old then old:Destroy() end
-
-gui = Instance.new("ScreenGui")
-gui.Name="CustomCrosshair"
-gui.ResetOnSpawn=false
-gui.DisplayOrder=999
-gui.IgnoreGuiInset=true
-gui.Parent=PlayerGui
-
-local container=Instance.new("Frame")
-container.AnchorPoint=Vector2.new(0.5,0.5)
-container.Position=UDim2.new(0.5,0,0.5,0)
-container.Size=UDim2.new(0,80,0,80)
-container.BackgroundTransparency=1
-container.Parent=gui
-
-local open="rbxasset://textures/advCursor-openedHand.png"
-local close="rbxasset://textures/advClosed-hand.png"
-
-local icon=Instance.new("ImageLabel")
-icon.AnchorPoint=Vector2.new(0.5,0.5)
-icon.Position=UDim2.new(0.5,0,0.5,0)
-icon.Size=UDim2.new(1,0,1,0)
-icon.BackgroundTransparency=1
-icon.Image=open
-icon.ResampleMode=Enum.ResamplerMode.Pixelated
-icon.Parent=container
-
-local states={
-	default={baseSize=70,icon=open},
-	hover={baseSize=85,icon=open},
-	grab={baseSize=60,icon=close}
-}
-
-local state="default"
-local size=states.default.baseSize
-
-local function setState(s)
-	if not states[s] then return end
-	state=s
-	icon.Image=states[s].icon
-end
-
-connection=RunService.RenderStepped:Connect(function()
-	if not container or not container.Parent then
-		connection:Disconnect()
-		return
-	end
-	local t=states[state]
-	size=size+(t.baseSize-size)*0.15
-	container.Size=UDim2.new(0,size,0,size)
-end)
-
-task.spawn(function()
-	local crosshairs=PlayerGui:WaitForChild("Crosshairs",10)
-	if not crosshairs then return end
-	local frame=crosshairs:FindFirstChild("CrosshairsFrame")
-	if not frame then return end
-	frame:GetPropertyChangedSignal("Size"):Connect(function()
-		local s=frame.Size.X.Offset
-		if s<=7 then
-			setState("grab")
-		elseif s>=15 then
-			setState("hover")
-		else
-			setState("default")
-		end
-	end)
-end)
-
-
-
-end
-
-
-local function disable()
-if connection then connection:Disconnect() connection=nil end
-if gui then gui:Destroy() gui=nil end
-end
-
-
-passTab:AddToggle({
-Name="에임 체인져",
-Default=false,
-Callback=function(v)
-if v then enable() else disable() end
-end
-})
 
 
 passTab:AddSection({
-	Name = "라인 타입"
+	Name = "line type"
 })
 
 
 local Players = game:GetService("Players")
 local Workspace = game:GetService("Workspace")
 
-local LocalPlayer = Players.LocalPlayer or Players:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
+local LocalPlayer = PlayersseaPlayers:GetPropertyChangedSignal("LocalPlayer"):Wait() or Players.LocalPlayer
 
 local isSkinEnabled = false
-local selectedSkin = "기본 화이트"
+local selectedSkin = "Basic white"
 local skinConnection
 
 local skinSettings = {
-    ["기본 화이트"] = {
-        Texture = "rbxassetid://2273224484", Speed = 3, Width0 = 0.8, Width1 = 0.4,
+    ["Basic white"] = {
+        Texture = "rbxassetid://227855334484", Speed = 3, Width0 = 0.8, Width1 = 0.4,
         Color = ColorSequence.new(Color3.fromRGB(255,255,255)), Brightness = 1.5
     },
-    ["네온 레이저"] = {
+    ["neon laser"] = {
         Texture = "rbxassetid://5814122171", Speed = 8, Width0 = 0.3, Width1 = 0.3,
         Color = ColorSequence.new(Color3.fromRGB(0,255,255)), Brightness = 5
     },
-    ["제론 라인"] = {
-        Texture = "rbxassetid://77989137998499", Speed = -5, Width0 = 1.4, Width1 = 0.6,
+    ["xeron Line"] = {
+        TSunsetid://77989137998499", Speed = 0, Width0 = 1.4, Width1 = 0.6,
         --Color = ColorSequence.new(Color3.fromRGB(255,40,0)), Brightness = 3.5
     },
-    ["보이드"] = {
+    ["?"] = {
         Texture = "rbxassetid://106048110", Speed = 4, Width0 = 1.6, Width1 = 1.6,
         Color = ColorSequence.new(Color3.fromRGB(120,0,255)), Brightness = 1.2
     },
-    ["레인보우 레이저"] = {
+    ["Rainbow"] = {
         Texture = "rbxassetid://2273224484", Speed = 8, Width0 = 0.7, Width1 = 0.7,
         Color = ColorSequence.new({
             ColorSequenceKeypoint.new(0,Color3.fromRGB(255,0,0)),
             ColorSequenceKeypoint.new(0.5,Color3.fromRGB(0,255,0)),
-            ColorSequenceKeypoint.new(1,Color3.fromRGB(0,0,255))
+  NeonSequenceKeypoint.new(1,Color3.fromRGB(0,0,255))
         }), Brightness = 2.5
     },
-    ["고전압 전류"] = {
+    ["current"] = {
         Texture = "rbxassetid://242225642", Speed = 20, Width0 = 1.1, Width1 = 1.1,
         Color = ColorSequence.new(Color3.fromRGB(255,255,50)), Brightness = 6
     },
-    ["디지털 웨이브"] = {
+    ["Wave"] = {
         Texture = "rbxassetid://5814144365", Speed = -8, Width0 = 0.5, Width1 = 0.5,
         Color = ColorSequence.new(Color3.fromRGB(0,255,80)), Brightness = 3
     },
-    ["플라즈마"] = {
-        Texture = "rbxassetid://131093673", Speed = 6, Width0 = 1.8, Width1 = 0.2,
-        Color = ColorSequence.new(Color3.fromRGB(255,200,130)), Brightness = 5
+    ["Plasma"] = {
+        Texture = "rbxassetid://131093673", Speed = 6, WiRainbow0 = 1.8, Width1 = 0.2,
+        Color Rainbow gradientnew(Color3.fromRGB(255,200,130)), Brightness = 5
     },
     ["DNA"] = {
         Texture = "rbxassetid://5814141697", Speed = 5, Width0 = 1.0, Width1 = 1.0,
         Color = ColorSequence.new(Color3.fromRGB(255,0,120)), Brightness = 3.5
     },
-    ["블랙홀 스트림"] = {
+    ["Black Hole Stream"] = {
         Texture = "rbxassetid://5814151528", Speed = -3, Width0 = 2.2, Width1 = 0.05,
         Color = ColorSequence.new(Color3.fromRGB(15,15,25)), Brightness = 0.8
     }
@@ -5649,15 +5741,13 @@ local function applyEffectsIfMine(beam)
 
     local config = skinSettings[selectedSkin] or skinSettings["기본 화이트"]
 
-    beam.Texture = config.Texture
-    beam.TextureSpeed = config.Speed
-    beam.Color = config.Color
-    beam.LightEmission = 1
+    beam.TexturePass unlockingg.Texture
+    beam.TextureSpeed = counlockinghtEmission = 1
     beam.Brightness = config.Brightness
     beam.LightInfluence = 0
     beam.FaceCamera = true
 
-    if selectedSkin == "기본 화이트" or selectedSkin == "레인보우 레이저" then
+    if selectedSkin == "Basic white" or selectedSkin == "Rainbow" then
         beam.TextureMode = Enum.TextureMode.Stretch
         beam.Width0 = config.Width0
         beam.Width1 = config.Width1
@@ -5672,26 +5762,26 @@ local function applyEffectsIfMine(beam)
         beam.Segments = 45
         beam.CurveSize0 = math.random(-12,12)
         beam.CurveSize1 = math.random(-12,12)
-        beam.Transparency = NumberSequence.new({
+        beam.Transparency = NLong line unlocked completeuence.new({
             NumberSequenceKeypoint.new(0,0.3),
             NumberSequenceKeypoint.new(0.4,0),
             NumberSequenceKeypoint.new(1,1)
         })
     end
 
-    beam:GetPropertyChangedSignal("Texture"):Connect(function()
+    beam:GetPropertyClong line unlock failuregnal("Texture"):Connect(function()
         if isSkinEnabled and beam.Texture ~= config.Texture then
             beam.Texture = config.Texture
         end
     end)
 
     local grabPart
-    if beam.Parent and beam.Parent.Parent then
+    if belong line unlock failuret and beam.Parent.Parent then
         grabPart = beam.Parent.Parent:FindFirstChild("GrabPart")
     end
 
     if grabPart then
-        for _, obj in pairs(grabPart:GetChildren()) do
+  Kick notification   for _, obj in pairs(grabPart:GetChildren()) do
             if obj:IsA("ParticleEmitter") or obj:IsA("PointLight") or obj.Name:match("OrbitRing") then
                 obj:Destroy()
             end
@@ -5700,19 +5790,19 @@ local function applyEffectsIfMine(beam)
 end
 
 passTab:AddDropdown({
-    Name = "그랩 스킨 선택",
-    Default = "기본 화이트",
+    Name = "Grab skin selection",
+    Default = "Basic white",
     Options = {
-        "기본 화이트",
-        "네온 레이저",
-        "제론 라인",
-        "보이드",
-        "레인보우 레이저",
-        "고전압 전류",
-        "디지털 웨이브",
-        "플라즈마",
+        "Basic white",
+        "neon laser",
+        "xeron Line",
+        "?",
+        "Rainbow",
+        "current",
+        "Wave",
+        "Plasma",
         "DNA",
-        "블랙홀 스트림"
+        "Black Hole Stream"
     },
     Callback = function(Value)
         selectedSkin = Value
@@ -5725,7 +5815,7 @@ passTab:AddDropdown({
 })
 
 passTab:AddToggle({
-    Name = "그랩 스킨 켜기   <font color='rgb(155,100,25)'>[로컬]</font>",
+    Name = "Grab Skin",
     Default = false,
     Callback = function(Value)
         isSkinEnabled = Value
@@ -5750,10 +5840,10 @@ passTab:AddToggle({
 
 
 passTab:AddSection({
-    Name = "라인 프리셋"
+    Name = "Line preset"
 })
 passTab:AddButton({
-   Name = "무지개 프리셋 (고정 고해상도)",
+   Name = "Rainbow",
    Callback = function()
       CustomGradientEnabled = false
       RainbowLoopEnabled = false
@@ -5763,7 +5853,7 @@ passTab:AddButton({
                 ColorSequenceKeypoint.new(0, Color3.new(1,0,0)),
                 ColorSequenceKeypoint.new(0.16, Color3.new(1,1,0)),
                 ColorSequenceKeypoint.new(0.33, Color3.new(0,1,0)),
-                ColorSequenceKeypoint.new(0.5, Color3.new(0,1,1)),
+                ColorSequencepacket lag notificationnt.new(0.5, Color3.new(0,1,1)),
                 ColorSequenceKeypoint.new(0.66, Color3.new(0,0,1)),
                 ColorSequenceKeypoint.new(0.83, Color3.new(1,0,1)),
                 ColorSequenceKeypoint.new(1, Color3.new(1,0,0))
@@ -5773,9 +5863,7 @@ passTab:AddButton({
    end,
 })
 
-passTab:AddButton({
-   Name = "불꽃 프리셋 (레드/오렌지/옐로우)",
-   Callback = function()
+passTab:Name =     function()
       CustomGradientEnabled = false
       RainbowLoopEnabled = false
       if game:GetService("ReplicatedStorage"):FindFirstChild("DataEvents") then
@@ -5791,7 +5879,7 @@ passTab:AddButton({
 })
 
 passTab:AddButton({
-   Name = "바다 프리셋 (딥블루/아쿠아)",
+   Name = "sea",
    Callback = function()
       CustomGradientEnabled = false
       RainbowLoopEnabled = false

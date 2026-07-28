@@ -160,19 +160,27 @@ do
 			})
 		end
 
-		function section:AddDropdown(ti)
-			local multi = (ti and ((ti.MultipleSelection == true) or (ti.Multi == true)))
-			local d = grp:AddDropdown(ti.Name or "Dropdown", {
-				Text = ti.Name or "Dropdown",
-				Values = ti.Options or {},
-				Default = ti.Default,
-				Multi = multi,
-				Callback = ti.Callback,
-			})
-			d = makeDropdownProxy(d)
-			ensureFlagObject(ti and ti.Flag, d)
+		local function makeDropdownProxy(d)
+		if type(d) ~= "table" then
 			return d
 		end
+		d.Set = function(_, v)
+			pcall(function() d:SetValue(v) end)
+		end
+		d.SetValue = function(_, v)
+			pcall(function() d:SetValue(v) end)
+		end
+		d.Get = function()
+			return d.Value
+		end
+		d.Refresh = function(_, values, keep)
+			pcall(function() d:SetValues(values or {}) end)
+			if not keep then
+				pcall(function() d:SetValue(nil) end)
+			end
+		end
+		return d
+	end
 
 		function section:AddSlider(ti)
 			local s = grp:AddSlider(ti.Name or "Slider", {

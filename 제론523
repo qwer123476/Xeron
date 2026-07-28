@@ -494,23 +494,7 @@ do
 				return makeLabelProxy(lbl)
 			end
 
-			function tabProxy:AddBind(ti)
-				local grp = getGroup(tabProxy)
-				local kp = grp:AddKeyPicker(ti.Name or "Bind", {
-					Text = ti.Name or "Bind",
-					Default = ti.Default,
-					Mode = ti.Hold and "Hold" or "Toggle",
-					Callback = ti.Callback,
-				})
-				pcall(function()
-					if type(kp) == "table" and kp.Set == nil and kp.SetValue ~= nil then
-						kp.Set = function(_, v) kp:SetValue(v) end
-					end
-				end)
-				ensureFlagObject(ti and ti.Flag, kp)
-				return kp
-			end
-
+			
 			function tabProxy:AddSection(ti)
 				local side = tabProxy._side or 1
 				local name = (typeof(ti) == "table" and ti.Name) or tostring(ti or "")
@@ -15389,16 +15373,7 @@ firework_section:AddDropdown({
     end
 })
 
-firework_section:AddBind({
-    Name = "트리거 폭탄",
-    Default = Enum.KeyCode.F,
-    Hold = true,
-    Callback = function()
-        if TriggerMode == 0 then
-            FireBomb = true
-        end
-    end
-})
+
 
 firework_section:AddDropdown({
     Name = "트리거 모드",
@@ -15451,7 +15426,7 @@ firework_section:AddDropdown({
     end
 })
 
-local PlayerToTarget = firework_section:AddPlayersDropdown({
+local PlayerToTarget = firework_section:AddDropdown({
     Name = "플레이어 고르기",
     Default = "",
     Options = {""},
@@ -15548,7 +15523,7 @@ task.spawn(function()
     end
 end)
 
-Window:AddConfigTab()
+--Window:AddConfigTab()
 LoadAll()
 
 

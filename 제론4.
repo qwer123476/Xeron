@@ -772,19 +772,19 @@ OrionLib.Themes.PatoSigma = {
 OrionLib.SelectedTheme = "PatoSigma"
 
     local Window = OrionLib:MakeWindow({
-        Name = "TKS Hub",
+        Name = "Xeron V4",
         HidePremium = false,
         SaveConfig = true,
-        ConfigFolder = "FunScript",
+        ConfigFolder = "Xeron",
         IntroEnabled = true,
         KeyToOpenWindow = "M",
         FreeMouse = true,
-        IntroText = "ã€Œ The King Scripts ã€",
-        IntroIcon = "rbxassetid://130521044774541",
-        SearchBar = {Default = "ðŸ” Search Everything"}
+        IntroText = "Xeron V4 ⚡️💎⚡️",
+        IntroIcon = "rbxassetid://77989137998499",
+        SearchBar = {Default = "제론입니다."}
     })
 
-
+--[[
 local services = {
     UserInputService = game:GetService("UserInputService"),
     RunService = game:GetService("RunService"),
@@ -882,7 +882,7 @@ _G.LoopKillBlobmanSelected = _G.LoopKillBlobmanSelected or {
     rightDetector = nil,
     weld = nil
 }
---[[]]
+
      vu1 = game:GetService("Players")
      vu14 = vu1.LocalPlayer
      vu8 = game:GetService("ReplicatedStorage")
@@ -899,7 +899,7 @@ _G.LoopKillBlobmanSelected = _G.LoopKillBlobmanSelected or {
     DeleteToyRE = game.ReplicatedStorage.MenuToys:FindFirstChild("DestroyToy")
     workspaceService = workspace
     U = services.UserInputService
-
+]]
 Players = game:GetService("Players")
 LocalPlayer = Players.LocalPlayer
 RunService = game:GetService("RunService")
@@ -15732,3 +15732,4 @@ SettingsSection:AddButton({
 
 
 end
+SaveManager:LoadAutoloadConfig()

@@ -975,6 +975,7 @@ end
 _G.ResetManager = ResetManager
 ResetManager:Start()
 
+do
 print("Xeron V4 ⚡️💎⚡️")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -1218,7 +1219,7 @@ function SpawnCFrame()
 
     return camPart
 end
-
+end
 G = rs.GrabEvents
 G:WaitForChild("EndGrabEarly"):Destroy()
 Instance.new("RemoteEvent", G).Name = "EndGrabEarly"

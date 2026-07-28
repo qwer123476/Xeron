@@ -15583,7 +15583,7 @@ else
 end
 end
 do
-__uiSafeBlock("UIcusTab", function()
+--__uiSafeBlock("UIcusTab", function()
 	ColorsSection = UIcusTab:AddSection({
 		Name = "Interface Colors"
 	})

@@ -5987,7 +5987,7 @@ local function doAntiGrab(friendPlayer, enemyPlayer)
     busy = false
 end
 
-FDTab:AddPlayersDropdown({
+FDTab:AddDropdown({
     Name = "안티 그랩 대상",
     Default = _G.PlayerToRemoveGrab,
     MultipleSelection = true,

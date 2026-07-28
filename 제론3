@@ -1,3 +1,4 @@
+do
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -974,7 +975,7 @@ end
 
 _G.ResetManager = ResetManager
 ResetManager:Start()
-
+end
 do
 print("Xeron V4 ⚡️💎⚡️")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

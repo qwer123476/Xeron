@@ -30,20 +30,36 @@ do
 		end,
 	})
 
-	local function safeNotify(title, content, time)
-		pcall(function()
-			Library:Notify({
-				Title = tostring(title or "Notification"),
-				Description = tostring(content or ""),
-				Time = tonumber(time) or 5,
-			})
-		end)
-	end
+	local function PlaySound(id)
+	local sound = Instance.new("Sound")
+	sound.SoundId = "rbxassetid://" .. id
+	sound.Volume = 2
+	sound.Parent = game:GetService("SoundService")
+	sound:Play()
 
-	function OrionLib:MakeNotification(info)
-		return safeNotify(info and (info.Name or info.Title), info and (info.Content or info.Description), info and info.Time)
-	end
+	game:GetService("Debris"):AddItem(sound, 3)
+end
 
+local function safeNotify(title, content, time)
+	pcall(function()
+		Library:Notify({
+			Title = tostring(title or "Notification"),
+			Description = tostring(content or ""),
+			Time = tonumber(time) or 5,
+		})
+
+		
+		PlaySound(6026984224)
+	end)
+end
+
+function OrionLib:MakeNotification(info)
+	return safeNotify(
+		info and (info.Name or info.Title),
+		info and (info.Content or info.Description),
+		info and info.Time
+	)
+end
 	local function getGroup(tabProxy)
 		if tabProxy._currentGroup then
 			return tabProxy._currentGroup

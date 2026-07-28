@@ -1,4 +1,5 @@
 do
+loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -787,18 +788,133 @@ OrionLib.Themes.PatoSigma = {
 OrionLib.SelectedTheme = "PatoSigma"
 
     local Window = OrionLib:MakeWindow({
-        Name = "Xeron V4",
+        Name = "TKS Hub",
         HidePremium = false,
         SaveConfig = true,
         ConfigFolder = "FunScript",
         IntroEnabled = true,
         KeyToOpenWindow = "M",
         FreeMouse = true,
-        IntroText = "Xeron V4⚡️",
+        IntroText = "ã€Œ The King Scripts ã€",
         IntroIcon = "rbxassetid://130521044774541",
         SearchBar = {Default = "ðŸ” Search Everything"}
     })
 
+
+local services = {
+    UserInputService = game:GetService("UserInputService"),
+    RunService = game:GetService("RunService"),
+    ReplicatedStorage = game:GetService("ReplicatedStorage"),
+    Players = game:GetService("Players"),
+    Workspace = game:GetService("Workspace"),
+    TweenService = game:GetService("TweenService"),
+    TextChatService = game:GetService("TextChatService"),
+    ContextActionService = game:GetService("ContextActionService"),
+    Camera = workspace.CurrentCamera
+}
+
+-- sigma.lua uses these as globals in a few places
+Players = services.Players
+LocalPlayer = services.Players.LocalPlayer
+
+ linguage = "pt-br"
+ function logMessage(_msg)
+
+end
+
+            local function isFriend(username)
+                local player = Players:FindFirstChild(username)
+                if player then
+                    local success, isFriendResult = pcall(function()
+                        return LocalPlayer:IsFriendsWith(player.UserId)
+                    end)
+                    return success and isFriendResult
+                end
+                return false
+            end
+
+localPlayer = services.Players.LocalPlayer
+localPlayerName = localPlayer.Name
+w = services.Workspace
+RunService = services.RunService
+
+
+ function IsNetworkOwner(part)
+    if not part or not part:IsA("BasePart") then return false end
+    local ok, owner = pcall(function()
+        return part:GetNetworkOwner()
+    end)
+    if not ok or owner == nil then return false end
+    return owner == localPlayer
+end
+
+local services2 = {
+	targetPlayer = services.Players,
+	rs = services.ReplicatedStorage,
+	lu = services.UserInputService,
+	plr = localPlayer,
+	CreateLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.CreateGrabLine,
+	DestroyLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.DestroyGrabLine,
+}
+
+
+local RE = {
+    SetNetworkOwner = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.SetNetworkOwner,
+    DestroyLine = services.ReplicatedStorage.GrabEvents and services.ReplicatedStorage.GrabEvents.DestroyGrabLine,
+}
+
+local localplayer = {
+    hentaipolice = 400,
+    hrp = nil,
+    Antigrab = false,
+    antifire = false,
+    antiexplode = false,
+    character = services.Players.LocalPlayer.Character,
+    IsHeld = services.Players.LocalPlayer.IsHeld,
+    humanoid = nil,
+    ExtinguishPart = (services.Workspace:FindFirstChild("Map")
+        and services.Workspace.Map:FindFirstChild("Hole", true)
+        and services.Workspace.Map.Hole:FindFirstChild("PoisonBigHole", true)
+        and services.Workspace.Map.Hole.PoisonBigHole:FindFirstChild("ExtinguishPart", true)) or nil,
+    UFO = nil,
+    isActive = false
+}
+
+pcall(function()
+	services.Players.LocalPlayer.CharacterAdded:Connect(function(c)
+		localplayer.character = c
+	end)
+end)
+
+_G.LoopKillBlobmanSelected = _G.LoopKillBlobmanSelected or {
+    enabled = false,
+    heartbeatConnection = nil,
+    currentTargetIndex = 1,
+    savedCFrame = nil,
+    cameraFixedCFrame = nil,
+    blobman = nil,
+    grab = nil,
+    release = nil,
+    rightDetector = nil,
+    weld = nil
+}
+--[[]]
+     vu1 = game:GetService("Players")
+     vu14 = vu1.LocalPlayer
+     vu8 = game:GetService("ReplicatedStorage")
+     vu4 = workspace
+     vu7 = game:GetService("UserInputService")
+     local _grabEvents = vu8:FindFirstChild("GrabEvents") or vu8:WaitForChild("GrabEvents", 5)
+     vu25 = _grabEvents and (_grabEvents:FindFirstChild("CreateGrabLine") or _grabEvents:WaitForChild("CreateGrabLine", 5)) or nil
+     vu26 = _grabEvents and (_grabEvents:FindFirstChild("DestroyGrabLine") or _grabEvents:WaitForChild("DestroyGrabLine", 5)) or nil
+     vu27 = _grabEvents and (_grabEvents:FindFirstChild("SetNetworkOwner") or _grabEvents:WaitForChild("SetNetworkOwner", 5)) or nil
+     vu28 = _grabEvents and (_grabEvents:FindFirstChild("ExtendGrabLine") or _grabEvents:WaitForChild("ExtendGrabLine", 5)) or nil
+     v33 = vu14:FindFirstChild("PlayerScripts") or vu14:WaitForChild("PlayerScripts", 5)
+     local _menuToys = vu8:FindFirstChild("MenuToys") or vu8:WaitForChild("MenuToys", 5)
+     BuyToy = _menuToys and (_menuToys:FindFirstChild("BuyToyRemoteFunction") or _menuToys:WaitForChild("BuyToyRemoteFunction", 5)) or nil
+    DeleteToyRE = game.ReplicatedStorage.MenuToys:FindFirstChild("DestroyToy")
+    workspaceService = workspace
+    U = services.UserInputService
 
 Players = game:GetService("Players")
 LocalPlayer = Players.LocalPlayer
@@ -940,142 +1056,6 @@ end
 
 _G.ResetManager = ResetManager
 ResetManager:Start()
-
---[[
-     local v448, vu449, vu450, vu451
-        _G.TP_Priority = 0
-    function ChangeActivityPriority(p185)
-        if _G.TP_Priority <= p185 then
-            _G.TP_Priority = p185
-            return true
-        end
-        if p185 == 0 then
-            _G.TP_Priority = p185
-            return true
-        end
-    end
-        function TeleportPlayer(p186, p187)
-        if (p187 == nil and 0 or p187) == _G.TP_Priority then
-            local v188 = GetPlayerCharacter()
-            if v188 and (not _G.TeleportingToNetworkOwnership and typeof(p186) == "CFrame") then
-                local v189 = v188.HumanoidRootPart
-                local v190 = v188:FindFirstChildOfClass("Humanoid")
-                v189.CFrame = v189.CFrame.Rotation + p186.Position
-                if v190.SeatPart == nil or tostring(v190.SeatPart.Parent) ~= "CreatureBlobman" then
-                    v190.Sit = false
-                end
-            end
-        end
-    end
-
-    function SNOWship(targetPart)
-        if targetPart and typeof(targetPart) == "Instance" then
-            local distanceFromCharacter = localPlayer:DistanceFromCharacter(targetPart.Position)
-            if localPlayer.Character and (localPlayer.Character:FindFirstChild("HumanoidRootPart") and distanceFromCharacter <= 30) then
-                setNetworkOwnerEvent:FireServer(targetPart, lookAt(localPlayer.Character.HumanoidRootPart.Position, targetPart.Position))
-            end
-        end
-    end
-
-_G.GetPlayerCharacter = function()
-    return game.Players.LocalPlayer.Character
-end
-
-_G.GetPlayerCFrame = function()
-    local char = _G.GetPlayerCharacter()
-    if char and char:FindFirstChild("HumanoidRootPart") then
-        return char.HumanoidRootPart.CFrame
-    end
-    return CFrame.new()
-end
-
-function _G.LoopKillBlobmanSelected.setupBlobman()
-    local success = false
-    pcall(function()
-         Players = game:GetService("Players")
-         LocalPlayer = Players.LocalPlayer
-         Char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-         HRP = Char:WaitForChild("HumanoidRootPart")
-
-        local Toys = workspace:FindFirstChild(LocalPlayer.Name .. "SpawnedInToys")
-        if not Toys then return end
-
-        local Blob = Toys:FindFirstChild("CreatureBlobman")
-        if not Blob then
-
-            if services.ReplicatedStorage:FindFirstChild("MenuToys") and services.ReplicatedStorage.MenuToys:FindFirstChild("SpawnToyRemoteFunction") then
-                services.ReplicatedStorage.MenuToys.SpawnToyRemoteFunction:InvokeServer("CreatureBlobman", HRP.CFrame, Vector3.new(0, -16.157, 0))
-                Blob = Toys:WaitForChild("CreatureBlobman", 3)
-            end
-        end
-        if not Blob then return end
-
-        _G.LoopKillBlobmanSelected.toys = Toys
-        _G.LoopKillBlobmanSelected.blobman = Blob
-        _G.LoopKillBlobmanSelected.grab = Blob.BlobmanSeatAndOwnerScript.CreatureGrab
-        _G.LoopKillBlobmanSelected.release = Blob.BlobmanSeatAndOwnerScript.CreatureRelease
-        _G.LoopKillBlobmanSelected.rightDetector = Blob.RightDetector
-        _G.LoopKillBlobmanSelected.weld = Blob.RightDetector.RightWeld
-
-        local Humanoid = Char:WaitForChild("Humanoid")
-        local Seat = Blob:WaitForChild("VehicleSeat", 2)
-        if Seat and Humanoid then
-            Seat:Sit(Humanoid)
-            task.wait(0.1)
-            if Seat.Occupant ~= Humanoid then
-                Seat:Sit(Humanoid)
-            end
-        end
-
-        success = true
-    end)
-    return success
-end
-
-function disconnectConnection(connection)
-    if connection then
-        connection:Disconnect()
-    end
-end
-]]
- 
- function createSafeToggle(name, default, callback)
-     isActive = default
-     connections = {}
-    
-    return function(value)
-        isActive = value
-        
-        for _, conn in pairs(connections) do
-            pcall(function() conn:Disconnect() end)
-        end
-        connections = {}
-        
-        if value then
-            local success, err = pcall(function()
-                callback(value)
-            end)
-            
-            if not success then
-                warn("Erro em " .. name .. ":", err)
-                return
-            end
-            
-            connections.respawn = LocalPlayer.CharacterAdded:Connect(function()
-                task.wait(0.3)
-                if isActive then
-                    pcall(function()
-                        callback(true)
-                    end)
-                end
-            end)
-        else
-            pcall(function()
-                callback(value)
-            end)
-        end
-    end
-end
 end
 do
 print("Xeron V4 ⚡️💎⚡️")
@@ -1376,17 +1356,6 @@ end
 
 
 
---[[
-local Window = OrionLib:MakeWindow({
-    Name = "Xeron V2 [ONWER]",
-    HidePremium = false,
-    SaveConfig = false,
-    ConfigFolder = "Xeron",
-	IntroIcon = "rbxassetid://77989137998499",   
-    IntroText = "Xeron V2",
-    IntroColor = Color3.fromRGB(0, 162, 255), 
-})
-]]
 
 local MyTab = Window:MakeTab({Name = "Xeron",Icon = "rbxassetid://77989137998499", PremiumOnly = false})
 local playerTab = Window:MakeTab({Name = "플레이어 설정", Icon = "rbxassetid://6034281935", PremiumOnly = false})    

@@ -914,7 +914,7 @@ _G.LoopKillBlobmanSelected = _G.LoopKillBlobmanSelected or {
     DeleteToyRE = game.ReplicatedStorage.MenuToys:FindFirstChild("DestroyToy")
     workspaceService = workspace
     U = services.UserInputService
-]]
+  ]]
 Players = game:GetService("Players")
 LocalPlayer = Players.LocalPlayer
 RunService = game:GetService("RunService")

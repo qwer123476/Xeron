@@ -26,7 +26,7 @@ do
 				Get = function() return nil end,
 			}
 			rawset(t, k, flag)
-			return flag
+			 flag
 		end,
 	})
 
@@ -70,7 +70,7 @@ end
 		local grp = (side == 1) and tabProxy._tab:AddLeftGroupbox(groupName) or tabProxy._tab:AddRightGroupbox(groupName)
 		tabProxy._side = (side == 1) and 2 or 1
 		tabProxy._currentGroup = grp
-		return grp
+		 grp
 	end
 
 	local function makeLabelProxy(lbl)
@@ -93,13 +93,13 @@ end
 		}
 		setmetatable(proxy, {
 			__index = function(_, k)
-				return t[k]
+				 t[k]
 			end,
 			__newindex = function(_, k, v)
 				t[k] = v
 			end,
 		})
-		return proxy
+		 proxy
 	end
 
 	local function makeDropdownProxy(d)
@@ -113,7 +113,7 @@ end
 			pcall(function() d:SetValue(v) end)
 		end
 		d.Get = function()
-			return d.Value
+			 d.Value
 		end
 		d.Refresh = function(_, values, keep)
 			pcall(function() d:SetValues(values or {}) end)
@@ -121,7 +121,7 @@ end
 				pcall(function() d:SetValue(nil) end)
 			end
 		end
-		return d
+		 d
 	end
 
 	local function ensureFlagObject(flagName, obj)
@@ -135,12 +135,12 @@ end
 		setmetatable(noop, {
 			__index = function(_, k)
 				if type(k) == "string" and k:sub(1, 3) == "Add" then
-					return function() return noop end
+					 function() return noop end
 				end
-				return nil
+				 nil
 			end,
 		})
-		return noop
+	 noop
 	end
 
 	local function makeSectionProxy(tabProxy, grp)
@@ -154,7 +154,7 @@ end
 			})
 			local proxy = makeToggleProxy(t)
 			ensureFlagObject(ti and ti.Flag, proxy)
-			return proxy
+			 proxy
 		end
 
 		function section:AddButton(ti)
@@ -175,7 +175,7 @@ end
 			})
 			d = makeDropdownProxy(d)
 			ensureFlagObject(ti and ti.Flag, d)
-			return d
+			 d
 		end
 
 		function section:AddTeamsDropdown(ti)
@@ -202,7 +202,7 @@ end
 			})
 			d = makeDropdownProxy(d)
 			ensureFlagObject(ti and ti.Flag, d)
-			return d
+			 d
 		end
 
 		function section:AddColorpicker(ti)
@@ -260,7 +260,7 @@ end
 			})
 			d = makeDropdownProxy(d)
 			ensureFlagObject(ti and ti.Flag, d)
-			return d
+			 d
 		end
 
 		function section:AddSlider(ti)
@@ -278,7 +278,7 @@ end
 				end
 			end)
 			ensureFlagObject(ti and ti.Flag, s)
-			return s
+			 s
 		end
 
 		function section:AddTextbox(ti)
@@ -295,7 +295,7 @@ end
 				end
 			end)
 			ensureFlagObject(ti and ti.Flag, i)
-			return i
+			 i
 		end
 
 		function section:AddLabel(text)
@@ -316,11 +316,11 @@ end
 				end
 			end)
 			ensureFlagObject(ti and ti.Flag, kp)
-			return kp
+			kp
 		end
 
 		function section:AddSection(ti)
-			return tabProxy:AddSection(ti)
+			tabProxy:AddSection(ti)
 		end
 
 		function section:AddParagraph(ti)
@@ -332,10 +332,10 @@ end
 			if content ~= "" then
 				grp:AddLabel(tostring(content))
 			end
-			return {}
+			 {}
 		end
 
-		return section
+		section
 	end
 
 	function OrionLib:MakeWindow(info)
@@ -361,7 +361,7 @@ end
 					if type(k) == "string" and k:sub(1, 3) == "Add" then
 						return function() return makeNoopSectionProxy() end
 					end
-					return rawget(t, k)
+				rawget(t, k)
 				end,
 			})
 
@@ -397,7 +397,7 @@ end
 				})
 				d = makeDropdownProxy(d)
 				ensureFlagObject(ti and ti.Flag, d)
-				return d
+				d
 			end
 
 			function tabProxy:AddTeamsDropdown(ti)
@@ -425,7 +425,7 @@ end
 				})
 				d = makeDropdownProxy(d)
 				ensureFlagObject(ti and ti.Flag, d)
-				return d
+				d
 			end
 
 			function tabProxy:AddColorpicker(ti)
@@ -464,7 +464,7 @@ end
 				})
 				d = makeDropdownProxy(d)
 				ensureFlagObject(ti and ti.Flag, d)
-				return d
+				 d
 			end
 
 			function tabProxy:AddSlider(ti)
@@ -483,7 +483,7 @@ end
 					end
 				end)
 				ensureFlagObject(ti and ti.Flag, s)
-				return s
+				 s
 			end
 
 			function tabProxy:AddTextbox(ti)
@@ -501,13 +501,13 @@ end
 					end
 				end)
 				ensureFlagObject(ti and ti.Flag, i)
-				return i
+				 i
 			end
 
 			function tabProxy:AddLabel(text)
 				local grp = getGroup(tabProxy)
 				local lbl = grp:AddLabel(tostring(text or ""))
-				return makeLabelProxy(lbl)
+				makeLabelProxy(lbl)
 			end
 
 			
@@ -520,7 +520,7 @@ end
 				local grp = (side == 1) and tabProxy._tab:AddLeftGroupbox(name) or tabProxy._tab:AddRightGroupbox(name)
 				tabProxy._side = (side == 1) and 2 or 1
 				tabProxy._currentGroup = grp
-				return makeSectionProxy(tabProxy, grp)
+				makeSectionProxy(tabProxy, grp)
 			end
 
 			function tabProxy:AddParagraph(ti)
@@ -533,13 +533,13 @@ end
 				if content ~= "" then
 					grp:AddLabel(tostring(content))
 				end
-				return {}
+				{}
 			end
 
-			return tabProxy
+			tabProxy
 		end
 
-		return windowProxy
+		windowProxy
 	end
 end
 

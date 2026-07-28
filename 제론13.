@@ -16,7 +16,7 @@ local OrionLib = {
 	ThemeObjects = {},
 }
 
-do
+
 	setmetatable(OrionLib.Flags, {
 		__index = function(t, k)
 			local flag = {

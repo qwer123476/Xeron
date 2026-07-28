@@ -1382,7 +1382,7 @@ local CreditsTab = Window:MakeTab({Name = "설정 저장", Icon = "rbxassetid://
 
 
 
-
+do
 function House()
     char = plr.Character
     if not char then
@@ -6169,7 +6169,7 @@ end
 end
 end
 end
-
+end
 ----------------------------------------------------------------------------------------- [ 시작 설정 ]
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer

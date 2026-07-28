@@ -54,7 +54,7 @@ local function safeNotify(title, content, time)
 end
 
 function OrionLib:MakeNotification(info)
-	return safeNotify(
+	safeNotify(
 		info and (info.Name or info.Title),
 		info and (info.Content or info.Description),
 		info and info.Time

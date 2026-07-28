@@ -15016,6 +15016,7 @@ lagTab:AddToggle({
         end
     end
 })
+do
 local Players = game:GetService("Players")
 local localPlayer = Players.LocalPlayer
 local Workspace = game:GetService("Workspace")
@@ -15599,4 +15600,5 @@ if loader then
     print("warking")
 else
     warn("[Loader] 스크립트 주소가 잘못되었거나 불러오지 못했습니다.")
+end
 end

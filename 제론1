@@ -789,12 +789,12 @@ OrionLib.SelectedTheme = "PatoSigma"
         Name = "Xeron V4",
         HidePremium = false,
         SaveConfig = true,
-        ConfigFolder = "FunScript",
+        ConfigFolder = "Xeron",
         IntroEnabled = true,
         KeyToOpenWindow = "M",
         FreeMouse = true,
         IntroText = "XERON X😎",
-        IntroIcon = "rbxassetid://130521044774541",
+        IntroIcon = "rbxassetid://77989137998499",
         SearchBar = {Default = "반가워요 제론입니다."}
     })
 
@@ -1223,7 +1223,7 @@ G = rs.GrabEvents
 G:WaitForChild("EndGrabEarly"):Destroy()
 Instance.new("RemoteEvent", G).Name = "EndGrabEarly"
 
-local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
+--local OrionLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/qwer123476/12345/main/Orion"))()
 
 local HttpService = game:GetService("HttpService")
 
@@ -1273,7 +1273,7 @@ end
 
 
 
-
+--[[
 local Window = OrionLib:MakeWindow({
     Name = "Xeron V2 [ONWER]",
     HidePremium = false,
@@ -1283,7 +1283,7 @@ local Window = OrionLib:MakeWindow({
     IntroText = "Xeron V2",
     IntroColor = Color3.fromRGB(0, 162, 255), 
 })
-
+]]
 
 local MyTab = Window:MakeTab({Name = "Xeron",Icon = "rbxassetid://77989137998499", PremiumOnly = false})
 local playerTab = Window:MakeTab({Name = "플레이어 설정", Icon = "rbxassetid://6034281935", PremiumOnly = false})    

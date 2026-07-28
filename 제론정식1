@@ -1360,6 +1360,11 @@ local funTab = Window:MakeTab({Name = "찌끄레기", Icon = "rbxassetid://44833
 local keybindTab = Window:MakeTab({Name = "설정", Icon = "rbxassetid://6031094678", PremiumOnly = false})             
 local lagTab = Window:MakeTab({Name = "렉", Icon = "rbxassetid://6023426923", PremiumOnly = false})   
 local CreditsTab = Window:MakeTab({Name = "설정 저장", Icon = "rbxassetid://77989137998499", PremiumOnly = false})
+local UIcusTab = Window:MakeTab({
+    Name = "라이브러리",
+    Icon = "rbxassetid://7734053426",
+    PremiumOnly = false
+}) 
 
 
 
@@ -15576,4 +15581,162 @@ if loader then
 else
     warn("[Loader] 스크립트 주소가 잘못되었거나 불러오지 못했습니다.")
 end
+end
+do
+__uiSafeBlock("UIcusTab", function()
+	ColorsSection = UIcusTab:AddSection({
+		Name = "Interface Colors"
+	})
+
+ function ReturnProperty(Object)
+    if not Object or not Object.ClassName then
+        return "BackgroundColor3"
+    end
+    
+    local className = Object.ClassName
+    
+    if className == "Frame" or className == "TextButton" then
+        return "BackgroundColor3"
+    elseif className == "ScrollingFrame" then
+        return "ScrollBarImageColor3"
+    elseif className == "UIStroke" then
+        return "Color"
+    elseif className == "TextLabel" or className == "TextBox" then
+        return "TextColor3"
+    elseif className == "ImageLabel" or className == "ImageButton" then
+        return "ImageColor3"
+    else
+        return "BackgroundColor3"
+    end
+end
+
+ function UpdateSpecificTheme(Type, Value)
+    OrionLib.Themes[OrionLib.SelectedTheme][Type] = Value
+    
+    for _, object in ipairs(OrionLib.ThemeObjects[Type] or {}) do
+        if object and object.Parent then
+            local property = ReturnProperty(object)
+            pcall(function()
+                if object[property] then
+                    object[property] = Value
+                end
+            end)
+        end
+    end
+end
+
+ColorsSection:AddColorpicker({
+    Name = "메인색",
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].Main,
+    Flag = "MainColor",
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("Main", Value)
+    end    
+})
+
+ColorsSection:AddColorpicker({
+    Name = "두번째 색", 
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].Second,
+    Flag = "SecondColor",
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("Second", Value)
+    end    
+})
+
+ColorsSection:AddColorpicker({
+    Name = "테두리 색",
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].Stroke,
+    Flag = "StrokeColor", 
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("Stroke", Value)
+    end    
+})
+
+ColorsSection:AddColorpicker({
+    Name = "디비더 색",
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].Divider,
+    Flag = "DividerColor",
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("Divider", Value)
+    end    
+})
+
+ColorsSection:AddColorpicker({
+    Name = "텍스트 색",
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].Text,
+    Flag = "TextColor",
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("Text", Value)
+    end
+})
+
+ColorsSection:AddColorpicker({
+    Name = "텍스트 다크 색", 
+    Default = OrionLib.Themes[OrionLib.SelectedTheme].TextDark,
+    Flag = "TextDarkColor",
+    Save = true,
+    Callback = function(Value)
+        UpdateSpecificTheme("TextDark", Value)
+    end    
+})
+
+ SettingsSection = UIcusTab:AddSection({
+    Name = "세팅"
+})
+
+SettingsSection:AddDropdown({
+    Name = "테마 프리셋",
+    Default = OrionLib.SelectedTheme,
+    Options = {"기본", "블리츠", "산타", "헬", "데모", "인퍼노", "BloodMoon", "RedDevil", "DarkNeon", "IceBlue", "FireHell", "MidnightPurple", "PastelDream", "ToxicGreen", "CyberRed", "VaporWave", "SteelGray", "GoldElite", "OceanDeep", "Matrix", "Sunset", "ArcticWhite", "RoyalBlue", "InfernoRed", "PinkGalaxy", "SteelBlueDark", "CoffeeBrown", "GhostWhite", "PatoSigma"},
+    Flag = "ThemePreset",
+    Save = true,
+    Callback = function(Value)
+        OrionLib.SelectedTheme = Value
+        
+        for themeType, _ in pairs(OrionLib.Themes[Value]) do
+            UpdateSpecificTheme(themeType, OrionLib.Themes[Value][themeType])
+        end
+    end
+})
+
+SettingsSection:AddButton({
+    Name = "모든 컬러 리셋",
+    Callback = function()
+        local currentTheme = OrionLib.SelectedTheme
+        local defaultColors = OrionLib.Themes[currentTheme]
+        
+        if OrionLib.Flags.MainColor then
+            OrionLib.Flags.MainColor:Set(defaultColors.Main)
+        end
+        if OrionLib.Flags.SecondColor then
+            OrionLib.Flags.SecondColor:Set(defaultColors.Second)
+        end
+        if OrionLib.Flags.StrokeColor then
+            OrionLib.Flags.StrokeColor:Set(defaultColors.Stroke)
+        end
+        if OrionLib.Flags.DividerColor then
+            OrionLib.Flags.DividerColor:Set(defaultColors.Divider)
+        end
+        if OrionLib.Flags.TextColor then
+            OrionLib.Flags.TextColor:Set(defaultColors.Text)
+        end
+        if OrionLib.Flags.TextDarkColor then
+            OrionLib.Flags.TextDarkColor:Set(defaultColors.TextDark)
+        end
+        
+        OrionLib:MakeNotification({
+            Name = "컬러 리셋됨",
+            Content = "모든색이 기본값으로 리셋됐어요.",
+            Time = 3
+        })
+    end
+})
+
+
+end)
 end

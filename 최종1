@@ -1057,6 +1057,8 @@ end
 _G.ResetManager = ResetManager
 ResetManager:Start()
 
+--local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+
 --local Window = OrionLib:MakeWindow({Name = "알수없는 시뮬레이터", HidePremium = false, SaveConfig = false, IntroText = "알수없는 시뮬레이터"})
 
 local LocalPlayer = game.Players.LocalPlayer
@@ -1103,7 +1105,9 @@ local PVPTab = Window:MakeTab({Name = "PVP", Icon = "rbxassetid://4483362458", P
 local ESPTab = Window:MakeTab({Name = "ESP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local UtilityTab = Window:MakeTab({Name = "안전", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 
-TeleportTab:AddLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
+TeleportTab:AddLabel("이스크립트는 혼자 개발한 스크입니다 ")
+TeleportTab:AddLabel("유포&판매 하지마세용")
+TeleportTab:AddSection({ Name = "텔포1" })
 TeleportTab:AddButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:AddButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
 TeleportTab:AddButton({ Name = "황금 뽑기", Callback = function() TeleportTo(Vector3.new(239.81, -373.26, 151.77)) end })
@@ -1111,6 +1115,7 @@ TeleportTab:AddButton({ Name = "강화", Callback = function() TeleportTo(Vector
 TeleportTab:AddButton({ Name = "인챈트", Callback = function() TeleportTo(Vector3.new(249.72, -373.26, 12.85)) end })
 TeleportTab:AddButton({ Name = "인챈트북", Callback = function() TeleportTo(Vector3.new(10.90, 70.61, -109.39)) end })
 TeleportTab:AddButton({ Name = "물약", Callback = function() TeleportTo(Vector3.new(465.21, -393.05, 7.59)) end })
+TeleportTab:AddSection({ Name = "텔포2" })
 TeleportTab:AddButton({ Name = "물건조합소", Callback = function() TeleportTo(Vector3.new(227.33, -373.26, 291.81)) end })
 TeleportTab:AddButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
 TeleportTab:AddButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
@@ -1119,7 +1124,7 @@ TeleportTab:AddButton({ Name = "블릿조직", Callback = function() TeleportTo(
 TeleportTab:AddButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:AddButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-AutoTab:AddLabel("====== 무기 설정 ======")
+AutoTab:AddSection({ Name = "무기 설정" })
 local SelectedWeapon = ""
 local AttackDelay = 0.1
 local AutoAttackEnabled = false
@@ -1222,58 +1227,9 @@ AutoTab:AddToggle({
    end,
 })
 
-local ClientStatSpoofEnabled = false
-AutoTab:AddToggle({
-   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
-   Default = false,
-   Callback = function(Value)
-      ClientStatSpoofEnabled = Value
-      if ClientStatSpoofEnabled then
-         task.spawn(function()
-            local ignoreKeys = {
-               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
-               "usescale", "priceinrobux", "assetid", "productid"
-            }
-            while ClientStatSpoofEnabled do
-               for _, v in pairs(getgc(true)) do
-                  if type(v) == "table" then
-                     local isJunk = false
-                     for key, _ in pairs(v) do
-                        if type(key) == "string" then
-                           local lowerKey = string.lower(key)
-                           for _, ignore in ipairs(ignoreKeys) do
-                              if string.find(lowerKey, ignore) then
-                                 isJunk = true
-                                 break
-                              end
-                           end
-                        end
-                        if isJunk then break end
-                     end
-                     
-                     if not isJunk then
-                        pcall(function()
-                           for key, val in pairs(v) do
-                              if type(key) == "string" and type(val) == "number" then
-                                 local lowerKey = string.lower(key)
-                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
-                                    if val > 0 then rawset(v, key, 0) end
-                                 end
-                              end
-                           end
-                        end)
-                     end
-                  end
-               end
-               task.wait(0.5)
-            end
-         end)
-         OrionLib:MakeNotification({Name = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Time = 3})
-      end
-   end,
-})
 
-AutoTab:AddLabel("====== 일반 뽑기 설정 ======")
+
+AutoTab:AddSection({ Name = "일반 뽑기 설정" })
 AutoTab:AddLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
@@ -1329,7 +1285,7 @@ AutoTab:AddToggle({
    end,
 })
 
-AutoTab:AddLabel("====== 골든 뽑기 설정 ======")
+AutoTab:AddSection({ Name = "골든 뽑기 설정" })
 local SelectedGoldenGachaCount = 1
 local GoldenGachaDelay = 0.1
 local AutoGoldenGachaEnabled = false
@@ -1384,38 +1340,9 @@ AutoTab:AddToggle({
    end,
 })
 
-AutoTab:AddLabel("====== 자동 인챈트 설정 ======")
-local AutoEnchantEnabled = false
-local LockConnectionEnchant = nil
+--AutoTab:AddSection({ Name = "자동 인챈트 설정" })
 
-AutoTab:AddToggle({
-   Name = "자동 인챈트 켜기",
-   Default = false,
-   Callback = function(Value)
-      AutoEnchantEnabled = Value
-      if AutoEnchantEnabled then
-         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
-            local character = LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-               local hrp = character.HumanoidRootPart
-               hrp.CFrame = CFrame.new(249.72, -373.26, 12.85)
-               hrp.AssemblyLinearVelocity = Vector3.zero
-               hrp.AssemblyAngularVelocity = Vector3.zero
-            end
-         end)
-         task.spawn(function()
-            while AutoEnchantEnabled do
-               CentralEvent:FireServer("NPCDialogue_Choose", {choiceIndex = 1})
-               task.wait(0.1)
-            end
-         end)
-      else
-         if LockConnectionEnchant then LockConnectionEnchant:Disconnect(); LockConnectionEnchant = nil end
-      end
-   end,
-})
-
-PlayerTab:AddLabel("====== 플레이어 상태 ======")
+PlayerTab:AddSection({ Name = "플레이어 상태" })
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
 local DefaultWalkSpeed = 16
@@ -1518,7 +1445,7 @@ RunService.PreRender:Connect(function()
    end
 end)
 
-PlayerTab:AddLabel("====== 기타 기능 ======")
+PlayerTab:AddSection({ Name = "기타 기능" })
 local InfiniteJumpEnabled = false
 PlayerTab:AddToggle({
    Name = "무한 점프",
@@ -1535,7 +1462,7 @@ UserInputService.JumpRequest:Connect(function()
    end
 end)
 
-PVPTab:AddLabel("====== PVP ======")
+PVPTab:AddSection({ Name = "PVP 기능" })
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
 
@@ -1597,7 +1524,7 @@ PVPTab:AddToggle({
    end,
 })
 
-ESPTab:AddLabel("====== 플레이어 ESP 설정 ======")
+ESPTab:AddSection({ Name = "플레이어 ESP 설정" })
 
 local ESPConfig = {
     General = false,
@@ -1746,7 +1673,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-ESPTab:AddLabel("====== NPC ESP 설정 ======")
+ESPTab:AddSection({ Name = "NPC ESP 설정" })
 
 local NpcESPConfig = {
     General = false,
@@ -1870,7 +1797,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-UtilityTab:AddLabel("====== 최적화 및 보안 ======")
+UtilityTab:AddSection({ Name = "최적화 및 보안" })
 
 local AntiLagEnabled = false
 local BackupLighting = {

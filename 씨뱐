@@ -4,7 +4,7 @@ local ThemeManager = loadstring(game:HttpGet(repo .. 'addons/ThemeManager.lua'))
 local SaveManager = loadstring(game:HttpGet(repo .. 'addons/SaveManager.lua'))()
 
 local Window = Library:CreateWindow({
-    Title = '알수없는 시뮬레이터',
+    Title = 'Script Hub',
     Center = true,
     AutoShow = true,
     TabPadding = 8,
@@ -18,7 +18,7 @@ local Tabs = {
     PVP = Window:AddTab('PVP'),
     ESP = Window:AddTab('ESP'),
     Utility = Window:AddTab('안전'),
-    UISettings = Window:AddTab('세팅'),
+    UISettings = Window:AddTab('UI Settings'),
 }
 
 local LocalPlayer = game.Players.LocalPlayer
@@ -28,6 +28,29 @@ local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
+
+local MobileGui = Instance.new("ScreenGui")
+local MobileToggleBtn = Instance.new("TextButton")
+MobileGui.Name = "LinoriaMobileGui"
+MobileGui.Parent = game.CoreGui
+MobileGui.ResetOnSpawn = false
+
+MobileToggleBtn.Name = "ToggleBtn"
+MobileToggleBtn.Parent = MobileGui
+MobileToggleBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+MobileToggleBtn.BorderColor3 = Color3.fromRGB(60, 60, 60)
+MobileToggleBtn.Position = UDim2.new(0, 15, 0, 15)
+MobileToggleBtn.Size = UDim2.new(0, 110, 0, 45)
+MobileToggleBtn.Font = Enum.Font.SourceSansBold
+MobileToggleBtn.Text = "UI 열기/닫기"
+MobileToggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+MobileToggleBtn.TextSize = 15
+MobileToggleBtn.Active = true
+MobileToggleBtn.Draggable = true
+
+MobileToggleBtn.MouseButton1Click:Connect(function()
+    Library:Toggle()
+end)
 
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -858,7 +881,7 @@ UtilityLeft:AddToggle('AntiKickToggle', {
    end,
 })
 
-Library:SetWatermark('알없시')
+Library:SetWatermark('Script Hub')
 local FrameTimer = tick()
 local FrameCounter = 0
 local FPS = 60
@@ -869,7 +892,7 @@ RunService.RenderStepped:Connect(function()
         FrameCounter = 0
         FrameTimer = tick()
     end
-    Library:SetWatermark(('알없시 | 프레임: %d | 핑: %dms'):format(FPS, math.floor(LocalPlayer:GetNetworkPing() * 1000)))
+    Library:SetWatermark(('Script Hub | FPS: %d | Ping: %dms'):format(FPS, math.floor(LocalPlayer:GetNetworkPing() * 1000)))
 end)
 
 ThemeManager:SetLibrary(Library)

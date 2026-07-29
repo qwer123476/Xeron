@@ -233,6 +233,8 @@ AutoTab:CreateButton({ Name = "10회", Callback = function() SetGachaCount(10) e
 AutoTab:CreateButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
 AutoTab:CreateButton({ Name = "250회", Callback = function() SetGachaCount(250) end })
 AutoTab:CreateButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
+AutoTab:CreateButton({ Name = "1000회", Callback = function() SetGachaCount(1000) end })
+
 
 AutoTab:CreateInput({
    Name = "일반 뽑기 속도 (딜레이)",

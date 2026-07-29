@@ -214,60 +214,9 @@ AutoTab:CreateToggle({
    end,
 })
 
-local ClientStatSpoofEnabled = false
-AutoTab:CreateToggle({
-   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
-   CurrentValue = false,
-   Flag = "SmartClientSpoof",
-   Callback = function(Value)
-      ClientStatSpoofEnabled = Value
-      if ClientStatSpoofEnabled then
-         task.spawn(function()
-            local ignoreKeys = {
-               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
-               "usescale", "priceinrobux", "assetid", "productid"
-            }
-            while ClientStatSpoofEnabled do
-               for _, v in pairs(getgc(true)) do
-                  if type(v) == "table" then
-                     local isJunk = false
-                     for key, _ in pairs(v) do
-                        if type(key) == "string" then
-                           local lowerKey = string.lower(key)
-                           for _, ignore in ipairs(ignoreKeys) do
-                              if string.find(lowerKey, ignore) then
-                                 isJunk = true
-                                 break
-                              end
-                           end
-                        end
-                        if isJunk then break end
-                     end
-                     
-                     if not isJunk then
-                        pcall(function()
-                           for key, val in pairs(v) do
-                              if type(key) == "string" and type(val) == "number" then
-                                 local lowerKey = string.lower(key)
-                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
-                                    if val > 0 then rawset(v, key, 0) end
-                                 end
-                              end
-                           end
-                        end)
-                     end
-                  end
-               end
-               task.wait(0.5)
-            end
-         end)
-         Rayfield:Notify({Title = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Duration = 3, Image = 4483362458})
-      end
-   end,
-})
 
 AutoTab:CreateSection("일반 뽑기 설정")
-AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
+--AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
 local AutoGachaEnabled = false
@@ -282,6 +231,7 @@ end
 AutoTab:CreateButton({ Name = "1회", Callback = function() SetGachaCount(1) end })
 AutoTab:CreateButton({ Name = "10회", Callback = function() SetGachaCount(10) end })
 AutoTab:CreateButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
+AutoTab:CreateButton({ Name = "250회", Callback = function() SetGachaCount(250) end })
 AutoTab:CreateButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
 
 AutoTab:CreateInput({
@@ -295,7 +245,7 @@ AutoTab:CreateInput({
 })
 
 AutoTab:CreateToggle({
-   Name = "오토 일반 뽑기",
+   Name = "오토 뽑기",
    CurrentValue = false,
    Flag = "AutoGachaToggle",
    Callback = function(Value)
@@ -337,6 +287,7 @@ end
 AutoTab:CreateButton({ Name = "골든 1회", Callback = function() SetGoldenGachaCount(1) end })
 AutoTab:CreateButton({ Name = "골든 10회", Callback = function() SetGoldenGachaCount(10) end })
 AutoTab:CreateButton({ Name = "골든 100회", Callback = function() SetGoldenGachaCount(100) end })
+AutoTab:CreateButton({ Name = "골든 250회", Callback = function() SetGachaCount(250) end })
 AutoTab:CreateButton({ Name = "골든 500회", Callback = function() SetGoldenGachaCount(500) end })
 
 AutoTab:CreateInput({

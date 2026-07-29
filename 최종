@@ -54,7 +54,6 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
--- 공용 유틸리티 함수
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coordinate)
@@ -84,7 +83,6 @@ local function IsPvpActive(targetPlayer)
    return false
 end
 
--- 탭 생성
 local TeleportTab = Window:CreateTab("TP", 4483362458)
 local AutoTab = Window:CreateTab("오토팜", 4483362458)
 local PlayerTab = Window:CreateTab("플레이어", 4483362458)
@@ -92,7 +90,6 @@ local PVPTab = Window:CreateTab("PVP", 4483362458)
 local ESPTab = Window:CreateTab("ESP", 4483362458)
 local UtilityTab = Window:CreateTab("안전", 4483362458)
 
--- [ 텔레포트 탭 ]
 TeleportTab:CreateLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
 TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
@@ -109,7 +106,6 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
--- [ 오토팜 탭 ]
 AutoTab:CreateSection("무기 설정")
 local SelectedWeapon = ""
 local AttackDelay = 0.1
@@ -214,9 +210,60 @@ AutoTab:CreateToggle({
    end,
 })
 
+local ClientStatSpoofEnabled = false
+AutoTab:CreateToggle({
+   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
+   CurrentValue = false,
+   Flag = "SmartClientSpoof",
+   Callback = function(Value)
+      ClientStatSpoofEnabled = Value
+      if ClientStatSpoofEnabled then
+         task.spawn(function()
+            local ignoreKeys = {
+               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
+               "usescale", "priceinrobux", "assetid", "productid"
+            }
+            while ClientStatSpoofEnabled do
+               for _, v in pairs(getgc(true)) do
+                  if type(v) == "table" then
+                     local isJunk = false
+                     for key, _ in pairs(v) do
+                        if type(key) == "string" then
+                           local lowerKey = string.lower(key)
+                           for _, ignore in ipairs(ignoreKeys) do
+                              if string.find(lowerKey, ignore) then
+                                 isJunk = true
+                                 break
+                              end
+                           end
+                        end
+                        if isJunk then break end
+                     end
+                     
+                     if not isJunk then
+                        pcall(function()
+                           for key, val in pairs(v) do
+                              if type(key) == "string" and type(val) == "number" then
+                                 local lowerKey = string.lower(key)
+                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
+                                    if val > 0 then rawset(v, key, 0) end
+                                 end
+                              end
+                           end
+                        end)
+                     end
+                  end
+               end
+               task.wait(0.5)
+            end
+         end)
+         Rayfield:Notify({Title = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Duration = 3, Image = 4483362458})
+      end
+   end,
+})
 
 AutoTab:CreateSection("일반 뽑기 설정")
---AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
+AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
 local AutoGachaEnabled = false
@@ -233,8 +280,6 @@ AutoTab:CreateButton({ Name = "10회", Callback = function() SetGachaCount(10) e
 AutoTab:CreateButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
 AutoTab:CreateButton({ Name = "250회", Callback = function() SetGachaCount(250) end })
 AutoTab:CreateButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
-AutoTab:CreateButton({ Name = "1000회", Callback = function() SetGachaCount(1000) end })
-
 
 AutoTab:CreateInput({
    Name = "일반 뽑기 속도 (딜레이)",
@@ -247,7 +292,7 @@ AutoTab:CreateInput({
 })
 
 AutoTab:CreateToggle({
-   Name = "오토 뽑기",
+   Name = "오토 일반 뽑기",
    CurrentValue = false,
    Flag = "AutoGachaToggle",
    Callback = function(Value)
@@ -289,7 +334,7 @@ end
 AutoTab:CreateButton({ Name = "골든 1회", Callback = function() SetGoldenGachaCount(1) end })
 AutoTab:CreateButton({ Name = "골든 10회", Callback = function() SetGoldenGachaCount(10) end })
 AutoTab:CreateButton({ Name = "골든 100회", Callback = function() SetGoldenGachaCount(100) end })
-AutoTab:CreateButton({ Name = "골든 250회", Callback = function() SetGachaCount(250) end })
+AutoTab:CreateButton({ Name = "골든 250회", Callback = function() SetGoldenGachaCount(250) end })
 AutoTab:CreateButton({ Name = "골든 500회", Callback = function() SetGoldenGachaCount(500) end })
 
 AutoTab:CreateInput({
@@ -330,7 +375,38 @@ AutoTab:CreateToggle({
    end,
 })
 
--- [ 플레이어 탭 ]
+AutoTab:CreateSection("자동 인챈트 설정")
+local AutoEnchantEnabled = false
+local LockConnectionEnchant = nil
+
+AutoTab:CreateToggle({
+   Name = "자동 인챈트 켜기",
+   CurrentValue = false,
+   Flag = "AutoEnchantToggle",
+   Callback = function(Value)
+      AutoEnchantEnabled = Value
+      if AutoEnchantEnabled then
+         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+               local hrp = character.HumanoidRootPart
+               hrp.CFrame = CFrame.new(249.72, -373.26, 12.85)
+               hrp.AssemblyLinearVelocity = Vector3.zero
+               hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+         end)
+         task.spawn(function()
+            while AutoEnchantEnabled do
+               CentralEvent:FireServer("NPCDialogue_Choose", {choiceIndex = 1})
+               task.wait(0.1)
+            end
+         end)
+      else
+         if LockConnectionEnchant then LockConnectionEnchant:Disconnect(); LockConnectionEnchant = nil end
+      end
+   end,
+})
+
 PlayerTab:CreateSection("플레이어 상태")
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
@@ -419,7 +495,6 @@ RunService.PreRender:Connect(function()
       local hum = character:FindFirstChildOfClass("Humanoid")
       local hrp = character.HumanoidRootPart
       hum.UseJumpPower = true
-
       if WalkSpeedEnabled then
          if hum.MoveDirection.Magnitude > 0 then
             local moveVel = hum.MoveDirection * WalkSpeedValue
@@ -453,7 +528,6 @@ UserInputService.JumpRequest:Connect(function()
    end
 end)
 
--- [ PVP 탭 ]
 PVPTab:CreateSection("PVP")
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
@@ -518,8 +592,7 @@ PVPTab:CreateToggle({
    end,
 })
 
--- [ ESP 탭 ]
-ESPTab:CreateSection("ESP 설정")
+ESPTab:CreateSection("플레이어 ESP 설정")
 
 local ESPConfig = {
     General = false,
@@ -532,7 +605,7 @@ local ESPConfig = {
 }
 
 ESPTab:CreateColorPicker({
-    Name = "ESP 색상",
+    Name = "플레이어 ESP 색상",
     Color = ESPConfig.Color,
     Flag = "ESPColorPicker",
     Callback = function(Value)
@@ -598,7 +671,6 @@ end)
 RunService.RenderStepped:Connect(function()
     local Camera = workspace.CurrentCamera
     for player, esp in pairs(ESPObjects) do
-        -- Update colors
         esp.Box.Color = ESPConfig.Color
         esp.Text.Color = ESPConfig.Color
         esp.Highlight.FillColor = ESPConfig.Color
@@ -614,12 +686,10 @@ RunService.RenderStepped:Connect(function()
                 local size = Vector2.new(3000 / depth, 4500 / depth)
                 local boxPos = Vector2.new(pos.X - size.X / 2, pos.Y - size.Y / 2)
                 
-                -- Box
                 esp.Box.Size = size
                 esp.Box.Position = boxPos
                 esp.Box.Visible = ESPConfig.Box
 
-                -- Text Info Assembly
                 local info = {}
                 if ESPConfig.Name then table.insert(info, player.Name) end
                 
@@ -653,7 +723,6 @@ RunService.RenderStepped:Connect(function()
                     esp.Text.Visible = false
                 end
 
-                -- Highlight
                 if ESPConfig.General then
                     if esp.Highlight.Parent ~= char then esp.Highlight.Parent = char end
                     esp.Highlight.Enabled = true
@@ -673,7 +742,130 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
+ESPTab:CreateSection("NPC ESP 설정")
 
+local NpcESPConfig = {
+    General = false,
+    Name = false,
+    Box = false,
+    Color = Color3.fromRGB(50, 255, 50)
+}
+
+ESPTab:CreateColorPicker({
+    Name = "NPC ESP 색상",
+    Color = NpcESPConfig.Color,
+    Flag = "NpcESPColorPicker",
+    Callback = function(Value)
+        NpcESPConfig.Color = Value
+    end
+})
+
+ESPTab:CreateToggle({ Name = "NPC 일반 ESP (하이라이트)", CurrentValue = false, Flag = "NpcESP_General", Callback = function(Value) NpcESPConfig.General = Value end })
+ESPTab:CreateToggle({ Name = "NPC 네임 ESP", CurrentValue = false, Flag = "NpcESP_Name", Callback = function(Value) NpcESPConfig.Name = Value end })
+ESPTab:CreateToggle({ Name = "NPC 박스 ESP", CurrentValue = false, Flag = "NpcESP_Box", Callback = function(Value) NpcESPConfig.Box = Value end })
+
+local TargetNpcNames = {
+    "하사", "레조", "큐턴", "지피", "킨치", "고상", "비투", "지피2", 
+    "엑스트라", "스타토처형식 모델", "Rig", "helper", "대장장이", 
+    "연구자", "인형 저스틴스틴", "기본뽑기 상인", "이도", "저스틴틴", 
+    "골든뽑기 상인", "LMGRig", "SlayerRIG", "소트2", "R6", "닥터", 
+    "하삐", "비거", "소트", "블마상인", "루카", "QRdoote1120"
+}
+
+local NpcESPObjects = {}
+
+local function CreateNpcESP(model)
+    if NpcESPObjects[model] then return end
+    
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Thickness = 1.5
+    box.Filled = false
+
+    local text = Drawing.new("Text")
+    text.Visible = false
+    text.Center = true
+    text.Outline = true
+    text.Size = 15
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.6
+    highlight.OutlineTransparency = 0
+
+    NpcESPObjects[model] = { Box = box, Text = text, Highlight = highlight }
+end
+
+local function RemoveNpcESP(model)
+    if NpcESPObjects[model] then
+        NpcESPObjects[model].Box:Remove()
+        NpcESPObjects[model].Text:Remove()
+        if NpcESPObjects[model].Highlight.Parent then
+            NpcESPObjects[model].Highlight:Destroy()
+        end
+        NpcESPObjects[model] = nil
+    end
+end
+
+task.spawn(function()
+    while task.wait(2) do
+        local currentNpcs = {}
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Model") and table.find(TargetNpcNames, obj.Name) and obj:FindFirstChild("HumanoidRootPart") then
+                currentNpcs[obj] = true
+                CreateNpcESP(obj)
+            end
+        end
+        for model, _ in pairs(NpcESPObjects) do
+            if not currentNpcs[model] or not model.Parent then
+                RemoveNpcESP(model)
+            end
+        end
+    end
+end)
+
+RunService.RenderStepped:Connect(function()
+    local Camera = workspace.CurrentCamera
+    for model, esp in pairs(NpcESPObjects) do
+        esp.Box.Color = NpcESPConfig.Color
+        esp.Text.Color = NpcESPConfig.Color
+        esp.Highlight.FillColor = NpcESPConfig.Color
+        esp.Highlight.OutlineColor = NpcESPConfig.Color
+
+        if model:FindFirstChild("HumanoidRootPart") then
+            local hrp = model.HumanoidRootPart
+            local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            
+            if onScreen then
+                local depth = pos.Z
+                local size = Vector2.new(3000 / depth, 4500 / depth)
+                local boxPos = Vector2.new(pos.X - size.X / 2, pos.Y - size.Y / 2)
+                
+                esp.Box.Size = size
+                esp.Box.Position = boxPos
+                esp.Box.Visible = NpcESPConfig.Box
+
+                esp.Text.Text = model.Name
+                esp.Text.Position = Vector2.new(pos.X, boxPos.Y - 20)
+                esp.Text.Visible = NpcESPConfig.Name
+
+                if NpcESPConfig.General then
+                    if esp.Highlight.Parent ~= model then esp.Highlight.Parent = model end
+                    esp.Highlight.Enabled = true
+                else
+                    esp.Highlight.Enabled = false
+                end
+            else
+                esp.Box.Visible = false
+                esp.Text.Visible = false
+                esp.Highlight.Enabled = false
+            end
+        else
+            esp.Box.Visible = false
+            esp.Text.Visible = false
+            esp.Highlight.Enabled = false
+        end
+    end
+end)
 
 UtilityTab:CreateSection("최적화 및 보안")
 
@@ -763,7 +955,6 @@ UtilityTab:CreateToggle({
 })
 
 local AntiKickEnabled = false
-local KickConnection = nil
 
 UtilityTab:CreateToggle({
    Name = "안티 킥(로컬)",

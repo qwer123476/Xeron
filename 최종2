@@ -18,7 +18,7 @@ local Tabs = {
     PVP = Window:AddTab('PVP'),
     ESP = Window:AddTab('ESP'),
     Utility = Window:AddTab('안전'),
-    UISettings = Window:AddTab("세팅'),
+    UISettings = Window:AddTab('세팅'),
 }
 
 local LocalPlayer = game.Players.LocalPlayer

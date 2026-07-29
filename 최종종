@@ -1,50 +1,6 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
-local ApA = {
-    TextColor = Color3.fromRGB(240, 240, 240),
-    Background = Color3.fromRGB(10, 10, 10),
-    Topbar = Color3.fromRGB(15, 15, 15),
-    Shadow = Color3.fromRGB(0, 0, 0),
-    NotificationBackground = Color3.fromRGB(18, 18, 18),
-    NotificationActionsBackground = Color3.fromRGB(28, 28, 28),
-    TabBackground = Color3.fromRGB(20, 20, 20),
-    TabStroke = Color3.fromRGB(35, 35, 35),
-    TabBackgroundSelected = Color3.fromRGB(32, 32, 32),
-    TabTextColor = Color3.fromRGB(160, 160, 160),
-    SelectedTabTextColor = Color3.fromRGB(255, 60, 60),
-    ElementBackground = Color3.fromRGB(18, 18, 18),
-    ElementBackgroundHover = Color3.fromRGB(28, 28, 28),
-    SecondaryElementBackground = Color3.fromRGB(14, 14, 14),
-    ElementStroke = Color3.fromRGB(35, 35, 35),
-    SecondaryElementStroke = Color3.fromRGB(25, 25, 25),
-    SliderBackground = Color3.fromRGB(25, 25, 25),
-    SliderProgress = Color3.fromRGB(220, 30, 30),
-    SliderStroke = Color3.fromRGB(150, 20, 20),
-    ToggleBackground = Color3.fromRGB(18, 18, 18),
-    ToggleEnabled = Color3.fromRGB(220, 30, 30),
-    ToggleEnabledStroke = Color3.fromRGB(255, 80, 80),
-    ToggleEnabledOuterStroke = Color3.fromRGB(120, 15, 15),
-    ToggleDisabled = Color3.fromRGB(40, 40, 40),
-    ToggleDisabledStroke = Color3.fromRGB(60, 60, 60),
-    ToggleDisabledOuterStroke = Color3.fromRGB(25, 25, 25),
-    DropdownSelected = Color3.fromRGB(28, 28, 28),
-    DropdownUnselected = Color3.fromRGB(18, 18, 18),
-    InputBackground = Color3.fromRGB(15, 15, 15),
-    InputStroke = Color3.fromRGB(35, 35, 35),
-    PlaceholderColor = Color3.fromRGB(100, 100, 100),
-}
 
-local Window = Rayfield:CreateWindow({
-    Name = "알수없는 시뮬레이터", 
-    Icon = 0, 
-    Theme = ApA, 
-    ToggleUIKeybind = "T",
-    ConfigurationSaving = {
-        Enabled = false,       
-        FolderName = nil,
-        FileName = "Config"
-    }
-})
+--local Window = OrionLib:MakeWindow({Name = "알수없는 시뮬레이터", HidePremium = false, SaveConfig = false, IntroText = "알수없는 시뮬레이터"})
 
 local LocalPlayer = game.Players.LocalPlayer
 local Players = game:GetService("Players")
@@ -83,30 +39,30 @@ local function IsPvpActive(targetPlayer)
    return false
 end
 
-local TeleportTab = Window:CreateTab("TP", 4483362458)
-local AutoTab = Window:CreateTab("오토팜", 4483362458)
-local PlayerTab = Window:CreateTab("플레이어", 4483362458)
-local PVPTab = Window:CreateTab("PVP", 4483362458)
-local ESPTab = Window:CreateTab("ESP", 4483362458)
-local UtilityTab = Window:CreateTab("안전", 4483362458)
+local TeleportTab = Window:MakeTab({Name = "TP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local AutoTab = Window:MakeTab({Name = "오토팜", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local PlayerTab = Window:MakeTab({Name = "플레이어", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local PVPTab = Window:MakeTab({Name = "PVP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local ESPTab = Window:MakeTab({Name = "ESP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local UtilityTab = Window:MakeTab({Name = "안전", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 
-TeleportTab:CreateLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
-TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
-TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
-TeleportTab:CreateButton({ Name = "황금 뽑기", Callback = function() TeleportTo(Vector3.new(239.81, -373.26, 151.77)) end })
-TeleportTab:CreateButton({ Name = "강화", Callback = function() TeleportTo(Vector3.new(-51.30, 10.44, -33.66)) end })
-TeleportTab:CreateButton({ Name = "인챈트", Callback = function() TeleportTo(Vector3.new(249.72, -373.26, 12.85)) end })
-TeleportTab:CreateButton({ Name = "인챈트북", Callback = function() TeleportTo(Vector3.new(10.90, 70.61, -109.39)) end })
-TeleportTab:CreateButton({ Name = "물약", Callback = function() TeleportTo(Vector3.new(465.21, -393.05, 7.59)) end })
-TeleportTab:CreateButton({ Name = "물건조합소", Callback = function() TeleportTo(Vector3.new(227.33, -373.26, 291.81)) end })
-TeleportTab:CreateButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
-TeleportTab:CreateButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
-TeleportTab:CreateButton({ Name = "병원 지하", Callback = function() TeleportTo(Vector3.new(214.79, -375.10, 935.49)) end })
---TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
-TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
-TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
+TeleportTab:AddLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
+TeleportTab:AddButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
+TeleportTab:AddButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
+TeleportTab:AddButton({ Name = "황금 뽑기", Callback = function() TeleportTo(Vector3.new(239.81, -373.26, 151.77)) end })
+TeleportTab:AddButton({ Name = "강화", Callback = function() TeleportTo(Vector3.new(-51.30, 10.44, -33.66)) end })
+TeleportTab:AddButton({ Name = "인챈트", Callback = function() TeleportTo(Vector3.new(249.72, -373.26, 12.85)) end })
+TeleportTab:AddButton({ Name = "인챈트북", Callback = function() TeleportTo(Vector3.new(10.90, 70.61, -109.39)) end })
+TeleportTab:AddButton({ Name = "물약", Callback = function() TeleportTo(Vector3.new(465.21, -393.05, 7.59)) end })
+TeleportTab:AddButton({ Name = "물건조합소", Callback = function() TeleportTo(Vector3.new(227.33, -373.26, 291.81)) end })
+TeleportTab:AddButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
+TeleportTab:AddButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
+TeleportTab:AddButton({ Name = "병원 지하", Callback = function() TeleportTo(Vector3.new(214.79, -375.10, 935.49)) end })
+TeleportTab:AddButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
+TeleportTab:AddButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
+TeleportTab:AddButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-AutoTab:CreateSection("무기 설정")
+AutoTab:AddLabel("====== 무기 설정 ======")
 local SelectedWeapon = ""
 local AttackDelay = 0.1
 local AutoAttackEnabled = false
@@ -159,7 +115,7 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     char.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
 end)
 
-AutoTab:CreateButton({
+AutoTab:AddButton({
    Name = "오토팜 무기 등록(장착한 무기)",
    Callback = function()
       local character = LocalPlayer.Character
@@ -168,28 +124,27 @@ AutoTab:CreateButton({
          if tool then
             SelectedWeapon = tool.Name
             wipeCooldowns(tool)
-            Rayfield:Notify({ Title = "완료", Content = "무기: " .. SelectedWeapon, Duration = 2.5, Image = 4483362458 })
+            OrionLib:MakeNotification({ Name = "완료", Content = "무기: " .. SelectedWeapon, Image = "rbxassetid://4483362458", Time = 2.5 })
          else
-            Rayfield:Notify({ Title = "실패", Content = "무기를 장착해주세요.", Duration = 2.5, Image = 4483362458 })
+            OrionLib:MakeNotification({ Name = "실패", Content = "무기를 장착해주세요.", Image = "rbxassetid://4483362458", Time = 2.5 })
          end
       end
    end,
 })
 
-AutoTab:CreateInput({
+AutoTab:AddTextbox({
    Name = "오토팜 딜레이",
-   PlaceholderText = "0.1",
-   RemoveTextAfterFocusLost = false,
+   Default = "0.1",
+   TextDisappear = false,
    Callback = function(Text)
       local num = tonumber(Text)
       if num and num >= 0 then AttackDelay = num else AttackDelay = 0.1 end
    end,
 })
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
    Name = "오토팜",
-   CurrentValue = false,
-   Flag = "AutoAttackToggle",
+   Default = false,
    Callback = function(Value)
       AutoAttackEnabled = Value
       if AutoAttackEnabled then
@@ -210,9 +165,59 @@ AutoTab:CreateToggle({
    end,
 })
 
+local ClientStatSpoofEnabled = false
+AutoTab:AddToggle({
+   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
+   Default = false,
+   Callback = function(Value)
+      ClientStatSpoofEnabled = Value
+      if ClientStatSpoofEnabled then
+         task.spawn(function()
+            local ignoreKeys = {
+               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
+               "usescale", "priceinrobux", "assetid", "productid"
+            }
+            while ClientStatSpoofEnabled do
+               for _, v in pairs(getgc(true)) do
+                  if type(v) == "table" then
+                     local isJunk = false
+                     for key, _ in pairs(v) do
+                        if type(key) == "string" then
+                           local lowerKey = string.lower(key)
+                           for _, ignore in ipairs(ignoreKeys) do
+                              if string.find(lowerKey, ignore) then
+                                 isJunk = true
+                                 break
+                              end
+                           end
+                        end
+                        if isJunk then break end
+                     end
+                     
+                     if not isJunk then
+                        pcall(function()
+                           for key, val in pairs(v) do
+                              if type(key) == "string" and type(val) == "number" then
+                                 local lowerKey = string.lower(key)
+                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
+                                    if val > 0 then rawset(v, key, 0) end
+                                 end
+                              end
+                           end
+                        end)
+                     end
+                  end
+               end
+               task.wait(0.5)
+            end
+         end)
+         OrionLib:MakeNotification({Name = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Time = 3})
+      end
+   end,
+})
 
-AutoTab:CreateSection("일반 뽑기 설정")
---AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
+AutoTab:AddLabel("====== 일반 뽑기 설정 ======")
+AutoTab:AddLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
 local AutoGachaEnabled = false
@@ -221,29 +226,28 @@ local LockConnectionGacha = nil
 
 local function SetGachaCount(count)
    SelectedGachaCount = count
-   Rayfield:Notify({ Title = "알림", Content = "일반 뽑기 횟수: " .. count .. "회 설정됨", Duration = 2, Image = 4483362458 })
+   OrionLib:MakeNotification({ Name = "알림", Content = "일반 뽑기 횟수: " .. count .. "회 설정됨", Image = "rbxassetid://4483362458", Time = 2 })
 end
 
-AutoTab:CreateButton({ Name = "1회", Callback = function() SetGachaCount(1) end })
-AutoTab:CreateButton({ Name = "10회", Callback = function() SetGachaCount(10) end })
-AutoTab:CreateButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
-AutoTab:CreateButton({ Name = "250회", Callback = function() SetGachaCount(250) end })
-AutoTab:CreateButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
+AutoTab:AddButton({ Name = "1회", Callback = function() SetGachaCount(1) end })
+AutoTab:AddButton({ Name = "10회", Callback = function() SetGachaCount(10) end })
+AutoTab:AddButton({ Name = "100회", Callback = function() SetGachaCount(100) end })
+AutoTab:AddButton({ Name = "250회", Callback = function() SetGachaCount(250) end })
+AutoTab:AddButton({ Name = "500회", Callback = function() SetGachaCount(500) end })
 
-AutoTab:CreateInput({
+AutoTab:AddTextbox({
    Name = "일반 뽑기 속도 (딜레이)",
-   PlaceholderText = "0.1",
-   RemoveTextAfterFocusLost = false,
+   Default = "0.1",
+   TextDisappear = false,
    Callback = function(Text)
       local num = tonumber(Text)
       if num and num >= 0 then GachaDelay = num else GachaDelay = 0.1 end
    end,
 })
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
    Name = "오토 일반 뽑기",
-   CurrentValue = false,
-   Flag = "AutoGachaToggle",
+   Default = false,
    Callback = function(Value)
       AutoGachaEnabled = Value
       if AutoGachaEnabled then
@@ -268,7 +272,7 @@ AutoTab:CreateToggle({
    end,
 })
 
-AutoTab:CreateSection("골든 뽑기 설정")
+AutoTab:AddLabel("====== 골든 뽑기 설정 ======")
 local SelectedGoldenGachaCount = 1
 local GoldenGachaDelay = 0.1
 local AutoGoldenGachaEnabled = false
@@ -277,29 +281,28 @@ local LockConnectionGoldenGacha = nil
 
 local function SetGoldenGachaCount(count)
    SelectedGoldenGachaCount = count
-   Rayfield:Notify({ Title = "알림", Content = "골든 뽑기 횟수: " .. count .. "회 설정됨", Duration = 2, Image = 4483362458 })
+   OrionLib:MakeNotification({ Name = "알림", Content = "골든 뽑기 횟수: " .. count .. "회 설정됨", Image = "rbxassetid://4483362458", Time = 2 })
 end
 
-AutoTab:CreateButton({ Name = "골든 1회", Callback = function() SetGoldenGachaCount(1) end })
-AutoTab:CreateButton({ Name = "골든 10회", Callback = function() SetGoldenGachaCount(10) end })
-AutoTab:CreateButton({ Name = "골든 100회", Callback = function() SetGoldenGachaCount(100) end })
-AutoTab:CreateButton({ Name = "골든 250회", Callback = function() SetGoldenGachaCount(250) end })
-AutoTab:CreateButton({ Name = "골든 500회", Callback = function() SetGoldenGachaCount(500) end })
+AutoTab:AddButton({ Name = "골든 1회", Callback = function() SetGoldenGachaCount(1) end })
+AutoTab:AddButton({ Name = "골든 10회", Callback = function() SetGoldenGachaCount(10) end })
+AutoTab:AddButton({ Name = "골든 100회", Callback = function() SetGoldenGachaCount(100) end })
+AutoTab:AddButton({ Name = "골든 250회", Callback = function() SetGoldenGachaCount(250) end })
+AutoTab:AddButton({ Name = "골든 500회", Callback = function() SetGoldenGachaCount(500) end })
 
-AutoTab:CreateInput({
+AutoTab:AddTextbox({
    Name = "골든 뽑기 속도 (딜레이)",
-   PlaceholderText = "0.1",
-   RemoveTextAfterFocusLost = false,
+   Default = "0.1",
+   TextDisappear = false,
    Callback = function(Text)
       local num = tonumber(Text)
       if num and num >= 0 then GoldenGachaDelay = num else GoldenGachaDelay = 0.1 end
    end,
 })
 
-AutoTab:CreateToggle({
+AutoTab:AddToggle({
    Name = "오토 골든 뽑기",
-   CurrentValue = false,
-   Flag = "AutoGoldenGachaToggle",
+   Default = false,
    Callback = function(Value)
       AutoGoldenGachaEnabled = Value
       if AutoGoldenGachaEnabled then
@@ -324,11 +327,38 @@ AutoTab:CreateToggle({
    end,
 })
 
+AutoTab:AddLabel("====== 자동 인챈트 설정 ======")
+local AutoEnchantEnabled = false
+local LockConnectionEnchant = nil
 
+AutoTab:AddToggle({
+   Name = "자동 인챈트 켜기",
+   Default = false,
+   Callback = function(Value)
+      AutoEnchantEnabled = Value
+      if AutoEnchantEnabled then
+         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
+            local character = LocalPlayer.Character
+            if character and character:FindFirstChild("HumanoidRootPart") then
+               local hrp = character.HumanoidRootPart
+               hrp.CFrame = CFrame.new(249.72, -373.26, 12.85)
+               hrp.AssemblyLinearVelocity = Vector3.zero
+               hrp.AssemblyAngularVelocity = Vector3.zero
+            end
+         end)
+         task.spawn(function()
+            while AutoEnchantEnabled do
+               CentralEvent:FireServer("NPCDialogue_Choose", {choiceIndex = 1})
+               task.wait(0.1)
+            end
+         end)
+      else
+         if LockConnectionEnchant then LockConnectionEnchant:Disconnect(); LockConnectionEnchant = nil end
+      end
+   end,
+})
 
-
-
-PlayerTab:CreateSection("플레이어 상태")
+PlayerTab:AddLabel("====== 플레이어 상태 ======")
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
 local DefaultWalkSpeed = 16
@@ -348,10 +378,9 @@ end
 if LocalPlayer.Character then setupHumanoid(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(setupHumanoid)
 
-PlayerTab:CreateToggle({
+PlayerTab:AddToggle({
    Name = "속도 조절",
-   CurrentValue = false,
-   Flag = "WalkSpeedToggle",
+   Default = false,
    Callback = function(Value)
       WalkSpeedEnabled = Value
       local character = LocalPlayer.Character
@@ -367,20 +396,20 @@ PlayerTab:CreateToggle({
    end,
 })
 
-PlayerTab:CreateSlider({
+PlayerTab:AddSlider({
    Name = "이동 속도",
-   Range = {16, 200},
+   Min = 16,
+   Max = 200,
+   Default = 16,
+   Color = Color3.fromRGB(255,255,255),
    Increment = 1,
-   Suffix = "",
-   CurrentValue = 16,
-   Flag = "WalkSpeedSlider",
+   ValueName = "",
    Callback = function(Value) WalkSpeedValue = Value end,
 })
 
-PlayerTab:CreateToggle({
+PlayerTab:AddToggle({
    Name = "점프 조절",
-   CurrentValue = false,
-   Flag = "JumpPowerToggle",
+   Default = false,
    Callback = function(Value)
       JumpPowerEnabled = Value
       local character = LocalPlayer.Character
@@ -392,13 +421,14 @@ PlayerTab:CreateToggle({
    end,
 })
 
-PlayerTab:CreateSlider({
+PlayerTab:AddSlider({
    Name = "점프력",
-   Range = {50, 300},
+   Min = 50,
+   Max = 300,
+   Default = 50,
+   Color = Color3.fromRGB(255,255,255),
    Increment = 1,
-   Suffix = "",
-   CurrentValue = 50,
-   Flag = "JumpPowerSlider",
+   ValueName = "",
    Callback = function(Value)
       JumpPowerValue = Value
       if JumpPowerEnabled then
@@ -431,12 +461,11 @@ RunService.PreRender:Connect(function()
    end
 end)
 
-PlayerTab:CreateSection("기타 기능")
+PlayerTab:AddLabel("====== 기타 기능 ======")
 local InfiniteJumpEnabled = false
-PlayerTab:CreateToggle({
+PlayerTab:AddToggle({
    Name = "무한 점프",
-   CurrentValue = false,
-   Flag = "InfiniteJumpToggle",
+   Default = false,
    Callback = function(Value) InfiniteJumpEnabled = Value end,
 })
 
@@ -449,7 +478,7 @@ UserInputService.JumpRequest:Connect(function()
    end
 end)
 
-PVPTab:CreateSection("PVP")
+PVPTab:AddLabel("====== PVP ======")
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
 
@@ -460,10 +489,9 @@ local function GetPvpTarget()
    return nil
 end
 
-PVPTab:CreateToggle({
+PVPTab:AddToggle({
    Name = "펀치 아우라 (잘되는지 모름)",
-   CurrentValue = false,
-   Flag = "PvpAuraToggle",
+   Default = false,
    Callback = function(Value)
       PvpAuraEnabled = Value
       if PvpAuraEnabled then
@@ -478,10 +506,9 @@ PVPTab:CreateToggle({
    end,
 })
 
-PVPTab:CreateToggle({
+PVPTab:AddToggle({
    Name = "PVP 오토팜(잘되는지 모름)",
-   CurrentValue = false,
-   Flag = "KillAutoBangToggle",
+   Default = false,
    Callback = function(Value)
       KillAutoBangEnabled = Value
       if KillAutoBangEnabled then
@@ -502,7 +529,7 @@ PVPTab:CreateToggle({
                   end
                else
                   if not notifiedNoTarget then
-                     Rayfield:Notify({Title = "알림", Content = "대상 플레이어가 없습니다.", Duration = 3, Image = 4483362458})
+                     OrionLib:MakeNotification({Name = "알림", Content = "대상 플레이어가 없습니다.", Time = 3})
                      notifiedNoTarget = true
                   end
                end
@@ -513,7 +540,7 @@ PVPTab:CreateToggle({
    end,
 })
 
-ESPTab:CreateSection("플레이어 ESP 설정")
+ESPTab:AddLabel("====== 플레이어 ESP 설정 ======")
 
 local ESPConfig = {
     General = false,
@@ -525,21 +552,20 @@ local ESPConfig = {
     Color = Color3.fromRGB(255, 50, 50)
 }
 
-ESPTab:CreateColorPicker({
+ESPTab:AddColorpicker({
     Name = "플레이어 ESP 색상",
-    Color = ESPConfig.Color,
-    Flag = "ESPColorPicker",
+    Default = ESPConfig.Color,
     Callback = function(Value)
         ESPConfig.Color = Value
     end
 })
 
-ESPTab:CreateToggle({ Name = "일반 ESP (하이라이트)", CurrentValue = false, Flag = "ESP_General", Callback = function(Value) ESPConfig.General = Value end })
-ESPTab:CreateToggle({ Name = "네임 ESP", CurrentValue = false, Flag = "ESP_Name", Callback = function(Value) ESPConfig.Name = Value end })
-ESPTab:CreateToggle({ Name = "박스 ESP", CurrentValue = false, Flag = "ESP_Box", Callback = function(Value) ESPConfig.Box = Value end })
-ESPTab:CreateToggle({ Name = "PvP 상태 표시", CurrentValue = false, Flag = "ESP_PvP", Callback = function(Value) ESPConfig.PvP = Value end })
-ESPTab:CreateToggle({ Name = "장착중인 무기 표시", CurrentValue = false, Flag = "ESP_Weapon", Callback = function(Value) ESPConfig.Weapon = Value end })
-ESPTab:CreateToggle({ Name = "벌고있는 돈 표시", CurrentValue = false, Flag = "ESP_Money", Callback = function(Value) ESPConfig.Money = Value end })
+ESPTab:AddToggle({ Name = "일반 ESP (하이라이트)", Default = false, Callback = function(Value) ESPConfig.General = Value end })
+ESPTab:AddToggle({ Name = "네임 ESP", Default = false, Callback = function(Value) ESPConfig.Name = Value end })
+ESPTab:AddToggle({ Name = "박스 ESP", Default = false, Callback = function(Value) ESPConfig.Box = Value end })
+ESPTab:AddToggle({ Name = "PvP 상태 표시", Default = false, Callback = function(Value) ESPConfig.PvP = Value end })
+ESPTab:AddToggle({ Name = "장착중인 무기 표시", Default = false, Callback = function(Value) ESPConfig.Weapon = Value end })
+ESPTab:AddToggle({ Name = "벌고있는 돈 표시", Default = false, Callback = function(Value) ESPConfig.Money = Value end })
 
 local ESPObjects = {}
 
@@ -663,7 +689,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-ESPTab:CreateSection("NPC ESP 설정")
+ESPTab:AddLabel("====== NPC ESP 설정 ======")
 
 local NpcESPConfig = {
     General = false,
@@ -672,18 +698,17 @@ local NpcESPConfig = {
     Color = Color3.fromRGB(50, 255, 50)
 }
 
-ESPTab:CreateColorPicker({
+ESPTab:AddColorpicker({
     Name = "NPC ESP 색상",
-    Color = NpcESPConfig.Color,
-    Flag = "NpcESPColorPicker",
+    Default = NpcESPConfig.Color,
     Callback = function(Value)
         NpcESPConfig.Color = Value
     end
 })
 
-ESPTab:CreateToggle({ Name = "NPC 일반 ESP (하이라이트)", CurrentValue = false, Flag = "NpcESP_General", Callback = function(Value) NpcESPConfig.General = Value end })
-ESPTab:CreateToggle({ Name = "NPC 네임 ESP", CurrentValue = false, Flag = "NpcESP_Name", Callback = function(Value) NpcESPConfig.Name = Value end })
-ESPTab:CreateToggle({ Name = "NPC 박스 ESP", CurrentValue = false, Flag = "NpcESP_Box", Callback = function(Value) NpcESPConfig.Box = Value end })
+ESPTab:AddToggle({ Name = "NPC 일반 ESP (하이라이트)", Default = false, Callback = function(Value) NpcESPConfig.General = Value end })
+ESPTab:AddToggle({ Name = "NPC 네임 ESP", Default = false, Callback = function(Value) NpcESPConfig.Name = Value end })
+ESPTab:AddToggle({ Name = "NPC 박스 ESP", Default = false, Callback = function(Value) NpcESPConfig.Box = Value end })
 
 local TargetNpcNames = {
     "하사", "레조", "큐턴", "지피", "킨치", "고상", "비투", "지피2", 
@@ -788,7 +813,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-UtilityTab:CreateSection("최적화 및 보안")
+UtilityTab:AddLabel("====== 최적화 및 보안 ======")
 
 local AntiLagEnabled = false
 local BackupLighting = {
@@ -799,10 +824,9 @@ local BackupLighting = {
 }
 local Conns = {}
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
    Name = "안티 렉",
-   CurrentValue = false,
-   Flag = "AntiLagToggle",
+   Default = false,
    Callback = function(Value)
       AntiLagEnabled = Value
       if AntiLagEnabled then
@@ -848,10 +872,9 @@ UtilityTab:CreateToggle({
 local AntiAfkEnabled = false
 local AfkConnection = nil
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
    Name = "안티 AFK",
-   CurrentValue = false,
-   Flag = "AntiAfkToggle",
+   Default = false,
    Callback = function(Value)
       AntiAfkEnabled = Value
       if AntiAfkEnabled then
@@ -877,10 +900,9 @@ UtilityTab:CreateToggle({
 
 local AntiKickEnabled = false
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
    Name = "안티 킥(로컬)",
-   CurrentValue = false,
-   Flag = "AntiKickToggle",
+   Default = false,
    Callback = function(Value)
       AntiKickEnabled = Value
       if AntiKickEnabled then
@@ -898,3 +920,5 @@ UtilityTab:CreateToggle({
       end
    end,
 })
+
+--OrionLib:Init()

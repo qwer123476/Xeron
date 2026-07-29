@@ -2,43 +2,33 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local ApA = {
     TextColor = Color3.fromRGB(240, 240, 240),
-
     Background = Color3.fromRGB(10, 10, 10),
     Topbar = Color3.fromRGB(15, 15, 15),
     Shadow = Color3.fromRGB(0, 0, 0),
-
     NotificationBackground = Color3.fromRGB(18, 18, 18),
     NotificationActionsBackground = Color3.fromRGB(28, 28, 28),
-
     TabBackground = Color3.fromRGB(20, 20, 20),
     TabStroke = Color3.fromRGB(35, 35, 35),
     TabBackgroundSelected = Color3.fromRGB(32, 32, 32),
     TabTextColor = Color3.fromRGB(160, 160, 160),
     SelectedTabTextColor = Color3.fromRGB(255, 60, 60),
-
     ElementBackground = Color3.fromRGB(18, 18, 18),
     ElementBackgroundHover = Color3.fromRGB(28, 28, 28),
     SecondaryElementBackground = Color3.fromRGB(14, 14, 14),
     ElementStroke = Color3.fromRGB(35, 35, 35),
     SecondaryElementStroke = Color3.fromRGB(25, 25, 25),
-
     SliderBackground = Color3.fromRGB(25, 25, 25),
     SliderProgress = Color3.fromRGB(220, 30, 30),
     SliderStroke = Color3.fromRGB(150, 20, 20),
-
     ToggleBackground = Color3.fromRGB(18, 18, 18),
-
     ToggleEnabled = Color3.fromRGB(220, 30, 30),
     ToggleEnabledStroke = Color3.fromRGB(255, 80, 80),
     ToggleEnabledOuterStroke = Color3.fromRGB(120, 15, 15),
-
     ToggleDisabled = Color3.fromRGB(40, 40, 40),
     ToggleDisabledStroke = Color3.fromRGB(60, 60, 60),
     ToggleDisabledOuterStroke = Color3.fromRGB(25, 25, 25),
-
     DropdownSelected = Color3.fromRGB(28, 28, 28),
     DropdownUnselected = Color3.fromRGB(18, 18, 18),
-
     InputBackground = Color3.fromRGB(15, 15, 15),
     InputStroke = Color3.fromRGB(35, 35, 35),
     PlaceholderColor = Color3.fromRGB(100, 100, 100),
@@ -64,19 +54,46 @@ local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
 
+-- 공용 유틸리티 함수
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(coordinate)
     end
 end
 
+local function IsPvpActive(targetPlayer)
+   if not targetPlayer or targetPlayer == LocalPlayer then return false end
+   local char = targetPlayer.Character
+   if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then return false end
+   if not char:FindFirstChild("HumanoidRootPart") then return false end
+
+   local pvpState = targetPlayer:GetAttribute("PVP") or targetPlayer:GetAttribute("PvpState") or targetPlayer:GetAttribute("PVPState")
+   if pvpState ~= nil then return pvpState == true end
+   
+   if char:GetAttribute("PVP") ~= nil or char:GetAttribute("PvpState") ~= nil then
+      return (char:GetAttribute("PVP") == true) or (char:GetAttribute("PvpState") == true)
+   end
+
+   local folderPath = workspace:FindFirstChild("Players") or workspace:FindFirstChild("Characters")
+   if folderPath then
+      local targetFolder = folderPath:FindFirstChild(targetPlayer.Name)
+      if targetFolder and (targetFolder:GetAttribute("PVP") == true or targetFolder:GetAttribute("PvpState") == true) then
+         return true
+      end
+   end
+   return false
+end
+
+-- 탭 생성
 local TeleportTab = Window:CreateTab("TP", 4483362458)
 local AutoTab = Window:CreateTab("오토팜", 4483362458)
 local PlayerTab = Window:CreateTab("플레이어", 4483362458)
 local PVPTab = Window:CreateTab("PVP", 4483362458)
+local ESPTab = Window:CreateTab("ESP", 4483362458)
 local UtilityTab = Window:CreateTab("안전", 4483362458)
-TeleportTab:CreateLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
 
+-- [ 텔레포트 탭 ]
+TeleportTab:CreateLabel("이스크립트는 혼자 개발한 스크입니다 유포&판매 하지마세용")
 TeleportTab:CreateButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:CreateButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
 TeleportTab:CreateButton({ Name = "황금 뽑기", Callback = function() TeleportTo(Vector3.new(239.81, -373.26, 151.77)) end })
@@ -92,16 +109,14 @@ TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() Teleport
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
-
+-- [ 오토팜 탭 ]
 AutoTab:CreateSection("무기 설정")
-
 local SelectedWeapon = ""
 local AttackDelay = 0.1
 local AutoAttackEnabled = false
 
 local function resetAttributesAndValues(obj)
     if not obj then return end
-    
     if obj:IsA("NumberValue") or obj:IsA("IntValue") or obj:IsA("DoubleConstrainedValue") then
         local nameLower = obj.Name:lower()
         if nameLower:find("cooldown") or nameLower:find("cd") or nameLower:find("delay") or nameLower:find("time") or nameLower:find("wait") then
@@ -112,7 +127,6 @@ local function resetAttributesAndValues(obj)
             obj.Text = "쿨타임: 0초"
         end
     end
-
     local attributes = obj:GetAttributes()
     for attrName, attrVal in pairs(attributes) do
         local nameLower = attrName:lower()
@@ -135,29 +149,18 @@ local function wipeCooldowns(instance)
 end
 
 wipeCooldowns(workspace)
-workspace.DescendantAdded:Connect(function(obj)
-    resetAttributesAndValues(obj)
-end)
-
+workspace.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
 if LocalPlayer:FindFirstChild("PlayerGui") then
     wipeCooldowns(LocalPlayer.PlayerGui)
-    LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj)
-        resetAttributesAndValues(obj)
-    end)
+    LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
 end
-
 if LocalPlayer.Character then
     wipeCooldowns(LocalPlayer.Character)
-    LocalPlayer.Character.DescendantAdded:Connect(function(obj)
-        resetAttributesAndValues(obj)
-    end)
+    LocalPlayer.Character.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
 end
-
 LocalPlayer.CharacterAdded:Connect(function(char)
     wipeCooldowns(char)
-    char.DescendantAdded:Connect(function(obj)
-        resetAttributesAndValues(obj)
-    end)
+    char.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
 end)
 
 AutoTab:CreateButton({
@@ -200,26 +203,71 @@ AutoTab:CreateToggle({
                   local myChar = LocalPlayer.Character
                   if myChar then
                      local tool = myChar:FindFirstChild(SelectedWeapon)
-                     if tool then
-                        wipeCooldowns(tool)
-                     end
+                     if tool then wipeCooldowns(tool) end
                   end
                   CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
                end
-               if AttackDelay > 0 then
-                  task.wait(AttackDelay)
-               else
-                  RunService.RenderStepped:Wait()
-               end
+               if AttackDelay > 0 then task.wait(AttackDelay) else RunService.RenderStepped:Wait() end
             end
          end)
       end
    end,
 })
 
+local ClientStatSpoofEnabled = false
+AutoTab:CreateToggle({
+   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
+   CurrentValue = false,
+   Flag = "SmartClientSpoof",
+   Callback = function(Value)
+      ClientStatSpoofEnabled = Value
+      if ClientStatSpoofEnabled then
+         task.spawn(function()
+            local ignoreKeys = {
+               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
+               "usescale", "priceinrobux", "assetid", "productid"
+            }
+            while ClientStatSpoofEnabled do
+               for _, v in pairs(getgc(true)) do
+                  if type(v) == "table" then
+                     local isJunk = false
+                     for key, _ in pairs(v) do
+                        if type(key) == "string" then
+                           local lowerKey = string.lower(key)
+                           for _, ignore in ipairs(ignoreKeys) do
+                              if string.find(lowerKey, ignore) then
+                                 isJunk = true
+                                 break
+                              end
+                           end
+                        end
+                        if isJunk then break end
+                     end
+                     
+                     if not isJunk then
+                        pcall(function()
+                           for key, val in pairs(v) do
+                              if type(key) == "string" and type(val) == "number" then
+                                 local lowerKey = string.lower(key)
+                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
+                                    if val > 0 then rawset(v, key, 0) end
+                                 end
+                              end
+                           end
+                        end)
+                     end
+                  end
+               end
+               task.wait(0.5)
+            end
+         end)
+         Rayfield:Notify({Title = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Duration = 3, Image = 4483362458})
+      end
+   end,
+})
+
 AutoTab:CreateSection("일반 뽑기 설정")
 AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
-
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
 local AutoGachaEnabled = false
@@ -262,15 +310,10 @@ AutoTab:CreateToggle({
                hrp.AssemblyAngularVelocity = Vector3.zero
             end
          end)
-
          task.spawn(function()
             while AutoGachaEnabled do
                CentralEvent:FireServer("GachaRequest", "\236\178\152\236\157\140\235\189\145\234\184\176", SelectedGachaCount)
-               if GachaDelay > 0 then
-                  task.wait(GachaDelay)
-               else
-                  RunService.RenderStepped:Wait()
-               end
+               if GachaDelay > 0 then task.wait(GachaDelay) else RunService.RenderStepped:Wait() end
             end
          end)
       else
@@ -280,7 +323,6 @@ AutoTab:CreateToggle({
 })
 
 AutoTab:CreateSection("골든 뽑기 설정")
-
 local SelectedGoldenGachaCount = 1
 local GoldenGachaDelay = 0.1
 local AutoGoldenGachaEnabled = false
@@ -323,15 +365,10 @@ AutoTab:CreateToggle({
                hrp.AssemblyAngularVelocity = Vector3.zero
             end
          end)
-
          task.spawn(function()
             while AutoGoldenGachaEnabled do
                CentralEvent:FireServer("GachaRequest", "\234\179\168\235\147\160\235\189\145\234\184\176", SelectedGoldenGachaCount)
-               if GoldenGachaDelay > 0 then
-                  task.wait(GoldenGachaDelay)
-               else
-                  RunService.RenderStepped:Wait()
-               end
+               if GoldenGachaDelay > 0 then task.wait(GoldenGachaDelay) else RunService.RenderStepped:Wait() end
             end
          end)
       else
@@ -340,8 +377,8 @@ AutoTab:CreateToggle({
    end,
 })
 
+-- [ 플레이어 탭 ]
 PlayerTab:CreateSection("플레이어 상태")
-
 local WalkSpeedEnabled = false
 local WalkSpeedValue = 16
 local DefaultWalkSpeed = 16
@@ -438,9 +475,7 @@ RunService.PreRender:Connect(function()
             hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
          end
       end
-
       if JumpPowerEnabled then hum.JumpPower = JumpPowerValue end
-
       if hum.MoveDirection.Magnitude == 0 and hum:GetState() ~= Enum.HumanoidStateType.Freefall then
          hrp.AssemblyLinearVelocity = Vector3.new(0, hrp.AssemblyLinearVelocity.Y, 0)
       end
@@ -448,7 +483,6 @@ RunService.PreRender:Connect(function()
 end)
 
 PlayerTab:CreateSection("기타 기능")
-
 local InfiniteJumpEnabled = false
 PlayerTab:CreateToggle({
    Name = "무한 점프",
@@ -466,43 +500,14 @@ UserInputService.JumpRequest:Connect(function()
    end
 end)
 
+-- [ PVP 탭 ]
 PVPTab:CreateSection("PVP")
-
 local PvpAuraEnabled = false
 local KillAutoBangEnabled = false
 
-local function IsPvpActive(targetPlayer)
-   if not targetPlayer or targetPlayer == LocalPlayer then return false end
-   
-   local char = targetPlayer.Character
-   if not char or not char:FindFirstChild("Humanoid") or char.Humanoid.Health <= 0 then return false end
-   if not char:FindFirstChild("HumanoidRootPart") then return false end
-
-   local pvpState = targetPlayer:GetAttribute("PVP") or targetPlayer:GetAttribute("PvpState") or targetPlayer:GetAttribute("PVPState")
-   if pvpState ~= nil then
-      return pvpState == true
-   end
-   
-   if char:GetAttribute("PVP") ~= nil or char:GetAttribute("PvpState") ~= nil then
-      return (char:GetAttribute("PVP") == true) or (char:GetAttribute("PvpState") == true)
-   end
-
-   local folderPath = workspace:FindFirstChild("Players") or workspace:FindFirstChild("Characters")
-   if folderPath then
-      local targetFolder = folderPath:FindFirstChild(targetPlayer.Name)
-      if targetFolder and (targetFolder:GetAttribute("PVP") == true or targetFolder:GetAttribute("PvpState") == true) then
-         return true
-      end
-   end
-
-   return false
-end
-
 local function GetPvpTarget()
    for _, plr in ipairs(Players:GetPlayers()) do
-      if IsPvpActive(plr) then
-         return plr
-      end
+      if IsPvpActive(plr) then return plr end
    end
    return nil
 end
@@ -549,12 +554,7 @@ PVPTab:CreateToggle({
                   end
                else
                   if not notifiedNoTarget then
-                     Rayfield:Notify({
-                        Title = "알림",
-                        Content = "대상 플레이어가 없습니다.",
-                        Duration = 3,
-                        Image = 4483362458,
-                     })
+                     Rayfield:Notify({Title = "알림", Content = "대상 플레이어가 없습니다.", Duration = 3, Image = 4483362458})
                      notifiedNoTarget = true
                   end
                end
@@ -564,6 +564,163 @@ PVPTab:CreateToggle({
       end
    end,
 })
+
+-- [ ESP 탭 ]
+ESPTab:CreateSection("ESP 설정")
+
+local ESPConfig = {
+    General = false,
+    Name = false,
+    Box = false,
+    PvP = false,
+    Weapon = false,
+    Money = false,
+    Color = Color3.fromRGB(255, 50, 50)
+}
+
+ESPTab:CreateColorPicker({
+    Name = "ESP 색상",
+    Color = ESPConfig.Color,
+    Flag = "ESPColorPicker",
+    Callback = function(Value)
+        ESPConfig.Color = Value
+    end
+})
+
+ESPTab:CreateToggle({ Name = "일반 ESP (하이라이트)", CurrentValue = false, Flag = "ESP_General", Callback = function(Value) ESPConfig.General = Value end })
+ESPTab:CreateToggle({ Name = "네임 ESP", CurrentValue = false, Flag = "ESP_Name", Callback = function(Value) ESPConfig.Name = Value end })
+ESPTab:CreateToggle({ Name = "박스 ESP", CurrentValue = false, Flag = "ESP_Box", Callback = function(Value) ESPConfig.Box = Value end })
+ESPTab:CreateToggle({ Name = "PvP 상태 표시", CurrentValue = false, Flag = "ESP_PvP", Callback = function(Value) ESPConfig.PvP = Value end })
+ESPTab:CreateToggle({ Name = "장착중인 무기 표시", CurrentValue = false, Flag = "ESP_Weapon", Callback = function(Value) ESPConfig.Weapon = Value end })
+ESPTab:CreateToggle({ Name = "벌고있는 돈 표시", CurrentValue = false, Flag = "ESP_Money", Callback = function(Value) ESPConfig.Money = Value end })
+
+local ESPObjects = {}
+
+local function CreateESP(player)
+    if ESPObjects[player] then return end
+    
+    local box = Drawing.new("Square")
+    box.Visible = false
+    box.Color = ESPConfig.Color
+    box.Thickness = 1.5
+    box.Filled = false
+
+    local text = Drawing.new("Text")
+    text.Visible = false
+    text.Center = true
+    text.Outline = true
+    text.Color = ESPConfig.Color
+    text.Size = 15
+
+    local highlight = Instance.new("Highlight")
+    highlight.FillTransparency = 0.6
+    highlight.OutlineTransparency = 0
+    highlight.FillColor = ESPConfig.Color
+    highlight.OutlineColor = ESPConfig.Color
+
+    ESPObjects[player] = { Box = box, Text = text, Highlight = highlight }
+end
+
+local function RemoveESP(player)
+    if ESPObjects[player] then
+        ESPObjects[player].Box:Remove()
+        ESPObjects[player].Text:Remove()
+        if ESPObjects[player].Highlight.Parent then
+            ESPObjects[player].Highlight:Destroy()
+        end
+        ESPObjects[player] = nil
+    end
+end
+
+for _, v in pairs(Players:GetPlayers()) do
+    if v ~= LocalPlayer then CreateESP(v) end
+end
+Players.PlayerAdded:Connect(function(v)
+    if v ~= LocalPlayer then CreateESP(v) end
+end)
+Players.PlayerRemoving:Connect(function(v)
+    RemoveESP(v)
+end)
+
+RunService.RenderStepped:Connect(function()
+    local Camera = workspace.CurrentCamera
+    for player, esp in pairs(ESPObjects) do
+        -- Update colors
+        esp.Box.Color = ESPConfig.Color
+        esp.Text.Color = ESPConfig.Color
+        esp.Highlight.FillColor = ESPConfig.Color
+        esp.Highlight.OutlineColor = ESPConfig.Color
+
+        local char = player.Character
+        if char and char:FindFirstChild("HumanoidRootPart") and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+            local hrp = char.HumanoidRootPart
+            local pos, onScreen = Camera:WorldToViewportPoint(hrp.Position)
+            
+            if onScreen then
+                local depth = pos.Z
+                local size = Vector2.new(3000 / depth, 4500 / depth)
+                local boxPos = Vector2.new(pos.X - size.X / 2, pos.Y - size.Y / 2)
+                
+                -- Box
+                esp.Box.Size = size
+                esp.Box.Position = boxPos
+                esp.Box.Visible = ESPConfig.Box
+
+                -- Text Info Assembly
+                local info = {}
+                if ESPConfig.Name then table.insert(info, player.Name) end
+                
+                if ESPConfig.PvP then
+                    if IsPvpActive(player) then table.insert(info, "[PvP: ON]") else table.insert(info, "[PvP: OFF]") end
+                end
+                
+                if ESPConfig.Weapon then
+                    local tool = char:FindFirstChildOfClass("Tool")
+                    if tool then table.insert(info, "[무기: " .. tool.Name .. "]") else table.insert(info, "[무기: 없음]") end
+                end
+                
+                if ESPConfig.Money then
+                    local moneyStr = "0"
+                    if player:FindFirstChild("leaderstats") then
+                        for _, stat in ipairs(player.leaderstats:GetChildren()) do
+                            if stat:IsA("IntValue") or stat:IsA("NumberValue") then
+                                moneyStr = tostring(stat.Value)
+                                break
+                            end
+                        end
+                    end
+                    table.insert(info, "[돈: " .. moneyStr .. "]")
+                end
+
+                if #info > 0 then
+                    esp.Text.Text = table.concat(info, "\n")
+                    esp.Text.Position = Vector2.new(pos.X, boxPos.Y - (#info * 16) - 5)
+                    esp.Text.Visible = true
+                else
+                    esp.Text.Visible = false
+                end
+
+                -- Highlight
+                if ESPConfig.General then
+                    if esp.Highlight.Parent ~= char then esp.Highlight.Parent = char end
+                    esp.Highlight.Enabled = true
+                else
+                    esp.Highlight.Enabled = false
+                end
+            else
+                esp.Box.Visible = false
+                esp.Text.Visible = false
+                esp.Highlight.Enabled = false
+            end
+        else
+            esp.Box.Visible = false
+            esp.Text.Visible = false
+            esp.Highlight.Enabled = false
+        end
+    end
+end)
+
+
 
 UtilityTab:CreateSection("최적화 및 보안")
 
@@ -616,9 +773,7 @@ UtilityTab:CreateToggle({
          Lighting.FogEnd = BackupLighting.FogEnd
          Lighting.OutdoorAmbient = BackupLighting.OutdoorAmbient
 
-         for _, conn in ipairs(Conns) do
-            conn:Disconnect()
-         end
+         for _, conn in ipairs(Conns) do conn:Disconnect() end
          Conns = {}
       end
    end,
@@ -649,10 +804,7 @@ UtilityTab:CreateToggle({
             end
          end)
       else
-         if AfkConnection then
-            AfkConnection:Disconnect()
-            AfkConnection = nil
-         end
+         if AfkConnection then AfkConnection:Disconnect(); AfkConnection = nil end
       end
    end,
 })

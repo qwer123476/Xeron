@@ -102,7 +102,7 @@ TeleportTab:CreateButton({ Name = "물건조합소", Callback = function() Telep
 TeleportTab:CreateButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
 TeleportTab:CreateButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
 TeleportTab:CreateButton({ Name = "병원 지하", Callback = function() TeleportTo(Vector3.new(214.79, -375.10, 935.49)) end })
-TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
+--TeleportTab:CreateButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
 TeleportTab:CreateButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:CreateButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
@@ -210,60 +210,9 @@ AutoTab:CreateToggle({
    end,
 })
 
-local ClientStatSpoofEnabled = false
-AutoTab:CreateToggle({
-   Name = "클라이언트 쿨타임 무력화 (스마트 스캔)",
-   CurrentValue = false,
-   Flag = "SmartClientSpoof",
-   Callback = function(Value)
-      ClientStatSpoofEnabled = Value
-      if ClientStatSpoofEnabled then
-         task.spawn(function()
-            local ignoreKeys = {
-               "hovertime", "releasetime", "presstime", "hovered", "pressed", 
-               "usescale", "priceinrobux", "assetid", "productid"
-            }
-            while ClientStatSpoofEnabled do
-               for _, v in pairs(getgc(true)) do
-                  if type(v) == "table" then
-                     local isJunk = false
-                     for key, _ in pairs(v) do
-                        if type(key) == "string" then
-                           local lowerKey = string.lower(key)
-                           for _, ignore in ipairs(ignoreKeys) do
-                              if string.find(lowerKey, ignore) then
-                                 isJunk = true
-                                 break
-                              end
-                           end
-                        end
-                        if isJunk then break end
-                     end
-                     
-                     if not isJunk then
-                        pcall(function()
-                           for key, val in pairs(v) do
-                              if type(key) == "string" and type(val) == "number" then
-                                 local lowerKey = string.lower(key)
-                                 if string.find(lowerKey, "cooldown") or string.find(lowerKey, "delay") or string.find(lowerKey, "rate") or string.find(lowerKey, "tick") or string.find(lowerKey, "time") then
-                                    if val > 0 then rawset(v, key, 0) end
-                                 end
-                              end
-                           end
-                        end)
-                     end
-                  end
-               end
-               task.wait(0.5)
-            end
-         end)
-         Rayfield:Notify({Title = "스마트 쿨타임 무력화", Content = "UI를 제외한 무기 딜레이를 0으로 고정합니다.", Duration = 3, Image = 4483362458})
-      end
-   end,
-})
 
 AutoTab:CreateSection("일반 뽑기 설정")
-AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
+--AutoTab:CreateLabel("모든 뽑기는 딜레이가 제거되어있으니 주의하세요!")
 local SelectedGachaCount = 1
 local GachaDelay = 0.1
 local AutoGachaEnabled = false
@@ -375,37 +324,9 @@ AutoTab:CreateToggle({
    end,
 })
 
-AutoTab:CreateSection("자동 인챈트 설정")
-local AutoEnchantEnabled = false
-local LockConnectionEnchant = nil
 
-AutoTab:CreateToggle({
-   Name = "자동 인챈트 켜기",
-   CurrentValue = false,
-   Flag = "AutoEnchantToggle",
-   Callback = function(Value)
-      AutoEnchantEnabled = Value
-      if AutoEnchantEnabled then
-         LockConnectionEnchant = RunService.RenderStepped:Connect(function()
-            local character = LocalPlayer.Character
-            if character and character:FindFirstChild("HumanoidRootPart") then
-               local hrp = character.HumanoidRootPart
-               hrp.CFrame = CFrame.new(249.72, -373.26, 12.85)
-               hrp.AssemblyLinearVelocity = Vector3.zero
-               hrp.AssemblyAngularVelocity = Vector3.zero
-            end
-         end)
-         task.spawn(function()
-            while AutoEnchantEnabled do
-               CentralEvent:FireServer("NPCDialogue_Choose", {choiceIndex = 1})
-               task.wait(0.1)
-            end
-         end)
-      else
-         if LockConnectionEnchant then LockConnectionEnchant:Disconnect(); LockConnectionEnchant = nil end
-      end
-   end,
-})
+
+
 
 PlayerTab:CreateSection("플레이어 상태")
 local WalkSpeedEnabled = false

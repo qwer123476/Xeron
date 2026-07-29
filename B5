@@ -3148,7 +3148,7 @@ end
 local v645 = u3
 local v646 = u3.MakeWindow(v645, {
 	Name = 'Fling Things and People',
-	HidePremium = true,
+	HidePremium = false,
 	SaveConfig = true,
 	ConfigFolder = 'FTAPConfig',
 	IntroEnabled = false,

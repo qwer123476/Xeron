@@ -368,7 +368,7 @@ local NP = {
     SelectedTabTextColor = Color3.fromRGB(255,0,0),
 
     ElementBackground = Color3.fromRGB(35,35,35),
-    ElementBackgroundHover = Color3.fromRGB(50,50,50),
+    ElementBackgroundHover =Color3.fromRGB(50,50,50),
     SecondaryElementBackground = Color3.fromRGB(25,25,25),
     ElementStroke = Color3.fromRGB(60,60,60),
     SecondaryElementStroke = Color3.fromRGB(45,45,45),

@@ -1104,9 +1104,14 @@ local PlayerTab = Window:MakeTab({Name = "플레이어", Icon = "rbxassetid://44
 local PVPTab = Window:MakeTab({Name = "PVP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local ESPTab = Window:MakeTab({Name = "ESP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local UtilityTab = Window:MakeTab({Name = "안전", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local MusicTab = Window:MakeTab({
+	Name = "배경음악",
+	Icon = "rbxassetid://4103737298",
+	PremiumOnly = false
+})
 
 TeleportTab:AddLabel("이스크립트는 혼자 개발한 스크입니다 ")
-TeleportTab:AddLabel("유포&판매 하지마세용")
+TeleportTab:AddLabel("함부러판매 하지마세용")
 TeleportTab:AddSection({ Name = "텔포1" })
 TeleportTab:AddButton({ Name = "스폰", Callback = function() TeleportTo(Vector3.new(-34.18, 10.44, -8.99)) end })
 TeleportTab:AddButton({ Name = "뽑기", Callback = function() TeleportTo(Vector3.new(-17.21, 10.44, -30.85)) end })
@@ -1120,7 +1125,7 @@ TeleportTab:AddButton({ Name = "물건조합소", Callback = function() Teleport
 TeleportTab:AddButton({ Name = "암시장", Callback = function() TeleportTo(Vector3.new(295.27, -387.37, -503.78)) end })
 TeleportTab:AddButton({ Name = "하수구", Callback = function() TeleportTo(Vector3.new(346.27, -375.08, -289.98)) end })
 TeleportTab:AddButton({ Name = "병원 지하", Callback = function() TeleportTo(Vector3.new(214.79, -375.10, 935.49)) end })
-TeleportTab:AddButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
+--TeleportTab:AddButton({ Name = "블릿조직", Callback = function() TeleportTo(Vector3.new(-325.00, -379.23, 383.85)) end })
 TeleportTab:AddButton({ Name = "컷씬 1", Callback = function() TeleportTo(Vector3.new(613.54, -304.45, 136.87)) end })
 TeleportTab:AddButton({ Name = "컷씬 2", Callback = function() TeleportTo(Vector3.new(60.89, -249.88, -118.98)) end })
 
@@ -2025,6 +2030,69 @@ UtilityTab:AddSlider({
     end,
 })
 
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
+local currentSound = nil
+
+local function setBackgroundMusic(state)
+	CentralEvent:FireServer("UpdateSetting", "MusicOn", state, 1)
+end
+
+local function stopMusic()
+	if currentSound then
+		currentSound:Stop()
+		currentSound:Destroy()
+		currentSound = nil
+	end
+	setBackgroundMusic(true)
+end
+
+local function playMusic(soundId)
+	setBackgroundMusic(false)
+	if currentSound then
+		currentSound:Stop()
+		currentSound:Destroy()
+		currentSound = nil
+	end
+	currentSound = Instance.new("Sound")
+	currentSound.SoundId = "rbxassetid://" .. tostring(soundId)
+	currentSound.Volume = 1
+	currentSound.Looped = true
+	currentSound.Parent = game:GetService("SoundService")
+	currentSound:Play()
+end
+
+local musicList = {
+	["Crab Lava"] = 5410086218,
+	["Time Attack"] = 88657328640254,
+	["Low Cortisol"] = 110919391228823,
+	["Happy-Go-Lively"] = 1842414898,
+	["Sugar Stutters (a)"] = 1838080629
+}
+
+local selectedMusic = "Crab Lava"
+
+
+MusicTab:AddDropdown({
+	Name = "노래를 골라주세요.",
+	Default = "Crab Lava",
+	Options = {"Crab Lava", "Time Attack", "Low Cortisol", "Happy-Go-Lively", "Sugar Stutters (a)"},
+	Callback = function(Value)
+		selectedMusic = Value
+	end    
+})
+
+MusicTab:AddToggle({
+	Name = "음악 켜기",
+	Default = false,
+	Callback = function(Value)
+		if Value then
+			playMusic(musicList[selectedMusic])
+		else
+			stopMusic()
+		end
+	end    
+})
 
 --OrionLib:Init()

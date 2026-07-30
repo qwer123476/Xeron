@@ -1176,6 +1176,7 @@ end)
 AutoTab:AddToggle({
 Name = "자동 무기 등록",
 Default = false,
+Flag = "1",
 Callback = function(Value)
 AutoWeaponSelectEnabled = Value
 if AutoWeaponSelectEnabled and LocalPlayer.Character then
@@ -1207,6 +1208,7 @@ end,
 AutoTab:AddTextbox({
 Name = "오토팜 딜레이",
 Default = "0.1",
+Flag = "2",
 TextDisappear = false,
 Callback = function(Text)
 local num = tonumber(Text)
@@ -1218,6 +1220,7 @@ end,
 AutoTab:AddToggle({
 Name = "오토팜",
 Default = false,
+Flag = "3",
 Callback = function(Value)
 AutoAttackEnabled = Value
 if AutoAttackEnabled then
@@ -1258,6 +1261,7 @@ AutoTab:AddButton({ Name = "500회", Callback = function() SetGachaCount(500) en
 AutoTab:AddTextbox({
    Name = "일반 뽑기 속도 (딜레이)",
    Default = "0.1",
+   Flag = "4",
    TextDisappear = false,
    Callback = function(Text)
       local num = tonumber(Text)
@@ -1268,6 +1272,7 @@ AutoTab:AddTextbox({
 AutoTab:AddToggle({
    Name = "오토 일반 뽑기",
    Default = false,
+   Flag = "5",
    Callback = function(Value)
       AutoGachaEnabled = Value
       if AutoGachaEnabled then
@@ -1313,6 +1318,7 @@ AutoTab:AddButton({ Name = "골든 500회", Callback = function() SetGoldenGacha
 AutoTab:AddTextbox({
    Name = "골든 뽑기 속도 (딜레이)",
    Default = "0.1",
+   Flag = "6",
    TextDisappear = false,
    Callback = function(Text)
       local num = tonumber(Text)
@@ -1323,6 +1329,7 @@ AutoTab:AddTextbox({
 AutoTab:AddToggle({
    Name = "오토 골든 뽑기",
    Default = false,
+   Flag = "7",
    Callback = function(Value)
       AutoGoldenGachaEnabled = Value
       if AutoGoldenGachaEnabled then
@@ -1372,6 +1379,7 @@ LocalPlayer.CharacterAdded:Connect(setupHumanoid)
 PlayerTab:AddToggle({
    Name = "속도 조절",
    Default = false,
+   Flag = "8",
    Callback = function(Value)
       WalkSpeedEnabled = Value
       local character = LocalPlayer.Character
@@ -1392,6 +1400,7 @@ PlayerTab:AddSlider({
    Min = 16,
    Max = 200,
    Default = 16,
+   Flag = "9",
    Color = Color3.fromRGB(255,255,255),
    Increment = 1,
    ValueName = "",
@@ -1401,6 +1410,7 @@ PlayerTab:AddSlider({
 PlayerTab:AddToggle({
    Name = "점프 조절",
    Default = false,
+   Flag = "10",
    Callback = function(Value)
       JumpPowerEnabled = Value
       local character = LocalPlayer.Character
@@ -1417,6 +1427,7 @@ PlayerTab:AddSlider({
    Min = 50,
    Max = 300,
    Default = 50,
+   Flag = "11",
    Color = Color3.fromRGB(255,255,255),
    Increment = 1,
    ValueName = "",
@@ -1457,6 +1468,7 @@ local InfiniteJumpEnabled = false
 PlayerTab:AddToggle({
    Name = "무한 점프",
    Default = false,
+   Flag = "12",
    Callback = function(Value) InfiniteJumpEnabled = Value end,
 })
 
@@ -1483,6 +1495,7 @@ end
 PVPTab:AddToggle({
    Name = "펀치 아우라 (잘되는지 모름)",
    Default = false,
+   Flag = "13",
    Callback = function(Value)
       PvpAuraEnabled = Value
       if PvpAuraEnabled then
@@ -1500,6 +1513,7 @@ PVPTab:AddToggle({
 PVPTab:AddToggle({
    Name = "PVP 오토팜(잘되는지 모름)",
    Default = false,
+   Flag = "14",
    Callback = function(Value)
       KillAutoBangEnabled = Value
       if KillAutoBangEnabled then
@@ -1546,17 +1560,18 @@ local ESPConfig = {
 ESPTab:AddColorpicker({
     Name = "플레이어 ESP 색상",
     Default = ESPConfig.Color,
+    Flag = "15",
     Callback = function(Value)
         ESPConfig.Color = Value
     end
 })
 
-ESPTab:AddToggle({ Name = "일반 ESP (하이라이트)", Default = false, Callback = function(Value) ESPConfig.General = Value end })
-ESPTab:AddToggle({ Name = "네임 ESP", Default = false, Callback = function(Value) ESPConfig.Name = Value end })
-ESPTab:AddToggle({ Name = "박스 ESP", Default = false, Callback = function(Value) ESPConfig.Box = Value end })
-ESPTab:AddToggle({ Name = "PvP 상태 표시", Default = false, Callback = function(Value) ESPConfig.PvP = Value end })
-ESPTab:AddToggle({ Name = "장착중인 무기 표시", Default = false, Callback = function(Value) ESPConfig.Weapon = Value end })
-ESPTab:AddToggle({ Name = "벌고있는 돈 표시", Default = false, Callback = function(Value) ESPConfig.Money = Value end })
+ESPTab:AddToggle({ Name = "일반 ESP", Default = false, Flag = "16",  Callback = function(Value) ESPConfig.General = Value end })
+ESPTab:AddToggle({ Name = "이름 ESP", Default = false, Flag = "17", Callback = function(Value) ESPConfig.Name = Value end })
+ESPTab:AddToggle({ Name = "박스 ESP", Default = false, Flag = "18", Callback = function(Value) ESPConfig.Box = Value end })
+ESPTab:AddToggle({ Name = "PvP 상태 표시", Default = false, Flag = "19", Callback = function(Value) ESPConfig.PvP = Value end })
+ESPTab:AddToggle({ Name = "장착중인 무기 표시", Default = false, Flag = "20", Callback = function(Value) ESPConfig.Weapon = Value end })
+ESPTab:AddToggle({ Name = "현재있는 돈표시", Default = false, Flag = "21", Callback = function(Value) ESPConfig.Money = Value end })
 
 local ESPObjects = {}
 
@@ -1692,21 +1707,22 @@ local NpcESPConfig = {
 ESPTab:AddColorpicker({
     Name = "NPC ESP 색상",
     Default = NpcESPConfig.Color,
+    Flag = "22",
     Callback = function(Value)
         NpcESPConfig.Color = Value
     end
 })
 
-ESPTab:AddToggle({ Name = "NPC 일반 ESP (하이라이트)", Default = false, Callback = function(Value) NpcESPConfig.General = Value end })
-ESPTab:AddToggle({ Name = "NPC 네임 ESP", Default = false, Callback = function(Value) NpcESPConfig.Name = Value end })
-ESPTab:AddToggle({ Name = "NPC 박스 ESP", Default = false, Callback = function(Value) NpcESPConfig.Box = Value end })
+ESPTab:AddToggle({ Name = "NPC 일반 ESP (하이라이트)", Default = false, Flag = "22", Callback = function(Value) NpcESPConfig.General = Value end })
+ESPTab:AddToggle({ Name = "NPC 네임 ESP", Default = false, Flag = "23", Callback = function(Value) NpcESPConfig.Name = Value end })
+ESPTab:AddToggle({ Name = "NPC 박스 ESP", Default = false, Flag = "24", Callback = function(Value) NpcESPConfig.Box = Value end })
 
 local TargetNpcNames = {
     "하사", "레조", "큐턴", "지피", "킨치", "고상", "비투", "지피2", 
     "엑스트라", "스타토처형식 모델", "Rig", "helper", "대장장이", 
     "연구자", "인형 저스틴스틴", "기본뽑기 상인", "이도", "저스틴틴", 
     "골든뽑기 상인", "LMGRig", "SlayerRIG", "소트2", "R6", "닥터", 
-    "하삐", "비거", "소트", "블마상인", "루카", "QRdoote1120"
+    "하삐", "비거", "소트", "블마상인", "루카", "나"
 }
 
 local NpcESPObjects = {}
@@ -1812,7 +1828,7 @@ local savedStates = {}
 UtilityTab:AddToggle({
     Name = "안티렉",
     CurrentValue = false,
-    Flag = "AntiLagToggle",
+    Flag = "25",
     Callback = function(Value)
         antiLagEnabled = Value
         if antiLagEnabled then
@@ -1850,7 +1866,7 @@ local fbConn = nil
 UtilityTab:AddToggle({
     Name = "안티 어둠",
     CurrentValue = false,
-    Flag = "FullbrightToggle",
+    Flag = "26",
     Callback = function(Value)
         fullbrightEnabled = Value
         if fullbrightEnabled then
@@ -1890,7 +1906,7 @@ local origAtmospheres = {}
 UtilityTab:AddToggle({
     Name = "안티 안개",
     CurrentValue = false,
-    Flag = "AntiFogToggle",
+    Flag = "27",
     Callback = function(Value)
         if Value then
             origFogEnd = Lighting.FogEnd
@@ -1922,6 +1938,7 @@ local AfkConnection = nil
 UtilityTab:AddToggle({
    Name = "안티 AFK",
    Default = false,
+   Flag = "28",
    Callback = function(Value)
       AntiAfkEnabled = Value
       if AntiAfkEnabled then
@@ -1950,6 +1967,7 @@ local AntiKickEnabled = false
 UtilityTab:AddToggle({
    Name = "안티 킥(로컬)",
    Default = false,
+   Flag = "29",
    Callback = function(Value)
       AntiKickEnabled = Value
       if AntiKickEnabled then
@@ -1975,7 +1993,7 @@ local savedCanCollide = {}
 UtilityTab:AddToggle({
     Name = "안티플링",
     CurrentValue = false,
-    Flag = "AntiFlingToggle",
+    Flag = "30",
     Callback = function(Value)
         antiFlingEnabled = Value
         if antiFlingEnabled then
@@ -2024,7 +2042,7 @@ UtilityTab:AddSlider({
     Increment = 1,
     Suffix = "",
     CurrentValue = 2,
-    Flag = "HipHeightSlider",
+    Flag = "31",
     Callback = function(Value)
         if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
             LocalPlayer.Character:FindFirstChildOfClass("Humanoid").HipHeight = Value
@@ -2079,6 +2097,7 @@ local selectedMusic = "Crab Lava"
 MusicTab:AddDropdown({
 	Name = "노래를 골라주세요.",
 	Default = "Crab Lava",
+    Flag = "32",
 	Options = {"Crab Lava", "Time Attack", "Low Cortisol", "Happy-Go-Lively", "Sugar Stutters (a)"},
 	Callback = function(Value)
 		selectedMusic = Value
@@ -2088,6 +2107,7 @@ MusicTab:AddDropdown({
 MusicTab:AddToggle({
 	Name = "음악 켜기",
 	Default = false,
+    Flag = "33",
 	Callback = function(Value)
 		if Value then
 			playMusic(musicList[selectedMusic])

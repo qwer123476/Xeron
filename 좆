@@ -1797,62 +1797,118 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
-UtilityTab:AddSection({ Name = "최적화 및 보안" })
+UtilityTab:AddSection({ Name = "안티" })
 
-local AntiLagEnabled = false
-local BackupLighting = {
-   GlobalShadows = Lighting.GlobalShadows,
-   Brightness = Lighting.Brightness,
-   FogEnd = Lighting.FogEnd,
-   OutdoorAmbient = Lighting.OutdoorAmbient
-}
-local Conns = {}
+local antiLagEnabled = false
+local savedStates = {}
 
-UtilityTab:AddToggle({
-   Name = "안티 렉",
-   Default = false,
-   Callback = function(Value)
-      AntiLagEnabled = Value
-      if AntiLagEnabled then
-         Lighting.GlobalShadows = false
-         Lighting.Brightness = 2
-         Lighting.FogEnd = 9e9
-         
-         for _, obj in ipairs(workspace:GetDescendants()) do
-            if obj:IsA("BasePart") then
-               obj.Material = Enum.Material.SmoothPlastic
-               obj.Reflectance = 0
-            elseif obj:IsA("Decal") or obj:IsA("Texture") then
-               obj.Transparency = 1
-            elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-               obj.Enabled = false
+UtilityTab:CreateToggle({
+    Name = "안티렉",
+    CurrentValue = false,
+    Flag = "AntiLagToggle",
+    Callback = function(Value)
+        antiLagEnabled = Value
+        if antiLagEnabled then
+            savedStates = {}
+            for _, obj in pairs(game:GetDescendants()) do
+                if obj:IsA("ParticleEmitter") or obj:IsA("Smoke") or obj:IsA("Fire") or obj:IsA("Sparkles") or obj:IsA("Trail") or obj:IsA("Beam") then
+                    savedStates[obj] = obj.Enabled
+                    obj.Enabled = false
+                elseif obj:IsA("BasePart") then
+                    savedStates[obj] = {Material = obj.Material, Reflectance = obj.Reflectance}
+                    obj.Material = Enum.Material.SmoothPlastic
+                    obj.Reflectance = 0
+                end
             end
-         end
-
-         table.insert(Conns, workspace.DescendantAdded:Connect(function(obj)
-            if AntiLagEnabled then
-               if obj:IsA("BasePart") then
-                  obj.Material = Enum.Material.SmoothPlastic
-                  obj.Reflectance = 0
-               elseif obj:IsA("Decal") or obj:IsA("Texture") then
-                  obj.Transparency = 1
-               elseif obj:IsA("ParticleEmitter") or obj:IsA("Fire") or obj:IsA("Smoke") or obj:IsA("Sparkles") then
-                  obj.Enabled = false
-               end
+        else
+            for obj, state in pairs(savedStates) do
+                if obj and obj.Parent then
+                    if typeof(state) == "boolean" then
+                        obj.Enabled = state
+                    elseif typeof(state) == "table" then
+                        obj.Material = state.Material
+                        obj.Reflectance = state.Reflectance
+                    end
+                end
             end
-         end))
-      else
-         Lighting.GlobalShadows = BackupLighting.GlobalShadows
-         Lighting.Brightness = BackupLighting.Brightness
-         Lighting.FogEnd = BackupLighting.FogEnd
-         Lighting.OutdoorAmbient = BackupLighting.OutdoorAmbient
-
-         for _, conn in ipairs(Conns) do conn:Disconnect() end
-         Conns = {}
-      end
-   end,
+            savedStates = {}
+        end
+    end,
 })
 
+local fullbrightEnabled = false
+local origLightingProps = {}
+local fbConn = nil
+
+UtilityTab:CreateToggle({
+    Name = "안티 어둠",
+    CurrentValue = false,
+    Flag = "FullbrightToggle",
+    Callback = function(Value)
+        fullbrightEnabled = Value
+        if fullbrightEnabled then
+            origLightingProps = {
+                Brightness = Lighting.Brightness,
+                ClockTime = Lighting.ClockTime,
+                GlobalShadows = Lighting.GlobalShadows,
+                OutdoorAmbient = Lighting.OutdoorAmbient
+            }
+            fbConn = RunService.RenderStepped:Connect(function()
+                if fullbrightEnabled then
+                    Lighting.Brightness = 2
+                    Lighting.ClockTime = 14
+                    Lighting.GlobalShadows = false
+                    Lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+                end
+            end)
+        else
+            if fbConn then
+                fbConn:Disconnect()
+                fbConn = nil
+            end
+            if origLightingProps.Brightness ~= nil then
+                Lighting.Brightness = origLightingProps.Brightness
+                Lighting.ClockTime = origLightingProps.ClockTime
+                Lighting.GlobalShadows = origLightingProps.GlobalShadows
+                Lighting.OutdoorAmbient = origLightingProps.OutdoorAmbient
+            end
+        end
+    end,
+})
+
+local origFogEnd = Lighting.FogEnd
+local origFogStart = Lighting.FogStart
+local origAtmospheres = {}
+
+UtilityTab:CreateToggle({
+    Name = "안티 안개",
+    CurrentValue = false,
+    Flag = "AntiFogToggle",
+    Callback = function(Value)
+        if Value then
+            origFogEnd = Lighting.FogEnd
+            origFogStart = Lighting.FogStart
+            Lighting.FogStart = 0
+            Lighting.FogEnd = 1e9
+            origAtmospheres = {}
+            for _, v in pairs(Lighting:GetChildren()) do
+                if v:IsA("Atmosphere") then
+                    origAtmospheres[v] = v.Density
+                    v.Density = 0
+                end
+            end
+        else
+            Lighting.FogStart = origFogStart
+            Lighting.FogEnd = origFogEnd
+            for atmosphere, density in pairs(origAtmospheres) do
+                if atmosphere and atmosphere.Parent then
+                    atmosphere.Density = density
+                end
+            end
+            origAtmospheres = {}
+        end
+    end,
+})
 local AntiAfkEnabled = false
 local AfkConnection = nil
 
@@ -1904,5 +1960,71 @@ UtilityTab:AddToggle({
       end
    end,
 })
+
+local antiFlingEnabled = false
+local antiFlingConn = nil
+local savedCanCollide = {}
+
+UtilityTab:AddToggle({
+    Name = "안티플링",
+    CurrentValue = false,
+    Flag = "AntiFlingToggle",
+    Callback = function(Value)
+        antiFlingEnabled = Value
+        if antiFlingEnabled then
+            savedCanCollide = {}
+            antiFlingConn = RunService.Stepped:Connect(function()
+                if not antiFlingEnabled then return end
+                for _, player in pairs(Players:GetPlayers()) do
+                    if player ~= LocalPlayer and player.Character then
+                        for _, part in pairs(player.Character:GetDescendants()) do
+                            if part:IsA("BasePart") then
+                                if savedCanCollide[part] == nil then
+                                    savedCanCollide[part] = part.CanCollide
+                                end
+                                part.CanCollide = false
+                            end
+                        end
+                    end
+                end
+            end)
+        else
+            if antiFlingConn then
+                antiFlingConn:Disconnect()
+                antiFlingConn = nil
+            end
+            for part, collide in pairs(savedCanCollide) do
+                if part and part.Parent then
+                    part.CanCollide = collide
+                end
+            end
+            savedCanCollide = {}
+        end
+    end,
+})
+local defaultHipHeight = 2
+task.spawn(function()
+    local char = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+    local hum = char:WaitForChild("Humanoid", 5)
+    if hum then
+        defaultHipHeight = hum.HipHeight
+    end
+end)
+UtilityTab:AddSection({ Name = "이외" })
+UtilityTab:AddSlider({
+    Name = "힙 하이스트",
+    Range = {0, 100},
+    Increment = 1,
+    Suffix = "",
+    CurrentValue = 2,
+    Flag = "HipHeightSlider",
+    Callback = function(Value)
+        if LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid") then
+            LocalPlayer.Character:FindFirstChildOfClass("Humanoid").HipHeight = Value
+        end
+    end,
+})
+
+
 
 --OrionLib:Init()

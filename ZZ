@@ -7974,7 +7974,7 @@ local Inputt = funTab:AddTextbox({
 })
 
 
-Local Ctratee = funTab:AddButton({
+local Ctratee = funTab:AddButton({
    Name = "Create",
    Callback = function()
        local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7994,7 +7994,7 @@ Local Ctratee = funTab:AddButton({
 
        local character = plr.Character or plr.CharacterAdded:Wait()
        local hrp = character:WaitForChild("HumanoidRootPart")
-       --local inv = workspace:WaitForChild(plr.Name .. "SpawnedInToys")
+       local inv = workspace:WaitForChild(plr.Name .. "SpawnedInToys")
        local StickyPartEvent = ReplicatedStorage:WaitForChild("PlayerEvents"):WaitForChild("StickyPartEvent")
        local SpawnToy = ReplicatedStorage:WaitForChild("MenuToys"):WaitForChild("SpawnToyRemoteFunction")
 

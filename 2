@@ -1,0 +1,764 @@
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent", 10)
+
+local State = {
+	AutoGachaNormal = false,
+	AutoGachaGolden = false,
+	GachaCount = 10,
+	
+	AutoEnchant = false,
+	TargetEnchant = "Speed V",
+	AutoPickupBooks = false,
+	
+	AutoUpgrade = false,
+	ProtectTicket = true,
+	
+	AutoPVP = false,
+	AutoKillAura = false,
+	
+	SelectedPotion = "행운 물약",
+	BrewCount = 1
+}
+
+local AllEnchants = {
+	"Speed I", "Speed II", "Speed III", "Speed IV", "Speed V", "Speed VI",
+	"Luck I", "Luck II", "Luck III", "Luck IV", "Luck V", "Luck VI",
+	"Coin I", "Coin II", "Coin III", "Coin IV", "Coin V", "Coin VI",
+	"깨달음"
+}
+
+local function getHRP()
+	local char = LocalPlayer.Character
+	return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function getEquippedToolName()
+	local char = LocalPlayer.Character
+	if char then
+		local tool = char:FindFirstChildOfClass("Tool")
+		if tool then return tool.Name end
+	end
+	local attr = LocalPlayer:GetAttribute("EquippedTool")
+	if type(attr) == "string" and attr ~= "" then return attr end
+	return nil
+end
+
+local function getCurrentEnchantName()
+	local toolName = getEquippedToolName()
+	if not toolName then return nil end
+	
+	local enchantBag = LocalPlayer:FindFirstChild("EnchantBag")
+	if enchantBag then
+		local item = enchantBag:FindFirstChild(toolName)
+		if item and item:FindFirstChild("CurrentEnchant") then
+			return item.CurrentEnchant.Value
+		end
+	end
+	
+	local attr = LocalPlayer:GetAttribute("CurrentEnchant_" .. toolName)
+	if attr then return tostring(attr) end
+	
+	return nil
+end
+
+local function matchTargetEnchant(current, target)
+	if not current or not target then return false end
+	current = tostring(current):lower():gsub("%s+", "")
+	target = tostring(target):lower():gsub("%s+", "")
+	return current:find(target, 1, true) ~= nil
+end
+
+local function notify(title, msg)
+	pcall(function()
+		local MessageModule = require(ReplicatedStorage.Modules.MessageModule)
+		MessageModule.Send(title .. ": " .. msg, Color3.fromRGB(0, 230, 160), 3)
+	end)
+end
+
+local function smartTeleport(query)
+	local hrp = getHRP()
+	if not hrp then return end
+	
+	if query == "스폰" then
+		local spawnObj = Workspace:FindFirstChildOfClass("SpawnLocation")
+		if spawnObj then
+			hrp.CFrame = spawnObj.CFrame + Vector3.new(0, 4, 0)
+			notify("텔레포트", "스폰 위치로 이동했습니다.")
+			return
+		end
+	end
+	
+	local q = query:lower()
+	local candidates = {}
+	
+	for _, v in ipairs(Workspace:GetDescendants()) do
+		if v:IsA("BasePart") or v:IsA("Model") then
+			local name = v.Name:lower()
+			if name:find(q, 1, true) then
+				table.insert(candidates, v)
+			end
+		end
+	end
+	
+	for _, v in ipairs(candidates) do
+		if v:IsA("BasePart") then
+			hrp.CFrame = v.CFrame + Vector3.new(0, 4, 0)
+			notify("텔레포트", query .. " (으)로 이동했습니다.")
+			return
+		elseif v:IsA("Model") then
+			local primary = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart", true)
+			if primary then
+				hrp.CFrame = primary.CFrame + Vector3.new(0, 4, 0)
+				notify("텔레포트", query .. " (으)로 이동했습니다.")
+				return
+			end
+		end
+	end
+	
+	for _, v in ipairs(Workspace:GetDescendants()) do
+		if v:IsA("ProximityPrompt") then
+			local pName = v.Parent and v.Parent.Name:lower() or ""
+			if pName:find(q, 1, true) and v.Parent:IsA("BasePart") then
+				hrp.CFrame = v.Parent.CFrame + Vector3.new(0, 4, 0)
+				notify("텔레포트", query .. " (으)로 이동했습니다.")
+				return
+			end
+		end
+	end
+	
+	notify("텔레포트 오류", query .. " 대상 위치를 맵에서 찾을 수 없습니다.")
+end
+
+task.spawn(function()
+	while true do
+		task.wait(0.2)
+		if State.AutoGachaNormal then
+			if CentralEvent then
+				CentralEvent:FireServer("GachaRequest", "처음뽑기", State.GachaCount or 1)
+			end
+		end
+		if State.AutoGachaGolden then
+			if CentralEvent then
+				CentralEvent:FireServer("GachaRequest", "골든뽑기", State.GachaCount or 1)
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(0.3)
+		if State.AutoEnchant then
+			local current = getCurrentEnchantName()
+			if current and matchTargetEnchant(current, State.TargetEnchant) then
+				State.AutoEnchant = false
+				notify("인챈트 달성", "목표 인챈트 [" .. tostring(State.TargetEnchant) .. "] 달성하여 자동 정지되었습니다.")
+			else
+				if CentralEvent then
+					CentralEvent:FireServer("EnchantBag_Apply", { Slot = 1 })
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(0.4)
+		if State.AutoPickupBooks then
+			local hrp = getHRP()
+			for _, v in ipairs(Workspace:GetDescendants()) do
+				if v:IsA("ProximityPrompt") and v.Enabled then
+					local pName = v.Parent and v.Parent.Name or ""
+					if pName:find("Book") or pName:find("인챈트") or pName:find("Totem") or pName:find("토템") then
+						if fireproximityprompt then
+							fireproximityprompt(v)
+						else
+							if hrp and v.Parent:IsA("BasePart") then
+								hrp.CFrame = v.Parent.CFrame
+							end
+						end
+					end
+				elseif v:IsA("TouchTransmitter") and v.Parent and v.Parent:IsA("BasePart") then
+					local partName = v.Parent.Name
+					if partName:find("Book") or partName:find("인챈트") or partName:find("Totem") or partName:find("토템") then
+						if hrp then
+							if firetouchinterest then
+								firetouchinterest(hrp, v.Parent, 0)
+								firetouchinterest(hrp, v.Parent, 1)
+							else
+								hrp.CFrame = v.Parent.CFrame
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(0.3)
+		if State.AutoUpgrade then
+			local toolName = getEquippedToolName()
+			if toolName and CentralEvent then
+				CentralEvent:FireServer("SetUpgradeProtectState", State.ProtectTicket)
+				CentralEvent:FireServer("UpgradeTool", toolName)
+			end
+		end
+	end
+end)
+
+local pvpSeq = 0
+task.spawn(function()
+	while true do
+		task.wait(0.1)
+		if State.AutoPVP then
+			LocalPlayer:SetAttribute("PVPEnabled", true)
+			pvpSeq = (pvpSeq % 1000000) + 1
+			if CentralEvent then
+				CentralEvent:FireServer("PunchRequest", pvpSeq)
+			end
+			
+			if State.AutoKillAura then
+				local hrp = getHRP()
+				if hrp then
+					for _, enemy in ipairs(Players:GetPlayers()) do
+						if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+							local enemyHrp = enemy.Character.HumanoidRootPart
+							local dist = (enemyHrp.Position - hrp.Position).Magnitude
+							if dist < 60 then
+								hrp.CFrame = enemyHrp.CFrame * CFrame.new(0, 0, 3)
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "UltimateAutoHubGui"
+ScreenGui.ResetOnSpawn = false
+
+pcall(function()
+	if gethui then
+		ScreenGui.Parent = gethui()
+	elseif syn and syn.protect_gui then
+		syn.protect_gui(ScreenGui)
+		ScreenGui.Parent = game:GetService("CoreGui")
+	else
+		ScreenGui.Parent = PlayerGui
+	end
+end)
+if not ScreenGui.Parent then ScreenGui.Parent = PlayerGui end
+
+local MainFrame = Instance.new("Frame")
+MainFrame.Name = "MainFrame"
+MainFrame.Size = UDim2.new(0, 680, 0, 450)
+MainFrame.Position = UDim2.new(0.5, -340, 0.5, -225)
+MainFrame.BackgroundColor3 = Color3.fromRGB(18, 20, 29)
+MainFrame.BackgroundTransparency = 0.08
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Parent = ScreenGui
+
+local MainUICorner = Instance.new("UICorner")
+MainUICorner.CornerRadius = UDim.new(0, 14)
+MainUICorner.Parent = MainFrame
+
+local MainUIStroke = Instance.new("UIStroke")
+MainUIStroke.Color = Color3.fromRGB(80, 120, 240)
+MainUIStroke.Thickness = 1.5
+MainUIStroke.Transparency = 0.3
+MainUIStroke.Parent = MainFrame
+
+local Header = Instance.new("Frame")
+Header.Name = "Header"
+Header.Size = UDim2.new(1, 0, 0, 48)
+Header.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
+Header.BorderSizePixel = 0
+Header.Parent = MainFrame
+
+local HeaderCorner = Instance.new("UICorner")
+HeaderCorner.CornerRadius = UDim.new(0, 14)
+HeaderCorner.Parent = Header
+
+local Title = Instance.new("TextLabel")
+Title.Name = "Title"
+Title.Size = UDim2.new(1, -60, 1, 0)
+Title.Position = UDim2.new(0, 16, 0, 0)
+Title.BackgroundTransparency = 1
+Title.Text = "⚡ ULTIMATE AUTOMATION HUB  |  LUAU MACRO"
+Title.TextColor3 = Color3.fromRGB(240, 245, 255)
+Title.TextSize = 16
+Title.Font = Enum.Font.GothamBold
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Parent = Header
+
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Name = "CloseBtn"
+CloseBtn.Size = UDim2.new(0, 32, 0, 32)
+CloseBtn.Position = UDim2.new(1, -40, 0.5, -16)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(235, 65, 75)
+CloseBtn.Text = "✕"
+CloseBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+CloseBtn.TextSize = 14
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Parent = Header
+
+local CloseCorner = Instance.new("UICorner")
+CloseCorner.CornerRadius = UDim.new(0, 8)
+CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+	ScreenGui:Destroy()
+end)
+
+local dragging, dragInput, dragStart, startPos
+Header.InputBegan:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+		dragging = true
+		dragStart = input.Position
+		startPos = MainFrame.Position
+		input.Changed:Connect(function()
+			if input.UserInputState == Enum.UserInputState.End then dragging = false end
+		end)
+	end
+end)
+Header.InputChanged:Connect(function(input)
+	if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+		dragInput = input
+	end
+end)
+UserInputService.InputChanged:Connect(function(input)
+	if input == dragInput and dragging then
+		local delta = input.Position - dragStart
+		MainFrame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+	end
+end)
+
+local Sidebar = Instance.new("Frame")
+Sidebar.Name = "Sidebar"
+Sidebar.Size = UDim2.new(0, 160, 1, -48)
+Sidebar.Position = UDim2.new(0, 0, 0, 48)
+Sidebar.BackgroundColor3 = Color3.fromRGB(15, 17, 24)
+Sidebar.BorderSizePixel = 0
+Sidebar.Parent = MainFrame
+
+local SidebarList = Instance.new("UIListLayout")
+SidebarList.SortOrder = Enum.SortOrder.LayoutOrder
+SidebarList.Padding = UDim.new(0, 4)
+SidebarList.Parent = Sidebar
+
+local SidebarPadding = Instance.new("UIPadding")
+SidebarPadding.PaddingTop = UDim.new(0, 10)
+SidebarPadding.PaddingLeft = UDim.new(0, 8)
+SidebarPadding.PaddingRight = UDim.new(0, 8)
+SidebarPadding.Parent = Sidebar
+
+local Content = Instance.new("Frame")
+Content.Name = "Content"
+Content.Size = UDim2.new(1, -160, 1, -48)
+Content.Position = UDim2.new(0, 160, 0, 48)
+Content.BackgroundTransparency = 1
+Content.Parent = MainFrame
+
+local TabFrames = {}
+local TabButtons = {}
+
+local function createTab(name, icon, order)
+	local TabBtn = Instance.new("TextButton")
+	TabBtn.Name = name .. "Tab"
+	TabBtn.Size = UDim2.new(1, 0, 0, 38)
+	TabBtn.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
+	TabBtn.BackgroundTransparency = 0.5
+	TabBtn.Text = "  " .. icon .. "  " .. name
+	TabBtn.TextColor3 = Color3.fromRGB(170, 185, 210)
+	TabBtn.TextSize = 13
+	TabBtn.Font = Enum.Font.GothamMedium
+	TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+	TabBtn.LayoutOrder = order
+	TabBtn.Parent = Sidebar
+	
+	local BtnCorner = Instance.new("UICorner")
+	BtnCorner.CornerRadius = UDim.new(0, 8)
+	BtnCorner.Parent = TabBtn
+	
+	local TabScroll = Instance.new("ScrollingFrame")
+	TabScroll.Name = name .. "Frame"
+	TabScroll.Size = UDim2.new(1, 0, 1, 0)
+	TabScroll.BackgroundTransparency = 1
+	TabScroll.ScrollBarThickness = 4
+	TabScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 120, 240)
+	TabScroll.Visible = (order == 1)
+	TabScroll.Parent = Content
+	
+	local ScrollList = Instance.new("UIListLayout")
+	ScrollList.SortOrder = Enum.SortOrder.LayoutOrder
+	ScrollList.Padding = UDim.new(0, 10)
+	ScrollList.Parent = TabScroll
+	
+	local ScrollPad = Instance.new("UIPadding")
+	ScrollPad.PaddingTop = UDim.new(0, 12)
+	ScrollPad.PaddingLeft = UDim.new(0, 14)
+	ScrollPad.PaddingRight = UDim.new(0, 14)
+	ScrollPad.PaddingBottom = UDim.new(0, 12)
+	ScrollPad.Parent = TabScroll
+	
+	TabFrames[name] = TabScroll
+	TabButtons[name] = TabBtn
+	
+	if order == 1 then
+		TabBtn.BackgroundColor3 = Color3.fromRGB(60, 100, 230)
+		TabBtn.BackgroundTransparency = 0
+		TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	end
+	
+	TabBtn.MouseButton1Click:Connect(function()
+		for k, frame in pairs(TabFrames) do
+			frame.Visible = (k == name)
+		end
+		for k, btn in pairs(TabButtons) do
+			if k == name then
+				btn.BackgroundColor3 = Color3.fromRGB(60, 100, 230)
+				btn.BackgroundTransparency = 0
+				btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+			else
+				btn.BackgroundColor3 = Color3.fromRGB(24, 28, 42)
+				btn.BackgroundTransparency = 0.5
+				btn.TextColor3 = Color3.fromRGB(170, 185, 210)
+			end
+		end
+	end)
+	
+	return TabScroll
+end
+
+local function addToggle(parent, text, default, callback)
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(1, 0, 0, 42)
+	Frame.BackgroundColor3 = Color3.fromRGB(26, 30, 46)
+	Frame.BorderSizePixel = 0
+	Frame.Parent = parent
+	
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 8)
+	Corner.Parent = Frame
+	
+	local Label = Instance.new("TextLabel")
+	Label.Size = UDim2.new(1, -70, 1, 0)
+	Label.Position = UDim2.new(0, 12, 0, 0)
+	Label.BackgroundTransparency = 1
+	Label.Text = text
+	Label.TextColor3 = Color3.fromRGB(230, 235, 250)
+	Label.TextSize = 13
+	Label.Font = Enum.Font.GothamMedium
+	Label.TextXAlignment = Enum.TextXAlignment.Left
+	Label.Parent = Frame
+	
+	local SwitchBtn = Instance.new("TextButton")
+	SwitchBtn.Size = UDim2.new(0, 48, 0, 24)
+	SwitchBtn.Position = UDim2.new(1, -60, 0.5, -12)
+	SwitchBtn.BackgroundColor3 = default and Color3.fromRGB(0, 200, 120) or Color3.fromRGB(50, 55, 75)
+	SwitchBtn.Text = default and "ON" or "OFF"
+	SwitchBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	SwitchBtn.TextSize = 11
+	SwitchBtn.Font = Enum.Font.GothamBold
+	SwitchBtn.Parent = Frame
+	
+	local SwitchCorner = Instance.new("UICorner")
+	SwitchCorner.CornerRadius = UDim.new(0, 12)
+	SwitchCorner.Parent = SwitchBtn
+	
+	local toggled = default
+	SwitchBtn.MouseButton1Click:Connect(function()
+		toggled = not toggled
+		SwitchBtn.BackgroundColor3 = toggled and Color3.fromRGB(0, 200, 120) or Color3.fromRGB(50, 55, 75)
+		SwitchBtn.Text = toggled and "ON" or "OFF"
+		callback(toggled)
+	end)
+end
+
+local function addButton(parent, text, color, callback)
+	local Btn = Instance.new("TextButton")
+	Btn.Size = UDim2.new(1, 0, 0, 40)
+	Btn.BackgroundColor3 = color or Color3.fromRGB(60, 100, 230)
+	Btn.Text = text
+	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Btn.TextSize = 13
+	Btn.Font = Enum.Font.GothamBold
+	Btn.Parent = parent
+	
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 8)
+	Corner.Parent = Btn
+	
+	Btn.MouseButton1Click:Connect(callback)
+end
+
+local function addCard(parent, titleText, descText)
+	local Frame = Instance.new("Frame")
+	Frame.Size = UDim2.new(1, 0, 0, 75)
+	Frame.BackgroundColor3 = Color3.fromRGB(22, 26, 40)
+	Frame.BorderSizePixel = 0
+	Frame.Parent = parent
+	
+	local Corner = Instance.new("UICorner")
+	Corner.CornerRadius = UDim.new(0, 8)
+	Corner.Parent = Frame
+	
+	local Stroke = Instance.new("UIStroke")
+	Stroke.Color = Color3.fromRGB(60, 90, 180)
+	Stroke.Thickness = 1
+	Stroke.Transparency = 0.5
+	Stroke.Parent = Frame
+	
+	local TitleLabel = Instance.new("TextLabel")
+	TitleLabel.Size = UDim2.new(1, -20, 0, 24)
+	TitleLabel.Position = UDim2.new(0, 10, 0, 8)
+	TitleLabel.BackgroundTransparency = 1
+	TitleLabel.Text = titleText
+	TitleLabel.TextColor3 = Color3.fromRGB(255, 215, 0)
+	TitleLabel.TextSize = 14
+	TitleLabel.Font = Enum.Font.GothamBold
+	TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+	TitleLabel.Parent = Frame
+	
+	local DescLabel = Instance.new("TextLabel")
+	DescLabel.Size = UDim2.new(1, -20, 0, 36)
+	DescLabel.Position = UDim2.new(0, 10, 0, 32)
+	DescLabel.BackgroundTransparency = 1
+	DescLabel.Text = descText
+	DescLabel.TextColor3 = Color3.fromRGB(200, 210, 230)
+	DescLabel.TextSize = 12
+	DescLabel.Font = Enum.Font.Gotham
+	DescLabel.TextXAlignment = Enum.TextXAlignment.Left
+	DescLabel.TextYAlignment = Enum.TextYAlignment.Top
+	DescLabel.TextWrapped = true
+	DescLabel.Parent = Frame
+end
+
+local GachaTab = createTab("뽑기", "🎲", 1)
+
+addToggle(GachaTab, "🛒 일반 상점 자동뽑기 (처음뽑기)", State.AutoGachaNormal, function(v)
+	State.AutoGachaNormal = v
+	notify("일반 상점 자동뽑기", v and "활성화됨" or "비활성화됨")
+end)
+
+addToggle(GachaTab, "🌟 골든 상점 자동뽑기 (골든뽑기)", State.AutoGachaGolden, function(v)
+	State.AutoGachaGolden = v
+	notify("골든 상점 자동뽑기", v and "활성화됨" or "비활성화됨")
+end)
+
+local DrawCountFrame = Instance.new("Frame")
+DrawCountFrame.Size = UDim2.new(1, 0, 0, 48)
+DrawCountFrame.BackgroundColor3 = Color3.fromRGB(26, 30, 46)
+DrawCountFrame.Parent = GachaTab
+local DrawCorner = Instance.new("UICorner")
+DrawCorner.CornerRadius = UDim.new(0, 8)
+DrawCorner.Parent = DrawCountFrame
+
+local DrawLabel = Instance.new("TextLabel")
+DrawLabel.Size = UDim2.new(0, 120, 1, 0)
+DrawLabel.Position = UDim2.new(0, 12, 0, 0)
+DrawLabel.BackgroundTransparency = 1
+DrawLabel.Text = "뽑기 횟수 선택:"
+DrawLabel.TextColor3 = Color3.fromRGB(230, 235, 250)
+DrawLabel.TextSize = 13
+DrawLabel.Font = Enum.Font.GothamMedium
+DrawLabel.TextXAlignment = Enum.TextXAlignment.Left
+DrawLabel.Parent = DrawCountFrame
+
+local drawCounts = { 1, 10, 100, 500 }
+for i, count in ipairs(drawCounts) do
+	local Btn = Instance.new("TextButton")
+	Btn.Size = UDim2.new(0, 60, 0, 28)
+	Btn.Position = UDim2.new(0, 130 + (i - 1) * 66, 0.5, -14)
+	Btn.BackgroundColor3 = (State.GachaCount == count) and Color3.fromRGB(60, 100, 230) or Color3.fromRGB(40, 45, 65)
+	Btn.Text = count .. "회"
+	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Btn.TextSize = 12
+	Btn.Font = Enum.Font.GothamBold
+	Btn.Parent = DrawCountFrame
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 6)
+	c.Parent = Btn
+	
+	Btn.MouseButton1Click:Connect(function()
+		State.GachaCount = count
+		for _, child in ipairs(DrawCountFrame:GetChildren()) do
+			if child:IsA("TextButton") then
+				child.BackgroundColor3 = Color3.fromRGB(40, 45, 65)
+			end
+		end
+		Btn.BackgroundColor3 = Color3.fromRGB(60, 100, 230)
+		notify("뽑기 횟수 변경", count .. "회로 설정되었습니다.")
+	end)
+end
+
+local EnchantTab = createTab("인챈트", "🔮", 2)
+
+addToggle(EnchantTab, "🔮 자동 인챈트 (목표 달성 시 자동 멈춤)", State.AutoEnchant, function(v)
+	State.AutoEnchant = v
+	notify("자동 인챈트", v and ("활성화됨 (목표: " .. State.TargetEnchant .. ")") or "비활성화됨")
+end)
+
+addToggle(EnchantTab, "📖 자동 인챈트북/토템 줍기", State.AutoPickupBooks, function(v)
+	State.AutoPickupBooks = v
+	notify("자동 줍기", v and "활성화됨 (월드 내 생성 아이템 자동 수집)" or "비활성화됨")
+end)
+
+local SelectFrame = Instance.new("Frame")
+SelectFrame.Size = UDim2.new(1, 0, 0, 180)
+SelectFrame.BackgroundColor3 = Color3.fromRGB(26, 30, 46)
+SelectFrame.Parent = EnchantTab
+local SelectCorner = Instance.new("UICorner")
+SelectCorner.CornerRadius = UDim.new(0, 8)
+SelectCorner.Parent = SelectFrame
+
+local SelectedTextLabel = Instance.new("TextLabel")
+SelectedTextLabel.Size = UDim2.new(1, -20, 0, 28)
+SelectedTextLabel.Position = UDim2.new(0, 10, 0, 6)
+SelectedTextLabel.BackgroundTransparency = 1
+SelectedTextLabel.Text = "선택된 목표 인챈트: [" .. State.TargetEnchant .. "]"
+SelectedTextLabel.TextColor3 = Color3.fromRGB(0, 230, 180)
+SelectedTextLabel.TextSize = 13
+SelectedTextLabel.Font = Enum.Font.GothamBold
+SelectedTextLabel.TextXAlignment = Enum.TextXAlignment.Left
+SelectedTextLabel.Parent = SelectFrame
+
+local GridScroll = Instance.new("ScrollingFrame")
+GridScroll.Size = UDim2.new(1, -20, 1, -40)
+GridScroll.Position = UDim2.new(0, 10, 0, 34)
+GridScroll.BackgroundTransparency = 1
+GridScroll.ScrollBarThickness = 4
+GridScroll.ScrollBarImageColor3 = Color3.fromRGB(80, 120, 240)
+GridScroll.Parent = SelectFrame
+
+local UIGrid = Instance.new("UIGridLayout")
+UIGrid.CellSize = UDim2.new(0, 100, 0, 32)
+UIGrid.CellPadding = UDim2.new(0, 6, 0, 6)
+UIGrid.SortOrder = Enum.SortOrder.LayoutOrder
+UIGrid.Parent = GridScroll
+
+local enchantBtns = {}
+for i, enchantName in ipairs(AllEnchants) do
+	local Btn = Instance.new("TextButton")
+	Btn.Name = enchantName
+	Btn.Size = UDim2.new(0, 100, 0, 32)
+	Btn.BackgroundColor3 = (State.TargetEnchant == enchantName) and Color3.fromRGB(0, 180, 120) or Color3.fromRGB(38, 44, 64)
+	Btn.Text = enchantName
+	Btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	Btn.TextSize = 11
+	Btn.Font = Enum.Font.GothamBold
+	Btn.Parent = GridScroll
+	
+	local c = Instance.new("UICorner")
+	c.CornerRadius = UDim.new(0, 6)
+	c.Parent = Btn
+	
+	enchantBtns[enchantName] = Btn
+	
+	Btn.MouseButton1Click:Connect(function()
+		State.TargetEnchant = enchantName
+		SelectedTextLabel.Text = "선택된 목표 인챈트: [" .. State.TargetEnchant .. "]"
+		for _, b in pairs(enchantBtns) do
+			b.BackgroundColor3 = Color3.fromRGB(38, 44, 64)
+		end
+		Btn.BackgroundColor3 = Color3.fromRGB(0, 180, 120)
+		notify("목표 인챈트 선택", "[" .. enchantName .. "] (으)로 선택되었습니다.")
+	end)
+end
+
+local UpgradeTab = createTab("강화/PVP", "⚔️", 3)
+
+addToggle(UpgradeTab, "🔨 장착 도구 자동 강화", State.AutoUpgrade, function(v)
+	State.AutoUpgrade = v
+	notify("자동 강화", v and "활성화됨" or "비활성화됨")
+end)
+
+addToggle(UpgradeTab, "🛡️ 강화 방지권 사용 (ON / OFF)", State.ProtectTicket, function(v)
+	State.ProtectTicket = v
+	if CentralEvent then
+		CentralEvent:FireServer("SetUpgradeProtectState", v)
+	end
+	notify("강화 방지권", v and "ON (파괴 방지)" or "OFF")
+end)
+
+addToggle(UpgradeTab, "⚔️ PVP 자동 연타 (Punch Request)", State.AutoPVP, function(v)
+	State.AutoPVP = v
+	notify("자동 PVP 연타", v and "활성화됨" or "비활성화됨")
+end)
+
+addToggle(UpgradeTab, "🎯 PVP 킬오라 (상대 근접 텔포)", State.AutoKillAura, function(v)
+	State.AutoKillAura = v
+	notify("PVP 킬오라", v and "활성화됨" or "비활성화됨")
+end)
+
+local BrewTab = createTab("물약/아이템", "🧪", 4)
+
+addCard(BrewTab, "🧪 물약 및 아이템 자동 조합", "소유 중인 재료를 소모하여 물약/토템/아이템을 자동 제작합니다.")
+
+addButton(BrewTab, "🧪 행운 물약 제작", Color3.fromRGB(40, 140, 220), function()
+	if CentralEvent then
+		CentralEvent:FireServer("CraftPotion", "행운 물약", State.BrewCount)
+		notify("조합 요청", "행운 물약 제작 시도")
+	end
+end)
+
+addButton(BrewTab, "⚡ 속도 물약 제작", Color3.fromRGB(220, 160, 30), function()
+	if CentralEvent then
+		CentralEvent:FireServer("CraftPotion", "속도 물약", State.BrewCount)
+		notify("조합 요청", "속도 물약 제작 시도")
+	end
+end)
+
+addButton(BrewTab, "💰 코인 물약 제작", Color3.fromRGB(210, 180, 40), function()
+	if CentralEvent then
+		CentralEvent:FireServer("CraftPotion", "코인 물약", State.BrewCount)
+		notify("조합 요청", "코인 물약 제작 시도")
+	end
+end)
+
+addButton(BrewTab, "🗿 스피드 토템 제작", Color3.fromRGB(140, 60, 200), function()
+	if CentralEvent then
+		CentralEvent:FireServer("CraftItem", "스피드 토템", State.BrewCount)
+		notify("조합 요청", "스피드 토템 제작 시도")
+	end
+end)
+
+local TeleTab = createTab("텔레포트", "🌀", 5)
+
+local teleportList = {
+	{ Label = "🏠 스폰 (Spawn)", Target = "스폰" },
+	{ Label = "🎲 가챠 샵 (Gacha Room)", Target = "gacha" },
+	{ Label = "🔮 인챈트 룸 (Enchant Room)", Target = "storepart" },
+	{ Label = "🧪 레시피/물약 조합소 (Recipe)", Target = "recipe" },
+	{ Label = "🔨 강화소 (Upgrade Room)", Target = "upgrade" },
+	{ Label = "⚔️ PVP 아레나 (PVP Arena)", Target = "pvp" },
+	{ Label = "👤 NPC 지프 (Jiff)", Target = "지프" },
+	{ Label = "👤 NPC 비투 (Bitu)", Target = "비투" },
+	{ Label = "👤 NPC 비투2 (Bitu 2)", Target = "비투2" },
+	{ Label = "👤 NPC 불릿회장 (Bullet)", Target = "불릿" },
+	{ Label = "👤 NPC 블랙마켓 (Blackmarket)", Target = "블랙마켓" }
+}
+
+for _, tp in ipairs(teleportList) do
+	addButton(TeleTab, "📍 " .. tp.Label, Color3.fromRGB(40, 50, 75), function()
+		smartTeleport(tp.Target)
+	end)
+end
+
+notify("LUAU HUB READY", "텔레포트 및 탭 업데이트 완료!")

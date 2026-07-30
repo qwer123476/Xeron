@@ -1520,6 +1520,7 @@ AutoTab:AddSection({ Name = "자동 인챈트 설정" })
 AutoTab:AddDropdown({
 	Name = "원하는 인챈트",
 	Default = "Speed V",
+    Flag = "525",
 	Options = AllEnchants,
 	Callback = function(Value)
 		State.TargetEnchant = Value
@@ -1529,6 +1530,7 @@ AutoTab:AddDropdown({
 AutoTab:AddToggle({
 	Name = "인챈트 오토팜",
 	Default = false,
+    Flag = "hdhe",
 	Callback = function(Value)
 		State.AutoEnchant = Value
 	end    
@@ -1536,16 +1538,10 @@ AutoTab:AddToggle({
 
 
 GTab:AddSection({ Name = "플레이어 상태" })
-GTab:AddToggle({
-	Name = "강화 하락 방지권 사용",
-	Default = "false",
-	Callback = function(Value)
-		State.ProtectTicket = Value
-	end    
-})
+
 
 GTab:AddToggle({
-	Name = "자동 강화 시작",
+	Name = "자동 강화(강방권 기본적용)",
 	Default = false,
 	Callback = function(Value)
 		State.AutoUpgrade = Value
@@ -1555,6 +1551,7 @@ PVPTab:AddSection({ Name = "V2 PVP" })
 PVPTab:AddToggle({
 	Name = "오토 PVP V2",
 	Default = false,
+    Flag = "16ysy",
 	Callback = function(Value)
 		State.AutoPVP = Value
 	end    
@@ -1563,6 +1560,7 @@ PVPTab:AddToggle({
 PVPTab:AddToggle({
 	Name = "PVP 오토팜 V2",
 	Default = false,
+    Flag = "s82uhf",
 	Callback = function(Value)
 		State.AutoKillAura = Value
 	end    
@@ -1570,7 +1568,7 @@ PVPTab:AddToggle({
 
 task.spawn(function()
 	while true do
-		task.wait(0.3)
+		task.wait()
 		if State.AutoEnchant then
 			local current = getCurrentEnchantName()
 			if current and matchTargetEnchant(current, State.TargetEnchant) then
@@ -1591,44 +1589,11 @@ task.spawn(function()
 end)
 
 
-task.spawn(function()
-	while true do
-		task.wait(0.4)
-		if State.AutoPickupBooks then
-			local hrp = getHRP()
-			for _, v in ipairs(Workspace:GetDescendants()) do
-				if v:IsA("ProximityPrompt") and v.Enabled then
-					local pName = v.Parent and v.Parent.Name or ""
-					if pName:find("Book") or pName:find("인챈트") or pName:find("Totem") or pName:find("토템") then
-						if fireproximityprompt then
-							fireproximityprompt(v)
-						else
-							if hrp and v.Parent:IsA("BasePart") then
-								hrp.CFrame = v.Parent.CFrame
-							end
-						end
-					end
-				elseif v:IsA("TouchTransmitter") and v.Parent and v.Parent:IsA("BasePart") then
-					local partName = v.Parent.Name
-					if partName:find("Book") or partName:find("인챈트") or partName:find("Totem") or partName:find("토템") then
-						if hrp then
-							if firetouchinterest then
-								firetouchinterest(hrp, v.Parent, 0)
-								firetouchinterest(hrp, v.Parent, 1)
-							else
-								hrp.CFrame = v.Parent.CFrame
-							end
-						end
-					end
-				end
-			end
-		end
-	end
-end)
+
 
 task.spawn(function()
 	while true do
-		task.wait(0.3)
+		task.wait(0.003)
 		if State.AutoUpgrade then
 			local toolName = getEquippedToolName()
 			if toolName and CentralEvent then
@@ -1642,7 +1607,7 @@ end)
 local pvpSeq = 0
 task.spawn(function()
 	while true do
-		task.wait(0.1)
+		task.wait()
 		if State.AutoPVP then
 			LocalPlayer:SetAttribute("PVPEnabled", true)
 			pvpSeq = (pvpSeq % 1000000) + 1

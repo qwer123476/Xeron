@@ -5559,7 +5559,6 @@ end
 
 local Window = OrionLib:MakeWindow({
     Name = "FTAP | 💎Premium💎",
-    HidePremium = false,
     SaveConfig = true,
     ConfigFolder = "OrionTest"
 })
@@ -8944,4 +8943,5 @@ local ViewTool = keybindTab:AddToggle({
     end
 })
 
+OrionLib:Init()
 

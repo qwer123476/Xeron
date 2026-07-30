@@ -1,5 +1,4 @@
 
---loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))()
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -210,9 +209,7 @@ end
 			local flag = ti and ti.Flag
 			local default = (ti and ti.Default) or Color3.new(1, 1, 1)
 
-			-- Obsidian exposes ColorPicker as an addon (BaseAddons) attached to a toggle.
-			-- We create an inert toggle to host the color picker so sigma code remains compatible.
-			local host = grp:AddToggle("__cp_" .. tostring(name), {
+						local host = grp:AddToggle("__cp_" .. tostring(name), {
 				Text = tostring(name),
 				Default = false,
 				Callback = function() end,

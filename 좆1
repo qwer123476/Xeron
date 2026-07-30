@@ -1802,7 +1802,7 @@ UtilityTab:AddSection({ Name = "안티" })
 local antiLagEnabled = false
 local savedStates = {}
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
     Name = "안티렉",
     CurrentValue = false,
     Flag = "AntiLagToggle",
@@ -1840,7 +1840,7 @@ local fullbrightEnabled = false
 local origLightingProps = {}
 local fbConn = nil
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
     Name = "안티 어둠",
     CurrentValue = false,
     Flag = "FullbrightToggle",
@@ -1880,7 +1880,7 @@ local origFogEnd = Lighting.FogEnd
 local origFogStart = Lighting.FogStart
 local origAtmospheres = {}
 
-UtilityTab:CreateToggle({
+UtilityTab:AddToggle({
     Name = "안티 안개",
     CurrentValue = false,
     Flag = "AntiFogToggle",

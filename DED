@@ -1,4 +1,4 @@
--- 이파일은 771244128821730211의해  변형되었음.V1.46
+-- This file has been modified from 771244128821730211 V1.46
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()

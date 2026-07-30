@@ -1042,103 +1042,107 @@ function AutoGucciF()
     while AutoGucciT do
         local success = pcall(function()
             spawnBlobmanF()
-             end
-             char = plr.Character
-            if not char then
-                task.wait(0.1)
-                return 
-            end
+        end)
 
-             hrp = char:WaitForChild("HumanoidRootPart")
-             hum = char:WaitForChild("Humanoid")
-             rag = hum:WaitForChild("Ragdolled")
-             held = plr:WaitForChild("IsHeld")
+        char = plr.Character
+        if not char then
+            task.wait(0.1)
+            return 
+        end
 
-             SpawnToyRemoteFunction = RepStorage.MenuToys.SpawnToyRemoteFunction 
-             RagdollRemote = RepStorage.CharacterEvents.RagdollRemote
-             DestroyToy = RepStorage.MenuToys.DestroyToy
-             seat = blobmanInstanceS:WaitForChild("VehicleSeat"):WaitForChild("ProximityPrompt")
+        hrp = char:WaitForChild("HumanoidRootPart")
+        hum = char:WaitForChild("Humanoid")
+        rag = hum:WaitForChild("Ragdolled")
+        held = plr:WaitForChild("IsHeld")
 
-            if not hrp then return end
-             OCF = hrp.CFrame
+        SpawnToyRemoteFunction = RepStorage.MenuToys.SpawnToyRemoteFunction 
+        RagdollRemote = RepStorage.CharacterEvents.RagdollRemote
+        DestroyToy = RepStorage.MenuToys.DestroyToy
+        seat = blobmanInstanceS:WaitForChild("VehicleSeat"):WaitForChild("ProximityPrompt")
 
-            if not sitJumpT then
-                task.spawn(sitJumpF)
-                sitJumpT = true
-            end
+        if not hrp then return end
+        OCF = hrp.CFrame
 
-            task.spawn(ragdollLoopF)
-            task.wait(0.3)
-            --fireproximityprompt(seat)
-            --task.wait(0.1)
-            --hrp.Massless = false
-            --task.wait(0.1)
-            hrp.CFrame = OCF
+        if not sitJumpT then
+            task.spawn(sitJumpF)
+            sitJumpT = true
+        end
 
-            successCheck = true
-            sitJumpT = false
-            RagdollRemote:FireServer(hrp, 0.001)
+        task.spawn(ragdollLoopF)
+        task.wait(0.3)
+        
+        --fireproximityprompt(seat)
+        --task.wait(0.1)
+        --hrp.Massless = false
+        --task.wait(0.1)
+        
+        hrp.CFrame = OCF
 
-            while successCheck and AutoGucciT do
-                if hum.Health <= 0 then
-                    if blobmanInstanceS then
-                        DestroyToy:FireServer(blobmanInstanceS)
-                    end
-                    successCheck = false
-                    break
-                end
+        successCheck = true
+        sitJumpT = false
+        RagdollRemote:FireServer(hrp, 0.001)
 
-                 seat = blobmanInstanceS and blobmanInstanceS:FindFirstChildWhichIsA("VehicleSeat")
-                if seat.Occupant ~= nil then
+        while successCheck and AutoGucciT do
+            if hum.Health <= 0 then
+                if blobmanInstanceS then
                     DestroyToy:FireServer(blobmanInstanceS)
-                    successCheck = false
-                    break
                 end
-
-                if rag.Value == true or held.Value == true then
-                    while (rag.Value == true or held.Value == true) and AutoGucciT do
-                        rs.CharacterEvents.Struggle:FireServer()
-                        task.wait()
-                    end
-                    successCheck = false
-                    break
-                end
-
-                 blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
-                if blobHRP then
-                     SetNetworkOwner = rs:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
-                    pcall(function()
-                        SetNetworkOwner:FireServer(blobHRP, hrp)
-                    end)
-                    blobHRP.CFrame = CFrame.new(0, 99999, 0)
-                end
-
-                task.wait()
+                successCheck = false
+                break
             end
 
-            if not successCheck then
-    blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
-    
-    OrionLib:MakeNotification({
-        Name = "[ 🔓 ]",
-        Content = "Gucci | Wait",
-        Time = 1
-    })
+            seat = blobmanInstanceS and blobmanInstanceS:FindFirstChildWhichIsA("VehicleSeat")
+            if seat and seat.Occupant ~= nil then
+                DestroyToy:FireServer(blobmanInstanceS)
+                successCheck = false
+                break
+            end
 
-    if hum then
-        rs.CharacterEvents.Struggle:FireServer(plr)
-        hum.Sit = true
-        task.wait(0.1)
-        hum.Sit = false
-        if blobHRP and blobHRP.Position.Y > 9000 then 
-            DestroyToy:FireServer(blobmanInstanceS) 
+            if rag.Value == true or held.Value == true then
+                while (rag.Value == true or held.Value == true) and AutoGucciT do
+                    rs.CharacterEvents.Struggle:FireServer()
+                    task.wait()
+                end
+                successCheck = false
+                break
+            end
+
+            blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
+            if blobHRP then
+                SetNetworkOwner = rs:WaitForChild("GrabEvents"):WaitForChild("SetNetworkOwner")
+                pcall(function()
+                    SetNetworkOwner:FireServer(blobHRP, hrp)
+                end)
+                blobHRP.CFrame = CFrame.new(0, 99999, 0)
+            end
+
+            task.wait()
+        end
+
+        if not successCheck then
+            blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
+            
+            OrionLib:MakeNotification({
+                Name = "[ 🔓 ]",
+                Content = "Gucci | Wait",
+                Time = 1
+            })
+
+            if hum then
+                rs.CharacterEvents.Struggle:FireServer(plr)
+                hum.Sit = true
+                task.wait(0.1)
+                hum.Sit = false
+                if blobHRP and blobHRP.Position.Y > 9000 then 
+                    DestroyToy:FireServer(blobmanInstanceS) 
+                end
+            end
+
+            sitJumpT = false
+            task.wait(1)
         end
     end
-
-    sitJumpT = false
-    task.wait(1)
 end
-
 
 function sitJumpFV2()
      char = plr.Character

@@ -1130,15 +1130,17 @@ local function SaveAll()
     end
 end
 
-local function LoadAll()
+local function LoadAll(silent)
     local fileName = ConfigName .. ".txt"
 
     if not isfile(fileName) then
-        OrionLib:MakeNotification({
-            Name = "로드 실패",
-            Content = "설정 파일을 찾을 수 없습니다.",
-            Time = 3
-        })
+        if not silent then
+            OrionLib:MakeNotification({
+                Name = "로드 실패",
+                Content = "설정 파일을 찾을 수 없습니다.",
+                Time = 3
+            })
+        end
         return
     end
 
@@ -1160,13 +1162,16 @@ local function LoadAll()
             Time = 3
         })
     else
-        OrionLib:MakeNotification({
-            Name = "로드 실패",
-            Content = "파일을 불러오는 중 오류가 발생했습니다.",
-            Time = 3
-        })
+        if not silent then
+            OrionLib:MakeNotification({
+                Name = "로드 실패",
+                Content = "파일을 불러오는 중 오류가 발생했습니다.",
+                Time = 3
+            })
+        end
     end
 end
+
 
 local TeleportTab = Window:MakeTab({Name = "TP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local AutoTab = Window:MakeTab({Name = "오토팜", Icon = "rbxassetid://4483362458", PremiumOnly = false})
@@ -2187,9 +2192,8 @@ MusicTab:AddToggle({
 	end    
 })
 
---OrionLib:Init()
 local ConfigTab = Window:MakeTab({
-    Name = "설정",
+    Name = "설정 저장",
     Icon = "rbxassetid://4483345998",
     PremiumOnly = false
 })
@@ -2215,9 +2219,11 @@ ConfigTab:AddButton({
 ConfigTab:AddButton({
     Name = "설정 불러오기",
     Callback = function()
-        LoadAll()
+        LoadAll(false)
     end
 })
 
 
-LoadAll()
+task.defer(function()
+    LoadAll(true)
+end)

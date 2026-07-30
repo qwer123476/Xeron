@@ -8937,6 +8937,4 @@ local ViewTool = keybindTab:AddToggle({
         ViewToolT = Value
         ViewToolF()
     end
-end
 })
-

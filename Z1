@@ -6318,8 +6318,11 @@ local HRPMODE = LoopTab:CreateToggle({
 HRPMODE:Set(true)
 ]]--
 
-LoopTab:CreateSection("Bring")
-LoopTab:CreateButton({
+local Section = LoopTab:AddSection({
+    Name = "Bring"
+})
+
+LoopTab:AddButton({
     Name = "Bring [ Blobman ]",
     Callback = function()
         UpdateCurrentBlobman()
@@ -6554,27 +6557,25 @@ LoopTab:AddButton({
     end
 })
 
-LoopTab:CreateSection("Owner Kick")
-local OLTPInput = LoopTab:CreateInput({
+LoopTab:AddSection({
+    Name = "Owner Kick"
+})
+
+local OLTPInput = LoopTab:AddTextbox({
     Name = "X Y Z",
-    CurrentValue = "0,20,0",
-    PlaceholderText = "",
-    RemoveTextAfterFocusLost = false,
-    Flag = "",
+    Default = "0,20,0",
+    TextDisappear = false,
     Callback = function(Value)
         local x, y, z = string.match(Value, "([%d.-]+),([%d.-]+),([%d.-]+)")
         if x and y and z then
             OLTPValue = Vector3.new(tonumber(x), tonumber(y), tonumber(z))
-        else
         end
     end
 })
-OLTPInput:Set("0,20,0")
 
-local blobLoop4Toggle = LoopTab:CreateToggle({
+local blobLoop4Toggle = LoopTab:AddToggle({
     Name = "Loop Owner Kick [ Auto ] <font color='rgb(255,154,123)'>[로프]</font>  <font color='rgb(0,255,0)'>[프리미엄]</font>  <font color='rgb(255,0,1)'>[킥]</font>  <font color='rgb(0,154,48)'>[락]</font>",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         blobLoopT4 = Value
         if blobLoopT4 then
@@ -6591,46 +6592,45 @@ local blobLoop4Toggle = LoopTab:CreateToggle({
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ Anchored ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         SkipOL = Value
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ No DestroyGrabLine ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         OnlyOwner = Value
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ Original ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         OwnerKickMODED = Value
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ Sit ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         SitMODED = Value
     end
 })
-LoopTab:CreateSection("바이패스")
-LoopTab:CreateToggle({
+
+LoopTab:AddSection({
+    Name = "바이패스"
+})
+
+LoopTab:AddToggle({
     Name = "바이패스 킥   <font color='rgb(255,154,123)'>[레이지봇]</font>  <font color='rgb(0,255,0)'>[프리미엄]</font>  <font color='rgb(255,0,1)'>[바이패스]</font>  <font color='rgb(0,154,48)'>[락]</font>",
     Default = false,
-    Flag = "22",
     Callback = function(Value)
         blobKickT3 = Value
         
@@ -6827,14 +6827,14 @@ LoopTab:CreateToggle({
         end)
     end
 })
---V3 LOOKLOOK BPS PING DUWN
 
+LoopTab:AddSection({
+    Name = "Blobman"
+})
 
-LoopTab:CreateSection("Blobman")
-LoopTab:CreateButton({
+LoopTab:AddButton({
     Name = "off massless",
     Callback = function()
-
         Players = game:GetService("Players")
 
         if #playersInLoop1V == 0 then return end
@@ -6848,14 +6848,12 @@ LoopTab:CreateButton({
         if not THRP then return end
 
         if THRP.Massless then THRP.Massless = false end
-
     end
 })
 
-local blobLoopToggle = LoopTab:CreateToggle({
+local blobLoopToggle = LoopTab:AddToggle({
     Name = "Loop Kick [ Blobman ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         blobLoopT = Value
         if blobLoopT then
@@ -6884,10 +6882,9 @@ local blobLoopToggle = LoopTab:CreateToggle({
     end
 })
 
-local blobLoop3Toggle = LoopTab:CreateToggle({
+local blobLoop3Toggle = LoopTab:AddToggle({
     Name = "Loop Kill [ Blobman ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         blobLoopT3 = Value
         if blobLoopT3 then
@@ -6904,10 +6901,9 @@ local blobLoop3Toggle = LoopTab:CreateToggle({
     end
 })
 
-local blobLoop2Toggle = LoopTab:CreateToggle({
+local blobLoop2Toggle = LoopTab:AddToggle({
     Name = "Loop Release Grab [ Blobman ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         blobLoopT2 = Value
         if blobLoopT2 then
@@ -6924,29 +6920,29 @@ local blobLoop2Toggle = LoopTab:CreateToggle({
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ Sit ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         LoopBringMODED = Value
     end
 })
 
-LoopTab:CreateToggle({
+LoopTab:AddToggle({
     Name = "[ Anti-InPlots Mode ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         LoopReleaseMODED = Value
     end
 })
 
-LoopTab:CreateSection("Owner")
-local Loop1 = LoopTab:CreateToggle({
+LoopTab:AddSection({
+    Name = "Owner"
+})
+
+local Loop1 = LoopTab:AddToggle({
     Name = "Loop Kill [ Owner ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         loopPlayerT = Value
         if loopPlayerT then
@@ -6963,10 +6959,10 @@ local Loop1 = LoopTab:CreateToggle({
     end
 })
 
-local Loop2 = LoopTab:CreateToggle({
+
+local Loop2 = LoopTab:AddToggle({
     Name = "Loop Kick [ Owner ]",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         loopPlayerT2 = Value
         if loopPlayerT2 then
@@ -6983,18 +6979,20 @@ local Loop2 = LoopTab:CreateToggle({
     end
 })
 
-LoopTab:CreateSection("Ragdoll")
-LoopTab:CreateToggle({
+LoopTab:AddSection({
+    Name = "Ragdoll"
+})
+
+LoopTab:AddToggle({
     Name = "Explode [ SnowBall ]",
-    CurrentValue = false,
-    Flag = "27",
+    Default = false,
     Callback = function(Value)
         LoopSnowBallT = Value
         LoopSnowBallF()
     end
 })
 
-LoopTab:CreateButton({
+LoopTab:AddButton({
     Name = "BlackHole [ NinjaKunai ]",
     Callback = function()
         local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -7160,11 +7158,13 @@ LoopTab:CreateButton({
     end
 })
 
-antiTab:CreateSection("Teleport | Toggle")
-local AntiGrabV1 = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Teleport | Toggle"
+})
+
+local AntiGrabV1 = antiTab:AddToggle({
     Name = "Void TP | Random",
-    CurrentValue = false,
-    Flag = "FakeTP",
+    Default = false,
     Callback = function(Value)
         AntiGrabTP_Active = Value
 
@@ -7232,10 +7232,9 @@ local AntiGrabV1 = antiTab:CreateToggle({
     end
 })
 
-local AntiGrabV1 = antiTab:CreateToggle({
+local AntiGrabV1 = antiTab:AddToggle({
     Name = "Loop TP | Random",
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         AntiGrabTP_ActiveV2 = Value
 
@@ -7273,21 +7272,22 @@ local AntiGrabV1 = antiTab:CreateToggle({
     end
 })
 
-antiTab:CreateSection("Grab | Toggle")
-local AntiGrab = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Grab | Toggle"
+})
+
+local AntiGrab = antiTab:AddToggle({
     Name = "Anti-Grab",
-    CurrentValue = false,
-    Flag = "5",
+    Default = true,
     Callback = function(Value)
         AntiGrabF(Value)
     end
 })
-AntiGrab:Set(true)
 
 --[[
-local AntiGrabSticky = antiTab:CreateToggle({
+local AntiGrabSticky = antiTab:AddToggle({
     Name = "Anti-Grab | StickyPart",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         AntiGrabStickyT = Value
         if Value then
@@ -7297,24 +7297,25 @@ local AntiGrabSticky = antiTab:CreateToggle({
 })
 ]]--
 
-local AntiRelease = antiTab:CreateToggle({
+local AntiRelease = antiTab:AddToggle({
     Name = "Anti-Release",
-    CurrentValue = false,
-    Flag = "AntiDeathToggleFlag",
+    Default = false,
     Callback = function(Value)
         AntiDeathT = Value
         if AntiDeathT then
             task.spawn(AntiDeathF)
         end
-    end,
+    end
 })
 --AntiRelease:Set(true)
 
-antiTab:CreateSection("Blob | Toggle")
-local AntiBlob = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Blob | Toggle"
+})
+
+local AntiBlob = antiTab:AddToggle({
 	Name = "Anti-Blob",
-	CurrentValue = false,
-	Flag = "16",
+	Default = true,
 	Callback = function(Value)
 		AntiBlobT = Value
 		if Value then
@@ -7322,28 +7323,26 @@ local AntiBlob = antiTab:CreateToggle({
 		end
 	end
 })
-AntiBlob:Set(true)
 
-local AntiMassless = antiTab:CreateToggle({
+local AntiMassless = antiTab:AddToggle({
     Name = "Anti-Massless",
-    CurrentValue = false,
-    Flag = "17",
+    Default = true,
     Callback = function(Value)
-    masslessT = Value
+        masslessT = Value
         masslessF()
     end
 })
-AntiMassless:Set(true)
 
-antiTab:CreateSection("Plot | Toggle")
+antiTab:AddSection({
+    Name = "Plot | Toggle"
+})
 
-local TEST= false
+local TEST = false
 
 if TEST then
-local dddddd Toggle = antiTab:CreateToggle({
+local ddddddToggle = antiTab:AddToggle({
     Name = "ddddddddddd",
-    CurrentValue = false,
-    Flag = "ddddddd Flag",
+    Default = false,
     Callback = function(Value)
         ddddddd = Value
         ddddddd()
@@ -7351,36 +7350,36 @@ local dddddd Toggle = antiTab:CreateToggle({
 })
 end
 
-local AntiInPlots = antiTab:CreateToggle({
+local AntiInPlots = antiTab:AddToggle({
     Name = "Anti-InPlots",
-    CurrentValue = true,
+    Default = true,
     Callback = function(Value)
-    antiInPlotsEnabled = Value
-         if Value then
+        antiInPlotsEnabled = Value
+        if Value then
             task.spawn(antiInPlotsLoop)
         end
     end
 })
-AntiInPlots:Set(true)
 
-antiTab:CreateSection("Game | Toggle")
-local AntiVoid = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Game | Toggle"
+})
+
+local AntiVoid = antiTab:AddToggle({
     Name = "Anti-Void",
-    CurrentValue = false,
+    Default = true,
     Callback = function(Value)
         if Value then
             workspace.FallenPartsDestroyHeight = -50000
         else
             workspace.FallenPartsDestroyHeight = -100
         end
-    end,
+    end
 })
-AntiVoid:Set(true)
 
-local AntiExplode = antiTab:CreateToggle({
+local AntiExplode = antiTab:AddToggle({
     Name = "Anti-Explosion",
-    CurrentValue = false,
-    Flag = "antiExplodeToggleFlag",
+    Default = true,
     Callback = function(Value)
         AntiExplosionT = Value
         if Value then
@@ -7391,53 +7390,46 @@ local AntiExplode = antiTab:CreateToggle({
         end
     end
 })
-AntiExplode:Set(true)
 
-local AntiBurn = antiTab:CreateToggle({
+local AntiBurn = antiTab:AddToggle({
     Name = "Anti-Burn",
-    CurrentValue = false,
-    Flag = "",
+    Default = true,
     Callback = function(Value)
         AntiBurnV = Value
         AntiBurn()
     end
 })
-AntiBurn:Set(true)
 
-local AntiPaint = antiTab:CreateToggle({
+local AntiPaint = antiTab:AddToggle({
     Name = "Anti-Paint",
-    CurrentValue = false,
+    Default = true,
     Callback = function(Value)
         AntiPaintT = Value
         antiPaintF(Value)
     end
 })
-AntiPaint:Set(true)
 
 AntiLagF()
-local AntiLag = antiTab:CreateToggle({
+local AntiLag = antiTab:AddToggle({
     Name = "Anti-Lag",
-    CurrentValue = false,
-    Flag = "AntiLagToggle",
+    Default = true,
     Callback = function(Value)
         antiLagEnabled = Value
     end
 })
-AntiLag:Set(true)
 
-local AutoAttack  antiTab:CreateToggle({
+local AutoAttack = antiTab:AddToggle({
     Name = "Auto-Attacker | Kill",
-    CurrentValue = false,
-    Flag = "AutoAttack",
+    Default = false,
     Callback = function(Value)
         AutoAttackT = Value
         AutoAttackF()
     end
 })
 
-local AntiHoldPart = antiTab:CreateToggle({
+local AntiHoldPart = antiTab:AddToggle({
     Name = "Anti-Hold Part",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         AntiBananaT = Value
         task.spawn(AntiBananaF)
@@ -7445,9 +7437,9 @@ local AntiHoldPart = antiTab:CreateToggle({
 })
 --AntiHoldPart:Set(true)
 
-local AntiBlobUse = antiTab:CreateToggle({
+local AntiBlobUse = antiTab:AddToggle({
     Name = "Anti-Vehicle Toy",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         AntiBlobUseT = Value
         if Value then
@@ -7456,35 +7448,34 @@ local AntiBlobUse = antiTab:CreateToggle({
     end
 })
 
-antiTab:CreateSection("Kick | Toggle")
-local FlyingReset = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Kick | Toggle"
+})
+
+local FlyingReset = antiTab:AddToggle({
     Name = "Flying Reset",
-    CurrentValue = false,
+    Default = true,
     Callback = function(Value)
+        if Value then
+            rs.GameCorrectionEvents.GameCorrectionsNotify.OnClientEvent:Connect(function(Type)
+                if Type == "Flying" then
+                    char = plr.Character
+                    hum = char:FindFirstChildOfClass("Humanoid")
+                    hrp = char:FindFirstChildOfClass("HumanoidRootPart")
 
-if Value then
-rs.GameCorrectionEvents.GameCorrectionsNotify.OnClientEvent:Connect(function(Type)
-if Type == "Flying" then
-
-char = plr.Character
-hum = char:FindFirstChildOfClass("Humanoid")
-hrp = char:FindFirstChildOfClass("HumanoidRootPart")
-
-rs.CharacterEvents.Struggle:FireServer()
-hum.Health = 0
-hum:ChangeState(Enum.HumanoidStateType.Dead)
-char:BreakJoints()
-
-end
-end)
-end
+                    rs.CharacterEvents.Struggle:FireServer()
+                    hum.Health = 0
+                    hum:ChangeState(Enum.HumanoidStateType.Dead)
+                    char:BreakJoints()
+                end
+            end)
+        end
     end
 })
-FlyingReset:Set(true)
 
-local AntiKick = antiTab:CreateToggle({
+local AntiKick = antiTab:AddToggle({
     Name = "Anti-Kick [ StickyPart ]",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         AntiKickT = Value
         task.spawn(AntiKickF)
@@ -7492,7 +7483,7 @@ local AntiKick = antiTab:CreateToggle({
 })
 --AntiKick:Set(true)
 
-antiTab:CreateButton({
+antiTab:AddButton({
     Name = "Anti-Kick [ StickyPart House ]",
     Callback = function()
         House()
@@ -7590,22 +7581,22 @@ antiTab:CreateButton({
     end
 })
 
-local AntiPCLD = antiTab:CreateToggle({
+local AntiPCLD = antiTab:AddToggle({
     Name = "Anti-Kick [ Delete PCLD ]",
-    CurrentValue = false,
-    Flag = "16",
+    Default = (not TESTPP),
     Callback = function(Value)
         AntiPCLDT = Value
         task.spawn(AntiPCLDF)
     end
 })
-if not TESTPP then AntiPCLD:Set(true) end
 
-antiTab:CreateSection("Ragdoll | Toggle")
-local PermRag = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Ragdoll | Toggle"
+})
+
+local PermRag = antiTab:AddToggle({
     Name = "Ragdoll",
-    CurrentValue = false,
-    Flag = "34",
+    Default = false,
     Callback = function(Value)
         permRagdollT = Value
         if permRagdollT and not permRagdollRunningS then
@@ -7616,56 +7607,56 @@ local PermRag = antiTab:CreateToggle({
     end
 })
 
-local PermRag2 = antiTab:CreateToggle({
+local PermRag2 = antiTab:AddToggle({
     Name = "Ragdoll Value",
-    CurrentValue = false,
-    Flag = "RagdollLoopToggle",
+    Default = false,
     Callback = function(Value)
         ragdollRunning = Value
         task.spawn(ragdollLoopF2)
     end
 })
 
-local RagdollWalkToggle = antiTab:CreateToggle({
+local RagdollWalkToggle = antiTab:AddToggle({
     Name = "Ragdoll Walk",
-    CurrentValue = false,
-    Flag = "14",
+    Default = false,
     Callback = function(Value)
         RagdollWalkT = Value
         RagdollWalk()
     end
 })
 
-antiTab:CreateSection("Gucci | Toggle")
-local AutoGucci = antiTab:CreateToggle({
+
+antiTab:AddSection({
+    Name = "Gucci | Toggle"
+})
+
+local AutoGucci = antiTab:AddToggle({
     Name = "Auto-Gucci",
-    CurrentValue = false,
-    Flag = "autoGucciToggleFlag",
+    Default = false,
     Callback = function(Value)
         AutoGucciT = Value
         if AutoGucciT then
             task.spawn(AutoGucciF)
         else
             if plr.Character.Humanoid then
-                    plr.Character.Humanoid.Sit = true
-                    task.wait(0.1)
-                    plr.Character.Humanoid.Sit = false
-                end
+                plr.Character.Humanoid.Sit = true
+                task.wait(0.1)
+                plr.Character.Humanoid.Sit = false
             end
-
+            
             sitJumpT = false
 
             if blobmanInstanceS then
-            RepStorage.MenuToys.DestroyToy:FireServer(blobmanInstanceS)
-            blobmanInstanceS = nil
+                RepStorage.MenuToys.DestroyToy:FireServer(blobmanInstanceS)
+                blobmanInstanceS = nil
+            end
         end
     end
 })
 
-local AutoGucciV2 = antiTab:CreateToggle({
+local AutoGucciV2 = antiTab:AddToggle({
     Name = "Train Gucci",
-    CurrentValue = false,
-    Flag = "autoGucciToggleFlag",
+    Default = false,
     Callback = function(Value)
         AutoGucciTV2 = Value
         if AutoGucciTV2 then
@@ -7678,163 +7669,162 @@ local AutoGucciV2 = antiTab:CreateToggle({
                     hum.Sit = true
                     task.wait(0.1)
                     hum.Sit = false
-                 end
-	    end
-    	 sitJumpT = false
-     end
-end
+                end
+            end
+            sitJumpT = false
+        end
+    end
 })
 
-antiTab:CreateSection("Delete | Toggle")
-local AutoHeight = antiTab:CreateToggle({
+antiTab:AddSection({
+    Name = "Delete | Toggle"
+})
+
+local AutoHeight = antiTab:AddToggle({
     Name = "Auto-HipHeight",
-    CurrentValue = false,
+    Default = false,
     Callback = function(Value)
         ToggleActive = Value
         StartMonitoring()
     end
 })
 
-local AutoDele = antiTab:CreateToggle({
-	Name = "Auto-Delete | Me",
-	CurrentValue = false,
-	Flag = "15",
-	Callback = function(Value)
-		autoDeleteLegs = Value
-		ragdollLegExplodeF()
-	end
-})
-
-local AutoDeletePartsDropdown = antiTab:CreateDropdown({
-	Name = "Select",
-	Options = {"Arm/Leg", "Leg/왼쪽", "Leg/오른쪽", "All/Leg", "Arm/왼쪽", "Arm/오른쪽", "All/Arm"},
-	CurrentOption = {"OPEN"},
-	Callback = function(Value)
-		selectedAutoDeletePart = Value[1]
-	end,
-})
-
-antiTab:CreateSection("")
-local KeybindTab = antiTab:CreateKeybind({
-    Name = "Delete | Target",
-    CurrentKeybind = "Q",
-    HoldToInteract = false,
-    Callback = function()
-            local beamPart = workspace:FindFirstChild("GrabParts") and workspace.GrabParts:FindFirstChild("BeamPart")
-            if beamPart then
-                local targetPlayer = getClosestPlayer(beamPart)
-                if targetPlayer then
-                teleportParts(targetPlayer, selectedPart)
-			end
-		end
+local AutoDele = antiTab:AddToggle({
+    Name = "Auto-Delete | Me",
+    Default = false,
+    Callback = function(Value)
+        autoDeleteLegs = Value
+        ragdollLegExplodeF()
     end
 })
 
-local Dropdown = antiTab:CreateDropdown({
+local AutoDeletePartsDropdown = antiTab:AddDropdown({
     Name = "Select",
     Options = {"Arm/Leg", "Leg/왼쪽", "Leg/오른쪽", "All/Leg", "Arm/왼쪽", "Arm/오른쪽", "All/Arm"},
-    CurrentOption = {"OPEN"},
+    Default = "OPEN",
     Callback = function(Value)
-        selectedPart = Value[1]
-    end,
+        selectedAutoDeletePart = Value
+    end
 })
 
-playerTab:CreateSection("Humanoid")
-playerTab:CreateToggle({
+antiTab:AddSection({
+    Name = ""
+})
+
+local KeybindTab = antiTab:AddBind({
+    Name = "Delete | Target",
+    Default = Enum.KeyCode.Q,
+    Hold = false,
+    Callback = function()
+        local beamPart = workspace:FindFirstChild("GrabParts") and workspace.GrabParts:FindFirstChild("BeamPart")
+        if beamPart then
+            local targetPlayer = getClosestPlayer(beamPart)
+            if targetPlayer then
+                teleportParts(targetPlayer, selectedPart)
+            end
+        end
+    end
+})
+
+local Dropdown = antiTab:AddDropdown({
+    Name = "Select",
+    Options = {"Arm/Leg", "Leg/왼쪽", "Leg/오른쪽", "All/Leg", "Arm/왼쪽", "Arm/오른쪽", "All/Arm"},
+    Default = "OPEN",
+    Callback = function(Value)
+        selectedPart = Value
+    end
+})
+
+playerTab:AddSection({
+    Name = "Humanoid"
+})
+
+playerTab:AddToggle({
     Name = "Walk Speed",
-    CurrentValue = false,
-    Flag = "28",
+    Default = false,
     Callback = function(Value)
         walkSpeedT = Value 
         updateWalkSpeedF()
     end
 })
 
-local walkSpeedInput = playerTab:CreateInput({
+local walkSpeedInput = playerTab:AddTextbox({
     Name = "Value",
-    CurrentValue = 16,
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "29",
+    Default = "16",
+    TextDisappear = false,
     Callback = function(Value)
         walkSpeedV = Value
         updateWalkSpeedF()
     end
 })
-walkSpeedInput:Set(16)
 
-playerTab:CreateSection("")
-playerTab:CreateToggle({
+playerTab:AddSection({
+    Name = ""
+})
+
+playerTab:AddToggle({
     Name = "Jump Power",
-    CurrentValue = false,
-    Flag = "30",
+    Default = false,
     Callback = function(Value)
         jumpPowerT = Value
         updateJumpPowerF()
     end
 })
 
-local jumpPowerInput = playerTab:CreateInput({
+local jumpPowerInput = playerTab:AddTextbox({
     Name = "Value",
-    CurrentValue = 24,
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "31",
+    Default = "24",
+    TextDisappear = false,
     Callback = function(Value)
         jumpPowerV = Value
         updateJumpPowerF()
     end
 })
-jumpPowerInput:Set(24)
 
-playerTab:CreateSection("Other")
-local NoClipToggle = playerTab:CreateToggle({
+playerTab:AddSection({
+    Name = "Other"
+})
+
+local NoClipToggle = playerTab:AddToggle({
     Name = "No-Clip",
-    CurrentValue = false,
-    Flag = "32",
+    Default = false,
     Callback = function(Value)
         noClipT = Value
         updateNoClipF()
     end
 })
 
-local infJumpToggle = playerTab:CreateToggle({
+local infJumpToggle = playerTab:AddToggle({
     Name = "Infinite jump",
-    CurrentValue = false,
-    Flag = "32",
+    Default = false,
     Callback = function(Value)
         infJumpT = Value
         updateInfJumpF()
     end
 })
 
-local Fly = playerTab:CreateToggle({ 
+local Fly = playerTab:AddToggle({ 
     Name = "Fly", 
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         flyT = Value
         flyF()
     end
 })
 
-local flyInput = playerTab:CreateInput({
+local flyInput = playerTab:AddTextbox({
     Name = "Speed",
-    CurrentValue = 50,
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "37",
+    Default = "80",
+    TextDisappear = false,
     Callback = function(Value)
         flyV = Value
     end
 })
-flyInput:Set(80)
 
 --[[
-AuraTab:CreateToggle({
+AuraTab:AddToggle({
     Name = "test Aura",
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         --ViewAuraT = Value
         --if Value then
@@ -7844,64 +7834,65 @@ AuraTab:CreateToggle({
 })
 ]]--
 
-AuraTab:CreateToggle({
-    Name = "Anti-Boombox Aura [ Owner ]", -- Boombox
-    CurrentValue = false,
-    Flag = "5",
+AuraTab:AddToggle({
+    Name = "Anti-Boombox Aura [ Owner ]",
+    Default = false,
     Callback = function(Value)
         AntiBoxT = Value
         AntiBoxF()
     end
 })
 
-AuraTab:CreateToggle({
+AuraTab:AddToggle({
     Name = "Anti-Banana Aura [ Owner ]",
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         AntiBananaAuraT = Value
         AntiBananaAuraF()
     end
 })
 
-AuraTab:CreateToggle({
+AuraTab:AddToggle({
     Name = "Anti-StickyPart Aura [ Owner ]",
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         ViewAuraT = Value
         ViewAuraF()
     end
 })
 
-funTab:CreateSection("TP")
-local VoidInput = funTab:CreateInput({
-   Name = "Set Y",
-   CurrentValue = "",
-   PlaceholderText = "...",
-   RemoveTextAfterFocusLost = false,
-   Flag = "Input1",
-   Callback = function(Text)
-      local num = tonumber(Text)
-      if num then
-         Value = num
-      else
-         Value = nil
-      end
-   end,
+funTab:AddSection({
+    Name = "TP"
 })
 
-local VoidButton = funTab:CreateButton({
-   Name = "Teleport",
-   Callback = function()
-      if not Value then return end
-      local hrp = plr.Character:WaitForChild("HumanoidRootPart")
-      local pos = hrp.Position
-      hrp.CFrame = CFrame.new(pos.X, Value, pos.Z)
-   end,
+local VoidInput = funTab:AddTextbox({
+    Name = "Set Y",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Text)
+        local num = tonumber(Text)
+        if num then
+            Value = num
+        else
+            Value = nil
+        end
+    end
 })
 
-funTab:CreateSection("")
+local VoidButton = funTab:AddButton({
+    Name = "Teleport",
+    Callback = function()
+        if not Value then return end
+        local hrp = plr.Character:WaitForChild("HumanoidRootPart")
+        local pos = hrp.Position
+        hrp.CFrame = CFrame.new(pos.X, Value, pos.Z)
+    end
+})
+
+funTab:AddSection({
+    Name = ""
+})
+
 local teleportLocations = {
     ["스폰"] = {0, -7, 0},
     ["스폰산"] = {494, 163, 175},
@@ -7923,21 +7914,16 @@ local teleportLocations = {
 
 local selectedLocation = "스폰"
 
-local Dropdown = funTab:CreateDropdown({
+local Dropdown = funTab:AddDropdown({
     Name = "Select Zone",
     Options = {"스폰","스폰산","광산","큰동굴","작은동굴","열차동굴","위험구역","설산","헛간(농지)","하늘섬","초록집","(초록집)","(분홍집)","(보라집)","(파랑집)","(빨강집)"},
-    CurrentOption = "스폰",
-    MultipleOptions = false,
+    Default = "스폰",
     Callback = function(Value)
-        if typeof(Value) == "table" then
-            selectedLocation = Value[1] or "스폰"
-        else
-            selectedLocation = Value
-        end
-    end,
+        selectedLocation = Value
+    end
 })
 
-local Button = funTab:CreateButton({
+local Button = funTab:AddButton({
     Name = "Teleport",
     Callback = function()
         local plr = game.Players.LocalPlayer
@@ -7950,54 +7936,61 @@ local Button = funTab:CreateButton({
         end
 
         hrp.CFrame = CFrame.new(pos[1], pos[2], pos[3])
-    end,
+    end
 })
 
-funTab:CreateSection("Lag")
-funTab:CreateToggle({
+funTab:AddSection({
+    Name = "Lag"
+})
+
+funTab:AddToggle({
     Name = "Line Lag",
-    CurrentValue = false,
-    Flag = "lagToggleFlag",
+    Default = false,
     Callback = function(Value)
         LineLagT = Value
         LineLagF()
     end
 })
 
-funTab:CreateInput({
+funTab:AddTextbox({
     Name = "Lines",
-    CurrentValue = 50,
-    PlaceholderText = "Lines",
-    RemoveTextAfterFocusLost = false,
-    Flag = "linesInputFlag",
+    Default = "50",
+    TextDisappear = false,
     Callback = function(Value)
         LineLagV = Value
     end
 })
 
-funTab:CreateSection("Penis")
-local Inputt = funTab:CreateInput({
-   Name = "Pencil",
-   CurrentValue = "",
-   PlaceholderText = "Value",
-   RemoveTextAfterFocusLost = false,
-   Flag = "Input1",
-   Callback = function(Text)
-   end
+funTab:AddSection({
+    Name = "Penis"
 })
 
-local Ctratee = funTab:CreateButton({
+local Inputt = funTab:AddTextbox({
+    Name = "Pencil",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Text)
+    end
+})
+
+
+Local Ctratee = funTab:AddButton({
    Name = "Create",
    Callback = function()
        local ReplicatedStorage = game:GetService("ReplicatedStorage")
-       local pencilCountText = Inputt.CurrentValue
+       local pencilCountText = Inputt.Text
        local TNUM = tonumber(pencilCountText)
 
        if not TNUM or TNUM <= 0 then
            warn("Please enter a valid number!")
-           Rayfield:Notify({Title = "[ ✏️ ]", Content = "Nil Value", Duration = 3, Image = 0})
+           OrionLib:MakeNotification({
+               Name = "[ ✏️ ]",
+               Content = "Nil Value",
+               Time = 3
+           })
            return
        end
+
 
        local character = plr.Character or plr.CharacterAdded:Wait()
        local hrp = character:WaitForChild("HumanoidRootPart")
@@ -8141,31 +8134,37 @@ end
    end
 })
 
-funTab:CreateSection("StickyEvent")
-local Inputt = funTab:CreateInput({
-   Name = "Kunai",
-   CurrentValue = "",
-   PlaceholderText = "Value",
-   RemoveTextAfterFocusLost = false,
-   Flag = "Input1",
-   Callback = function(Text)
-   end
+funTab:AddSection({
+    Name = "StickyEvent"
 })
 
-local Ctratee = funTab:CreateButton({
-   Name = "Create [ Grab The Part ]",
-   Callback = function()
-       local ReplicatedStorage = game:GetService("ReplicatedStorage")
-       local Players = game:GetService("Players")
-       local plr = Players.LocalPlayer
-       
-       local kunaiCountText = Inputt.CurrentValue
-       local TNUM = tonumber(kunaiCountText)
+local Inputt = funTab:AddTextbox({
+    Name = "Kunai",
+    Default = "",
+    TextDisappear = false,
+    Callback = function(Text)
+    end
+})
 
-       if not TNUM or TNUM <= 0 or TNUM > 100 then
-           Rayfield:Notify({Title = "[ 🥷 ]", Content = "Invalid Value", Duration = 3, Image = 0})
-           return
-       end
+local Ctratee = funTab:AddButton({
+    Name = "Create [ Grab The Part ]",
+    Callback = function()
+        local ReplicatedStorage = game:GetService("ReplicatedStorage")
+        local Players = game:GetService("Players")
+        local plr = Players.LocalPlayer
+        
+        local kunaiCountText = Inputt.Text
+        local TNUM = tonumber(kunaiCountText)
+
+        if not TNUM or TNUM <= 0 or TNUM > 100 then
+            OrionLib:MakeNotification({
+                Name = "[ 🥷 ]",
+                Content = "Invalid Value",
+                Time = 3
+            })
+            return
+        end
+
 
        local character = plr.Character or plr.CharacterAdded:Wait()
        local hrp = character:WaitForChild("HumanoidRootPart")
@@ -8317,8 +8316,11 @@ local Ctratee = funTab:CreateButton({
    end
 })
 
-keybindTab:CreateSection("Shader")
-keybindTab:CreateButton({
+local Section = keybindTab:AddSection({
+    Name = "shader"
+})
+
+keybindTab:AddButton({
     Name = "Default",
     Callback = function()
         local Lighting = game:GetService("Lighting")
@@ -8364,7 +8366,7 @@ keybindTab:CreateButton({
     end
 })
 
-keybindTab:CreateButton({
+keybindTab:AddButton({
     Name = "Day Time",
     Callback = function()
         local Lighting = game:GetService("Lighting")
@@ -8412,7 +8414,7 @@ keybindTab:CreateButton({
     end
 })
 
-keybindTab:CreateButton({
+keybindTab:AddButton({
     Name = "Shore",
     Callback = function()
         local Lighting = game:GetService("Lighting")
@@ -8476,7 +8478,7 @@ keybindTab:CreateButton({
     end
 })
 
-keybindTab:CreateButton({
+keybindTab:AddButton({
     Name = "Cloudy",
     Callback = function()
         local Lighting = game:GetService("Lighting")
@@ -8561,24 +8563,27 @@ function jerk()
     end
 end
 
-keybindTab:CreateSection("Line")
-local antilagDet = keybindTab:CreateInput({
+keybindTab:AddSection({
+    Name = "Line"
+})
+
+local antilagDet = keybindTab:AddTextbox({
     Name = "Line Detect",
-    CurrentValue = 30,
-    PlaceholderText = "",
-    RemoveTextAfterFocusLost = false,
-    Flag = "linesInputFlag",
+    Default = "30",
+    TextDisappear = false,
     Callback = function(Value)
         AntiLagV = Value
     end
 })
-antilagDet:Set(30)
 
-keybindTab:CreateSection("Animation")
-local Jerk = keybindTab:CreateKeybind({
+keybindTab:AddSection({
+    Name = "Animation"
+})
+
+local Jerk = keybindTab:AddBind({
     Name = "Jerk",
-    CurrentKeybind = "Three",
-    HoldToInteract = false,
+    Default = Enum.KeyCode.Three,
+    Hold = false,
     Callback = jerk
 })
 
@@ -8587,19 +8592,20 @@ game:GetService('Players').LocalPlayer.CharacterAdded:Connect(function()
     vu6 = false
 end)
 
-keybindTab:CreateSection("Mouse")
-keybindTab:CreateKeybind({
+keybindTab:AddSection({
+    Name = "Mouse"
+})
+
+keybindTab:AddBind({
     Name = "Teleport",
-    CurrentKeybind = "Z",
-    HoldToInteract = false,
-    Flag = "38",
+    Default = Enum.KeyCode.Z,
+    Hold = false,
     Callback = tpF
 })
 
-local Tper = keybindTab:CreateToggle({
+local Tper = keybindTab:AddToggle({
     Name = "3rd person",
-    CurrentValue = false,
-    Flag = "AutoSitBlobman",
+    Default = true,
     Callback = function(Value)
         if Value then
             plr.CameraMode = Enum.CameraMode.Classic
@@ -8610,48 +8616,49 @@ local Tper = keybindTab:CreateToggle({
         end
     end
 })
-Tper:Set(true)
 
-keybindTab:CreateSection("Sit")
-local AutoSit = keybindTab:CreateToggle({
+keybindTab:AddSection({
+    Name = "Sit"
+})
+
+local AutoSit = keybindTab:AddToggle({
     Name = "Sit [Blobman]",
-    CurrentValue = false,
-    Flag = "AutoSitBlobman",
+    Default = false,
     Callback = function(Value)
         AutoSitT = Value
         AutoSitF()
     end
 })
 
-keybindTab:CreateKeybind({
+keybindTab:AddBind({
     Name = "Sit [Blobman]",
-    CurrentKeybind = "X",
-    HoldToInteract = false,
-    Flag = "40",
+    Default = Enum.KeyCode.X,
+    Hold = false,
     Callback = function()
         BlobSit()
-    end,
+    end
 })
 
-keybindTab:CreateSection("Plot")
-local BarrierNoclip = keybindTab:CreateToggle({
+keybindTab:AddSection({
+    Name = "Plot"
+})
+
+local BarrierNoclip = keybindTab:AddToggle({
     Name = "Barrier Noclip",
-    CurrentValue = false,
-    Flag = "BarrierNoclipToggle",
+    Default = true,
     Callback = function(Value)
         BarrierCanCollideT = Value
         BarrierCanCollideF()
     end
 })
-BarrierNoclip:Set(true)
 
-keybindTab:CreateKeybind({
+keybindTab:AddBind({
     Name = "Delete Barrier | FoodBread",
-    CurrentKeybind = "Y",
-    HoldToInteract = false,
+    Default = Enum.KeyCode.Y,
+    Hold = false,
     Callback = function()
         PlotBarrierDelete()
-    end,
+    end
 })
 
 local isExecuting = false
@@ -8675,10 +8682,10 @@ local function getMyPlot()
     end
 end
 
-keybindTab:CreateKeybind({
+keybindTab:AddBind({
     Name = "House Grab",
-    CurrentKeybind = "G",
-    HoldToInteract = false,
+    Default = Enum.KeyCode.G,
+    Hold = false,
     Callback = function()
         if isExecuting then
             return
@@ -8704,7 +8711,7 @@ keybindTab:CreateKeybind({
 
         local GrabParts = workspace:FindFirstChild("GrabParts")
         if GrabParts then
-        mouse1click()
+            mouse1click()
         end
 
         local torso = char:WaitForChild("Torso")
@@ -8718,123 +8725,128 @@ keybindTab:CreateKeybind({
     end
 })
 
-keybindTab:CreateSection("Owner")
-keybindTab:CreateKeybind({
+keybindTab:AddSection({
+    Name = "Owner"
+})
+
+keybindTab:AddBind({
     Name = "Anchored",
-    CurrentKeybind = "H",
-    HoldToInteract = false,
-    Flag = "AnchoredKeybind",
+    Default = Enum.KeyCode.H,
+    Hold = false,
     Callback = function()
-			local original = workspace:FindFirstChild("GrabParts")
-			if not original then return end
+        local original = workspace:FindFirstChild("GrabParts")
+        if not original then return end
 
-			local grabPart = original:FindFirstChild("GrabPart", true)
-			if not grabPart or not grabPart:IsA("BasePart") then return end
+        local grabPart = original:FindFirstChild("GrabPart", true)
+        if not grabPart or not grabPart:IsA("BasePart") then return end
 
-			local wasCollide = grabPart.CanCollide
-			grabPart.CanCollide = true
-			task.wait(0.1)
+        local wasCollide = grabPart.CanCollide
+        grabPart.CanCollide = true
+        task.wait(0.1)
 
-			local targetModel = nil
-			local touchingParts = grabPart:GetTouchingParts()
+        local targetModel = nil
+        local touchingParts = grabPart:GetTouchingParts()
 
-			if #touchingParts == 0 then
-				grabPart.CanCollide = wasCollide
-				return
-			end
+        if #touchingParts == 0 then
+            grabPart.CanCollide = wasCollide
+            return
+        end
 
-			for _, part in ipairs(touchingParts) do
-				if not part:IsDescendantOf(original) then
-					local current = part
-					while current and current ~= workspace do
-						if current:IsA("Model") then
-							targetModel = current
-							break
-						end
-						current = current.Parent
-					end
-					if targetModel then break end
-				end
-			end
+        for _, part in ipairs(touchingParts) do
+            if not part:IsDescendantOf(original) then
+                local current = part
+                while current and current ~= workspace do
+                    if current:IsA("Model") then
+                        targetModel = current
+                        break
+                    end
+                    current = current.Parent
+                end
+                if targetModel then break end
+            end
+        end
 
-			grabPart.CanCollide = wasCollide
+        grabPart.CanCollide = wasCollide
 
-			if not targetModel then return end
+        if not targetModel then return end
 
-			if not targetModel.Parent then
-				local found = false
-				local connection
-				connection = targetModel.AncestryChanged:Connect(function(_, parent)
-					if parent then
-						found = true
-						connection:Disconnect()
-					end
-				end)
+        if not targetModel.Parent then
+            local found = false
+            local connection
+            connection = targetModel.AncestryChanged:Connect(function(_, parent)
+                if parent then
+                    found = true
+                    connection:Disconnect()
+                end
+            end)
 
-				local startTime = tick()
-				while not found and tick() - startTime < 2 do
-					task.wait(0.1)
-				end
+            local startTime = tick()
+            while not found and tick() - startTime < 2 do
+                task.wait(0.1)
+            end
 
-				if not found then return end
-			end
+            if not found then return end
+        end
 
-			local existing = targetModel:FindFirstChild("Force")
-			if existing then
-				local existingHighlight = targetModel:FindFirstChild("AnchorHighlight")
-				if existingHighlight then
-					existingHighlight:Destroy()
-				end
-				existing:Destroy()
-				return
-			end
+        local existing = targetModel:FindFirstChild("Force")
+        if existing then
+            local existingHighlight = targetModel:FindFirstChild("AnchorHighlight")
+            if existingHighlight then
+                existingHighlight:Destroy()
+            end
+            existing:Destroy()
+            return
+        end
 
-			local clone = original:Clone()
-			clone.Name = "Force" -- CleanedGrabParts
+        local clone = original:Clone()
+        clone.Name = "Force" -- CleanedGrabParts
 
-			for _, desc in ipairs(clone:GetDescendants()) do
-				if desc:IsA("BasePart") then
-					desc.Transparency = 1
-					desc.CanCollide = false
+        for _, desc in ipairs(clone:GetDescendants()) do
+            if desc:IsA("BasePart") then
+                desc.Transparency = 1
+                desc.CanCollide = false
 
-					local beam = desc:FindFirstChild("GrabBeam")
-					if beam then beam:Destroy() end
+                local beam = desc:FindFirstChild("GrabBeam")
+                if beam then beam:Destroy() end
 
-					for _, sName in ipairs({"AttachSound1", "AttachSound", "BeamSound", "BeamSound1"}) do
-						local sound = desc:FindFirstChild(sName)
-						if sound then sound:Destroy() end
-					end
-				end
-			end
+                for _, sName in ipairs({"AttachSound1", "AttachSound", "BeamSound", "BeamSound1"}) do
+                    local sound = desc:FindFirstChild(sName)
+                    if sound then sound:Destroy() end
+                end
+            end
+        end
 
-			clone.Parent = targetModel
+        clone.Parent = targetModel
 
-			local hl = Instance.new("Highlight")
-			hl.Name = "AnchorHighlight"
-			hl.FillColor = Color3.fromRGB(0, 0, 255)
-			hl.FillTransparency = 0.9
-			hl.OutlineColor = Color3.fromRGB(0, 0, 255)
-			hl.OutlineTransparency = 0.5
-			hl.Adornee = targetModel
-			hl.Parent = targetModel
+        local hl = Instance.new("Highlight")
+        hl.Name = "AnchorHighlight"
+        hl.FillColor = Color3.fromRGB(0, 0, 255)
+        hl.FillTransparency = 0.9
+        hl.OutlineColor = Color3.fromRGB(0, 0, 255)
+        hl.OutlineTransparency = 0.5
+        hl.Adornee = targetModel
+        hl.Parent = targetModel
 
-			local connection
-			connection = game:GetService("RunService").Heartbeat:Connect(function()
-				if not clone or not clone.Parent or not targetModel or not targetModel.Parent then
-					if connection then connection:Disconnect() end
-					return
-				end
+        local connection
+        connection = game:GetService("RunService").Heartbeat:Connect(function()
+            if not clone or not clone.Parent or not targetModel or not targetModel.Parent then
+                if connection then connection:Disconnect() end
+                return
+            end
 
-				if hl and hl.Parent then
-					hl.Adornee = targetModel
-				else
-					connection:Disconnect()
-				end
-			end)
+            if hl and hl.Parent me then
+                hl.Adornee = targetModel
+            else
+                connection:Disconnect()
+            end
+        end)
     end
 })
 
-keybindTab:CreateSection("ESP")
+keybindTab:AddSection({
+    Name = "ESP"
+})
+
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
 
@@ -8900,50 +8912,29 @@ function PcldViewF()
     end
 end
 
-local iconEsp = keybindTab:CreateToggle({
+local iconEsp = keybindTab:AddToggle({
     Name = "Icon esp",
-    CurrentValue = false,
-    Flag = "",
+    Default = false,
     Callback = function(Value)
         PlrEspT = Value
         PlrEspF()
     end
 })
---iconEsp:Set(true)
 
-local PCLDView = keybindTab:CreateToggle({
+local PCLDView = keybindTab:AddToggle({
     Name = "PCLD View",
-    CurrentValue = false,
-    Flag = "PCLDView",
+    Default = true,
     Callback = function(Value)
         PcldViewT = Value
         PcldViewF()
     end
 })
-PCLDView:Set(true)
 
-local ViewTool = keybindTab:CreateToggle({
+local ViewTool = keybindTab:AddToggle({
     Name = "StickyPart View",
-    CurrentValue = false,
-    Flag = "5",
+    Default = true,
     Callback = function(Value)
         ViewToolT = Value
         ViewToolF()
     end
 })
-ViewTool:Set(true)
-
---[[
-CreditsTab:CreateLabel("@Defiant", 96897864871400, Color3.fromRGB(255, 255, 255), false)
-CreditsTab:CreateParagraph({Title = "dsc savior.liberty", Content = ":>"})
-
-CreditsTab:CreateLabel("NetherLandson_Ontop ( Dungi )", 113854105043977, Color3.fromRGB(255, 255, 255), false)
-CreditsTab:CreateParagraph({Title = "dsc netherlandson_top0", Content = ":>"})
-
-CreditsTab:CreateLabel("NoPe", 0, Color3.fromRGB(255, 255, 255), false)
-CreditsTab:CreateParagraph({Title = "dsc ftap.np", Content = "Owner"})
-
-CreditsTab:CreateLabel("Diro", 78390276296494, Color3.fromRGB(255, 255, 255), false)
-CreditsTab:CreateParagraph({Title = "dsc l1l1l1l1l1l1l1l1l1l1l1_", Content = "Co-Owner"})
-]]--
-

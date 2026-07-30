@@ -1,4 +1,4 @@
-
+-- 이파일은 771244128821730211의해  변형되었음.V1.46
 local repo = "https://raw.githubusercontent.com/deividcomsono/Obsidian/main/"
 local Library = loadstring(game:HttpGet(repo .. "Library.lua"))()
 local ThemeManager = loadstring(game:HttpGet(repo .. "addons/ThemeManager.lua"))()
@@ -7134,7 +7134,7 @@ LoopTab:AddSection({
 })
 
 LoopTab:AddToggle({
-    Name = "바이패스 킥   <font color='rgb(255,154,123)'>[레이지봇]</font>  <font color='rgb(0,255,0)'>[프리미엄]</font>  <font color='rgb(255,0,1)'>[바이패스]</font>  <font color='rgb(0,154,48)'>[락]</font>",
+    Name = "바이패스 킥 <font color='rgb(255,154,123)'>[레이지봇]</font>  <font color='rgb(0,255,0)'>[프리미엄]</font>  <font color='rgb(255,0,1)'>[바이패스]</font>  <font color='rgb(0,154,48)'>[락]</font>",
     Default = false,
     Callback = function(Value)
         blobKickT3 = Value
@@ -7783,7 +7783,7 @@ antiTab:AddSection({
 
 local AntiGrab = antiTab:AddToggle({
     Name = "Anti-Grab",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         AntiGrabF(Value)
     end
@@ -7820,7 +7820,7 @@ antiTab:AddSection({
 
 local AntiBlob = antiTab:AddToggle({
 	Name = "Anti-Blob",
-	Default = true,
+	Default = false,
 	Callback = function(Value)
 		AntiBlobT = Value
 		if Value then
@@ -7831,7 +7831,7 @@ local AntiBlob = antiTab:AddToggle({
 
 local AntiMassless = antiTab:AddToggle({
     Name = "Anti-Massless",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         masslessT = Value
         masslessF()
@@ -7857,7 +7857,7 @@ end
 
 local AntiInPlots = antiTab:AddToggle({
     Name = "Anti-InPlots",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         antiInPlotsEnabled = Value
         if Value then
@@ -7872,7 +7872,7 @@ antiTab:AddSection({
 
 local AntiVoid = antiTab:AddToggle({
     Name = "Anti-Void",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             workspace.FallenPartsDestroyHeight = -50000
@@ -7884,7 +7884,7 @@ local AntiVoid = antiTab:AddToggle({
 
 local AntiExplode = antiTab:AddToggle({
     Name = "Anti-Explosion",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         AntiExplosionT = Value
         if Value then
@@ -7898,7 +7898,7 @@ local AntiExplode = antiTab:AddToggle({
 
 local AntiBurn = antiTab:AddToggle({
     Name = "Anti-Burn",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         AntiBurnV = Value
         AntiBurn()
@@ -7907,7 +7907,7 @@ local AntiBurn = antiTab:AddToggle({
 
 local AntiPaint = antiTab:AddToggle({
     Name = "Anti-Paint",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         AntiPaintT = Value
         antiPaintF(Value)
@@ -7917,7 +7917,7 @@ local AntiPaint = antiTab:AddToggle({
 AntiLagF()
 local AntiLag = antiTab:AddToggle({
     Name = "Anti-Lag",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         antiLagEnabled = Value
     end
@@ -7959,7 +7959,7 @@ antiTab:AddSection({
 
 local FlyingReset = antiTab:AddToggle({
     Name = "Flying Reset",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             rs.GameCorrectionEvents.GameCorrectionsNotify.OnClientEvent:Connect(function(Type)
@@ -8088,7 +8088,7 @@ antiTab:AddButton({
 
 local AntiPCLD = antiTab:AddToggle({
     Name = "Anti-Kick [ Delete PCLD ]",
-    Default = (not TESTPP),
+    Default = false,
     Callback = function(Value)
         AntiPCLDT = Value
         task.spawn(AntiPCLDF)
@@ -9110,7 +9110,7 @@ keybindTab:AddBind({
 
 local Tper = keybindTab:AddToggle({
     Name = "3rd person",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         if Value then
             plr.CameraMode = Enum.CameraMode.Classic
@@ -9150,7 +9150,7 @@ keybindTab:AddSection({
 
 local BarrierNoclip = keybindTab:AddToggle({
     Name = "Barrier Noclip",
-    Default = true,
+    Default = false,
     Callback = function(Value)
         BarrierCanCollideT = Value
         BarrierCanCollideF()
@@ -9445,5 +9445,5 @@ local ViewTool = keybindTab:AddToggle({
     end
 })
 
-OrionLib:Init()
+
 

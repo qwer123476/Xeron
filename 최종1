@@ -5558,10 +5558,17 @@ end
 ----------------------------------------------------------------------------------------- [ 시작 설정 ]
 
 local Window = OrionLib:MakeWindow({
-    Name = "FTAP | 💎Premium💎",
-    SaveConfig = true,
-    ConfigFolder = "OrionTest"
-})
+        Name = "FTAP | 💎Premium💎",
+        HidePremium = false,
+        SaveConfig = true,
+        ConfigFolder = "Script",
+        IntroEnabled = true,
+        KeyToOpenWindow = "M",
+        FreeMouse = true,
+        IntroText = "mad by paca",
+        IntroIcon = "rbxassetid://130521044774541",
+        SearchBar = {Default = "TTT"}
+    })
 
 local playerTab = Window:MakeTab({Name = "메인", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 local grabTab = Window:MakeTab({Name = "그랩", Icon = "rbxassetid://4483345998", PremiumOnly = false})

@@ -8902,7 +8902,6 @@ function PcldViewF()
                 processed[obj] = nil
             end
         end)
-
     else
         for obj, box in pairs(redBoxes) do
             if box then box:Destroy() end
@@ -8911,6 +8910,8 @@ function PcldViewF()
         processed = {}
     end
 end
+
+
 
 local iconEsp = keybindTab:AddToggle({
     Name = "Icon esp",
@@ -8938,3 +8939,5 @@ local ViewTool = keybindTab:AddToggle({
         ViewToolF()
     end
 })
+
+

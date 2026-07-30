@@ -344,7 +344,7 @@ SpawnCFrame()
 
 -- ================== Rayfield 안정 버전 (Build Mismatch 해결) ==================
 print("Rayfield 로드 시작움직이면 뒤진다 시발새끼야")
-local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/qwer123476/12345/main/Orion'))()
+local OrionLib = loadstring(game:HttpGet('https://raw.githubusercontent.com/qwer123476/12345/main/Orion'))()
 print("로드 완료 알림:니엄마 로딩완료 ")
 
 G = rs.GrabEvents

@@ -1449,7 +1449,7 @@ local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent", 10)
 
 local State = {
 	AutoEnchant = false,
-	TargetEnchant = "Speed V",
+	--TargetEnchant = "Speed V",
 	AutoPickupBooks = false,
 	AutoUpgrade = false,
 	ProtectTicket = true,
@@ -1581,7 +1581,7 @@ task.spawn(function()
 				})
 			else
 				if CentralEvent then
-					--CentralEvent:FireServer("EnchantBag_Apply", { Slot = 1 })
+					CentralEvent:FireServer("EnchantBag_Apply", { Slot = 1 })
 				end
 			end
 		end

@@ -1068,6 +1068,15 @@ local Lighting = game:GetService("Lighting")
 local UserInputService = game:GetService("UserInputService")
 local VirtualUser = game:GetService("VirtualUser")
 local CentralEvent = game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent", 10)
 
 local function TeleportTo(coordinate)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
@@ -1429,7 +1438,235 @@ AutoTab:AddToggle({
    end,
 })
 
---AutoTab:AddSection({ Name = "자동 인챈트 설정" })
+
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+
+local LocalPlayer = Players.LocalPlayer
+local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent", 10)
+
+local State = {
+	AutoEnchant = false,
+	TargetEnchant = "Speed V",
+	AutoPickupBooks = false,
+	AutoUpgrade = false,
+	ProtectTicket = true,
+	AutoPVP = false,
+	AutoKillAura = false
+}
+
+local AllEnchants = {
+	"Speed I", "Speed II", "Speed III", "Speed IV", "Speed V", "Speed VI",
+	"Luck I", "Luck II", "Luck III", "Luck IV", "Luck V", "Luck VI",
+	"Coin I", "Coin II", "Coin III", "Coin IV", "Coin V", "Coin VI",
+	"깨달음"
+}
+
+local function getHRP()
+	local char = LocalPlayer.Character
+	return char and char:FindFirstChild("HumanoidRootPart")
+end
+
+local function getEquippedToolName()
+	local char = LocalPlayer.Character
+	if char then
+		local tool = char:FindFirstChildOfClass("Tool")
+		if tool then return tool.Name end
+	end
+	local attr = LocalPlayer:GetAttribute("EquippedTool")
+	if type(attr) == "string" and attr ~= "" then return attr end
+	return nil
+end
+
+local function getCurrentEnchantName()
+	local toolName = getEquippedToolName()
+	if not toolName then return nil end
+	
+	local enchantBag = LocalPlayer:FindFirstChild("EnchantBag")
+	if enchantBag then
+		local item = enchantBag:FindFirstChild(toolName)
+		if item and item:FindFirstChild("CurrentEnchant") then
+			return item.CurrentEnchant.Value
+		end
+	end
+	
+	local attr = LocalPlayer:GetAttribute("CurrentEnchant_" .. toolName)
+	if attr then return tostring(attr) end
+	return nil
+end
+
+local function matchTargetEnchant(current, target)
+	if not current or not target then return false end
+	current = tostring(current):lower():gsub("%s+", "")
+	target = tostring(target):lower():gsub("%s+", "")
+	return current:find(target, 1, true) ~= nil
+end
+
+local function notify(title, msg)
+	if OrionLib then
+		OrionLib:MakeNotification({
+			Name = title,
+			Content = msg,
+			Image = "rbxassetid://4483345998",
+			Time = 3
+		})
+	end
+end
+
+AutoTab:AddSection({ Name = "자동 인챈트 설정" })
+
+AutoTab:AddDropdown({
+	Name = "원하는 인챈트",
+	Default = "Speed V",
+	Options = AllEnchants,
+	Callback = function(Value)
+		State.TargetEnchant = Value
+	end    
+})
+
+AutoTab:AddToggle({
+	Name = "인챈트 오토팜",
+	Default = false,
+	Callback = function(Value)
+		State.AutoEnchant = Value
+	end    
+})
+
+
+GTab:AddSection({ Name = "플레이어 상태" })
+GTab:AddToggle({
+	Name = "강화 하락 방지권 사용",
+	Default = "false",
+	Callback = function(Value)
+		State.ProtectTicket = Value
+	end    
+})
+
+GTab:AddToggle({
+	Name = "자동 강화 시작",
+	Default = false,
+	Callback = function(Value)
+		State.AutoUpgrade = Value
+	end    
+})
+PVPTab:AddSection({ Name = "V2 PVP" })
+PVPTab:AddToggle({
+	Name = "오토 PVP V2",
+	Default = false,
+	Callback = function(Value)
+		State.AutoPVP = Value
+	end    
+})
+
+PVPTab:AddToggle({
+	Name = "PVP 오토팜 V2",
+	Default = false,
+	Callback = function(Value)
+		State.AutoKillAura = Value
+	end    
+})
+
+task.spawn(function()
+	while true do
+		task.wait(0.3)
+		if State.AutoEnchant then
+			local current = getCurrentEnchantName()
+			if current and matchTargetEnchant(current, State.TargetEnchant) then
+				State.AutoEnchant = false
+				OrionLib:MakeNotification({
+					Name = "인챈 성공",
+					Content = "목표 [" .. tostring(State.TargetEnchant) .. "] 뽑음",
+					Image = "rbxassetid://4483345998",
+					Time = 3
+				})
+			else
+				if CentralEvent then
+					CentralEvent:FireServer("EnchantBag_Apply", { Slot = 1 })
+				end
+			end
+		end
+	end
+end)
+
+
+task.spawn(function()
+	while true do
+		task.wait(0.4)
+		if State.AutoPickupBooks then
+			local hrp = getHRP()
+			for _, v in ipairs(Workspace:GetDescendants()) do
+				if v:IsA("ProximityPrompt") and v.Enabled then
+					local pName = v.Parent and v.Parent.Name or ""
+					if pName:find("Book") or pName:find("인챈트") or pName:find("Totem") or pName:find("토템") then
+						if fireproximityprompt then
+							fireproximityprompt(v)
+						else
+							if hrp and v.Parent:IsA("BasePart") then
+								hrp.CFrame = v.Parent.CFrame
+							end
+						end
+					end
+				elseif v:IsA("TouchTransmitter") and v.Parent and v.Parent:IsA("BasePart") then
+					local partName = v.Parent.Name
+					if partName:find("Book") or partName:find("인챈트") or partName:find("Totem") or partName:find("토템") then
+						if hrp then
+							if firetouchinterest then
+								firetouchinterest(hrp, v.Parent, 0)
+								firetouchinterest(hrp, v.Parent, 1)
+							else
+								hrp.CFrame = v.Parent.CFrame
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
+
+task.spawn(function()
+	while true do
+		task.wait(0.3)
+		if State.AutoUpgrade then
+			local toolName = getEquippedToolName()
+			if toolName and CentralEvent then
+				CentralEvent:FireServer("SetUpgradeProtectState", State.ProtectTicket)
+				CentralEvent:FireServer("UpgradeTool", toolName)
+			end
+		end
+	end
+end)
+
+local pvpSeq = 0
+task.spawn(function()
+	while true do
+		task.wait(0.1)
+		if State.AutoPVP then
+			LocalPlayer:SetAttribute("PVPEnabled", true)
+			pvpSeq = (pvpSeq % 1000000) + 1
+			if CentralEvent then
+				CentralEvent:FireServer("PunchRequest", pvpSeq)
+			end
+			
+			if State.AutoKillAura then
+				local hrp = getHRP()
+				if hrp then
+					for _, enemy in ipairs(Players:GetPlayers()) do
+						if enemy ~= LocalPlayer and enemy.Character and enemy.Character:FindFirstChild("HumanoidRootPart") then
+							local enemyHrp = enemy.Character.HumanoidRootPart
+							local dist = (enemyHrp.Position - hrp.Position).Magnitude
+							if dist < 60 then
+								hrp.CFrame = enemyHrp.CFrame * CFrame.new(0, 0, 3)
+								break
+							end
+						end
+					end
+				end
+			end
+		end
+	end
+end)
 
 PlayerTab:AddSection({ Name = "플레이어 상태" })
 local WalkSpeedEnabled = false

@@ -1097,6 +1097,76 @@ local function IsPvpActive(targetPlayer)
    end
    return false
 end
+local HttpService = game:GetService("HttpService")
+
+local ConfigName = "config"
+
+local function SaveAll()
+    local fileName = ConfigName .. ".txt"
+    local saveTable = {}
+
+    for flag, obj in pairs(OrionLib.Flags or {}) do
+        if obj and obj.Value ~= nil then
+            saveTable[flag] = obj.Value
+        end
+    end
+
+    local success, err = pcall(function()
+        writefile(fileName, HttpService:JSONEncode(saveTable))
+    end)
+
+    if success then
+        OrionLib:MakeNotification({
+            Name = "저장 성공",
+            Content = "저장완료!",
+            Time = 3
+        })
+    else
+        OrionLib:MakeNotification({
+            Name = "저장 실패",
+            Content = "저장 실패: " .. tostring(err),
+            Time = 3
+        })
+    end
+end
+
+local function LoadAll()
+    local fileName = ConfigName .. ".txt"
+
+    if not isfile(fileName) then
+        OrionLib:MakeNotification({
+            Name = "로드 실패",
+            Content = "설정 파일을 찾을 수 없습니다.",
+            Time = 3
+        })
+        return
+    end
+
+    local success, data = pcall(function()
+        return HttpService:JSONDecode(readfile(fileName))
+    end)
+
+    if success and type(data) == "table" then
+        for flag, value in pairs(data) do
+            if OrionLib.Flags and OrionLib.Flags[flag] then
+                pcall(function()
+                    OrionLib.Flags[flag]:Set(value)
+                end)
+            end
+        end
+        OrionLib:MakeNotification({
+            Name = "로드 성공",
+            Content = "로드완료 !",
+            Time = 3
+        })
+    else
+        OrionLib:MakeNotification({
+            Name = "로드 실패",
+            Content = "파일을 불러오는 중 오류가 발생했습니다.",
+            Time = 3
+        })
+    end
+end
 
 local TeleportTab = Window:MakeTab({Name = "TP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local AutoTab = Window:MakeTab({Name = "오토팜", Icon = "rbxassetid://4483362458", PremiumOnly = false})
@@ -2118,3 +2188,36 @@ MusicTab:AddToggle({
 })
 
 --OrionLib:Init()
+local ConfigTab = Window:MakeTab({
+    Name = "설정",
+    Icon = "rbxassetid://4483345998",
+    PremiumOnly = false
+})
+
+ConfigTab:AddTextbox({
+    Name = "설정 파일 이름",
+    Default = "config",
+    TextDisappear = false,
+    Callback = function(Value)
+        if Value and Value ~= "" then
+            ConfigName = Value
+        end
+    end
+})
+
+ConfigTab:AddButton({
+    Name = "설정 저장하기",
+    Callback = function()
+        SaveAll()
+    end
+})
+
+ConfigTab:AddButton({
+    Name = "설정 불러오기",
+    Callback = function()
+        LoadAll()
+    end
+})
+
+
+LoadAll()

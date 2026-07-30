@@ -344,7 +344,7 @@ SpawnCFrame()
 
 -- ================== Rayfield 안정 버전 (Build Mismatch 해결) ==================
 print("Rayfield 로드 시작움직이면 뒤진다 시발새끼야")
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Rayfield = loadstring(game:HttpGet('https://raw.githubusercontent.com/qwer123476/12345/main/Orion'))()
 print("로드 완료 알림:니엄마 로딩완료 ")
 
 G = rs.GrabEvents
@@ -1117,23 +1117,28 @@ function AutoGucciF()
             end
 
             if not successCheck then
-                 blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
-                Rayfield:Notify({Title = "[ 🔓 ]",Content = "Gucci | Wait",Duration = 1,Image = nil,})
-                if hum then
-                    rs.CharacterEvents.Struggle:FireServer(plr)
-                    hum.Sit = true
-                    task.wait(0.1)
-                    hum.Sit = false
-                    if blobHRP.Position.Y > 9000 then  DestroyToy:FireServer(blobmanInstanceS) end
-                end
+    blobHRP = blobmanInstanceS and blobmanInstanceS:FindFirstChild("HumanoidRootPart")
+    
+    OrionLib:MakeNotification({
+        Name = "[ 🔓 ]",
+        Content = "Gucci | Wait",
+        Time = 1
+    })
 
-                sitJumpT = false
-                task.wait(1)
-            end
-        end)
-    task.wait()
+    if hum then
+        rs.CharacterEvents.Struggle:FireServer(plr)
+        hum.Sit = true
+        task.wait(0.1)
+        hum.Sit = false
+        if blobHRP and blobHRP.Position.Y > 9000 then 
+            DestroyToy:FireServer(blobmanInstanceS) 
+        end
     end
+
+    sitJumpT = false
+    task.wait(1)
 end
+
 
 function sitJumpFV2()
      char = plr.Character
@@ -5548,21 +5553,29 @@ end
 
 ----------------------------------------------------------------------------------------- [ 시작 설정 ]
 
-local Window = Rayfield:CreateWindow({Name = "FTAP | 💎Premium💎", Icon = 0, Theme = NP, ToggleUIKeybind = "T"})
+local Window = OrionLib:MakeWindow({
+    Name = "FTAP | 💎Premium💎",
+    HidePremium = false,
+    SaveConfig = true,
+    ConfigFolder = "OrionTest"
+})
 
-local playerTab = Window:CreateTab("메인", 0)
-local grabTab = Window:CreateTab("그랩", 0)
-local antiTab = Window:CreateTab("보안", 0)
-local ListTab = Window:CreateTab("리스트", 0)
-local LoopTab = Window:CreateTab("실행", 0)
-local AuraTab = Window:CreateTab("아우라", 0)
-local funTab = Window:CreateTab("기타", 0)
-local keybindTab = Window:CreateTab("설정", 0)
---local CreditsTab = Window:CreateTab("이외", 0)
-local DevTab = Window:CreateTab("Dev", 0)
+local playerTab = Window:MakeTab({Name = "메인", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local grabTab = Window:MakeTab({Name = "그랩", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local antiTab = Window:MakeTab({Name = "보안", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local ListTab = Window:MakeTab({Name = "리스트", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local LoopTab = Window:MakeTab({Name = "실행", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local AuraTab = Window:MakeTab({Name = "아우라", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local funTab = Window:MakeTab({Name = "기타", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local keybindTab = Window:MakeTab({Name = "설정", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+--local CreditsTab = Window:MakeTab({Name = "이외", Icon = "rbxassetid://4483345998", PremiumOnly = false})
+local DevTab = Window:MakeTab({Name = "Dev", Icon = "rbxassetid://4483345998", PremiumOnly = false})
 
-DevTab:CreateSection("Gamepass")
-DevTab:CreateButton({
+local Section = DevTab:AddSection({
+    Name = "Gamepass"
+})
+
+DevTab:AddButton({
     Name = "UnLock | Farther Reach",
     Callback = function()
 
@@ -5583,7 +5596,7 @@ DevTab:CreateButton({
     end
 })
 
-DevTab:CreateButton({
+DevTab:AddButton({
     Name = "UnLock | Multi Color",
     Callback = function()
 
@@ -5601,8 +5614,11 @@ DevTab:CreateButton({
     end
 })
 
-DevTab:CreateSection("Gam")
-DevTab:CreateToggle({
+local Section = DevTab:AddSection({
+    Name = "Gam"
+})
+
+DevTab:AddToggle({
     Name = "Kick Notification",
     CurrentValue = true,
     Flag = "5",
@@ -5618,8 +5634,11 @@ headMatrix = {0,0,0,0,0,0,0,1,0}
 torsoMatrix = {0,0,0,0,0,0,0,1,0}
 rightArmMatrix = {0,0,2,0,0,0,0,0,1}
 
-DevTab:CreateSection("")
-DevTab:CreateToggle({ 
+local Section = DevTab:AddSection({
+    Name = ""
+})
+
+DevTab:AddToggle({ 
     Name = "Look", 
     CurrentValue = false,
     Flag = "ToggleSpam",
@@ -5656,12 +5675,10 @@ DevTab:CreateToggle({
     end
 })
 
-local HR = DevTab:CreateInput({
+local HR = DevTab:AddTextbox({
     Name = "Head Rotation",
-    CurrentValue = "0,0,0,0,0,0,0,1,0",
-    PlaceholderText = "xx, xy, xz, yx, yy, yz, zx, zy, zz",
-    RemoveTextAfterFocusLost = false,
-    Flag = "HeadMatrix",
+    Default = "0,0,0,0,0,0,0,1,0",
+    TextDisappear = false,
     Callback = function(Value)
         local numbers = {}
         for num in Value:gmatch("[^,]+") do
@@ -5674,12 +5691,10 @@ local HR = DevTab:CreateInput({
     end
 })
 
-local TR = DevTab:CreateInput({
+local TR = DevTab:AddTextbox({
     Name = "Torso Rotation",
-    CurrentValue = "0,0,0,0,0,0,0,1,0",
-    PlaceholderText = "xx, xy, xz, yx, yy, yz, zx, zy, zz",
-    RemoveTextAfterFocusLost = false,
-    Flag = "TorsoMatrix",
+    Default = "0,0,0,0,0,0,0,1,0",
+    TextDisappear = false,
     Callback = function(Value)
         local numbers = {}
         for num in Value:gmatch("[^,]+") do
@@ -5692,12 +5707,10 @@ local TR = DevTab:CreateInput({
     end
 })
 
-local ARA = DevTab:CreateInput({
+local ARA = DevTab:AddTextbox({
     Name = "Right Arm Rotation",
-    CurrentValue = "0,0,2,0,0,0,0,0,1",
-    PlaceholderText = "xx, xy, xz, yx, yy, yz, zx, zy, zz",
-    RemoveTextAfterFocusLost = false,
-    Flag = "ArmMatrix",
+    Default = "0,0,2,0,0,0,0,0,1",
+    TextDisappear = false,
     Callback = function(Value)
         local numbers = {}
         for num in Value:gmatch("[^,]+") do
@@ -5710,42 +5723,39 @@ local ARA = DevTab:CreateInput({
     end
 })
 
-DevTab:CreateButton({
+DevTab:AddButton({
     Name = "Reset",
     Callback = function()
+        headMatrix = {0,0,0,0,0,0,0,1,0}
+        torsoMatrix = {0,0,0,0,0,0,0,1,0}
+        rightArmMatrix = {0,0,2,0,0,0,0,0,1}
 
-headMatrix = {0,0,0,0,0,0,0,1,0}
-torsoMatrix = {0,0,0,0,0,0,0,1,0}
-rightArmMatrix = {0,0,2,0,0,0,0,0,1}
-
-HR:Set("0,0,0,0,0,0,0,1,0")
-TR:Set("0,0,0,0,0,0,0,1,0")
-ARA:Set("0,0,2,0,0,0,0,0,1")
-
+        HR:Set("0,0,0,0,0,0,0,1,0")
+        TR:Set("0,0,0,0,0,0,0,1,0")
+        ARA:Set("0,0,2,0,0,0,0,0,1")
     end
 })
 
 local TextChatService = game:GetService("TextChatService")
 local RunService = game:GetService("RunService")
 
-DevTab:CreateSection("Chat")
-DevTab:CreateInput({
+DevTab:AddSection({
+    Name = "Chat"
+})
+
+DevTab:AddTextbox({
     Name = "Sound",
-    CurrentValue = "",
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "SoundInput",
+    Default = "",
+    TextDisappear = false,
     Callback = function(Value)
         spamText = tostring(Value)
     end
 })
 
-DevTab:CreateInput({
+DevTab:AddTextbox({
     Name = "Speed",
-    CurrentValue = "",
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "SpeedInput",
+    Default = "",
+    TextDisappear = false,
     Callback = function(Value)
         local num = tonumber(Value)
         if num and num > 0 then
@@ -5756,10 +5766,9 @@ DevTab:CreateInput({
     end
 })
 
-DevTab:CreateToggle({ 
+DevTab:AddToggle({ 
     Name = "Toggle", 
-    CurrentValue = false,
-    Flag = "SpamToggle",
+    Default = false,
     Callback = function(Value)
         spamming = Value
 
@@ -5790,17 +5799,22 @@ DevTab:CreateToggle({
     end
 })
 
-DevTab:CreateSection("Tweened Objects")
-DevTab:CreateButton({
+DevTab:AddSection({
+    Name = "Tweened Objects"
+})
+
+DevTab:AddButton({
     Name = "Train SetOwner",
     Callback = TrSw
 })
 
-DevTab:CreateSection("OWNER")
-local Loop1 = DevTab:CreateToggle({
+DevTab:AddSection({
+    Name = "OWNER"
+})
+
+local Loop1 = DevTab:AddToggle({
     Name = "PTM",
-    CurrentValue = false,
-    Flag = "21",
+    Default = false,
     Callback = function(Value)
         loopPlayerT3 = Value
         if loopPlayerT3 then
@@ -5817,7 +5831,7 @@ local Loop1 = DevTab:CreateToggle({
     end
 })
 
-DevTab:CreateButton({
+DevTab:AddButton({
     Name = "Kill [ Owner ]",
     Callback = function()
         table.clear(playersInLoop2V)
@@ -5874,7 +5888,7 @@ DevTab:CreateButton({
     end
 })
 
-DevTab:CreateButton({
+DevTab:AddButton({
     Name = "Fling [ Owner ]",
     Callback = function()
         table.clear(playersInLoop2V)
@@ -5968,11 +5982,13 @@ DevTab:CreateButton({
     end
 })
 
-DevTab:CreateSection("BLOB")
-DevTab:CreateToggle({
+DevTab:AddSection({
+    Name = "BLOB"
+})
+
+DevTab:AddToggle({
     Name = "Loop WD",
-    CurrentValue = false,
-    Flag = "5",
+    Default = false,
     Callback = function(Value)
         AntiStickyGBT = Value
         if Value then
@@ -5981,105 +5997,105 @@ DevTab:CreateToggle({
     end
 })
 
-local RRButton = DevTab:CreateButton({
+local RRButton = DevTab:AddButton({
     Name = "Release [ Blobman ]",
     Callback = function()
         table.clear(playersInLoop2V)
-	for i, e in ipairs(playersInLoop1V) do
-		local nameOnly = e:match("^(.-) %(") or e
-		table.insert(playersInLoop2V, nameOnly)
-	end
+        for i, e in ipairs(playersInLoop1V) do
+            local nameOnly = e:match("^(.-) %(") or e
+            table.insert(playersInLoop2V, nameOnly)
+        end
         BlobReleaseR()
     end
 })
 
-local LGButton = DevTab:CreateButton({
+local LGButton = DevTab:AddButton({
     Name = "Massless [ Blobman ]",
     Callback = function()
         table.clear(playersInLoop2V)
-	for i, e in ipairs(playersInLoop1V) do
-		local nameOnly = e:match("^(.-) %(") or e
-		table.insert(playersInLoop2V, nameOnly)
-	end
+        for i, e in ipairs(playersInLoop1V) do
+            local nameOnly = e:match("^(.-) %(") or e
+            table.insert(playersInLoop2V, nameOnly)
+        end
         BlobMasslessR()
     end
 })
 
-local RGButton = DevTab:CreateButton({
+local RGButton = DevTab:AddButton({
     Name = "Grab [ Blobman ]",
     Callback = function()
         table.clear(playersInLoop2V)
-	for i, e in ipairs(playersInLoop1V) do
-		local nameOnly = e:match("^(.-) %(") or e
-		table.insert(playersInLoop2V, nameOnly)
-	end
+        for i, e in ipairs(playersInLoop1V) do
+            local nameOnly = e:match("^(.-) %(") or e
+            table.insert(playersInLoop2V, nameOnly)
+        end
         BlobGrabR()
     end
 })
 
-local RDButton = DevTab:CreateButton({
+local RDButton = DevTab:AddButton({
     Name = "Drop [ Blobman ]",
     Callback = function()
         table.clear(playersInLoop2V)
-	for i, e in ipairs(playersInLoop1V) do
-		local nameOnly = e:match("^(.-) %(") or e
-		table.insert(playersInLoop2V, nameOnly)
-	end
+        for i, e in ipairs(playersInLoop1V) do
+            local nameOnly = e:match("^(.-) %(") or e
+            table.insert(playersInLoop2V, nameOnly)
+        end
         BlobDropR()
     end
 })
 
-grabTab:CreateSection("Fling")
-local flingToggle = grabTab:CreateToggle({
+grabTab:AddSection({
+    Name = "Fling"
+})
+
+local flingToggle = grabTab:AddToggle({
     Name = "Fling",
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         flingT = Value
         flingF()
     end
 })
 
-local strengthInput = grabTab:CreateInput({
+local strengthInput = grabTab:AddTextbox({
     Name = "Strength",
-    CurrentValue = 0,
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "2",
+    Default = "9999",
+    TextDisappear = false,
     Callback = function(Value)
         strengthV = Value
     end
 })
-strengthInput:Set(9999)
 
-grabTab:CreateSection("Line")
-local extendLineToggle = grabTab:CreateToggle({
+grabTab:AddSection({
+    Name = "Line"
+})
+
+local extendLineToggle = grabTab:AddToggle({
     Name = "Extend Line",
-    CurrentValue = false,
-    Flag = "3",
+    Default = false,
     Callback = function(Value)
         infLineExtendT = Value
         infLineExtendF()
     end
 })
 
-local extendLineInput = grabTab:CreateInput({
+local extendLineInput = grabTab:AddTextbox({
     Name = "Wheel Speed",
-    CurrentValue = 0,
-    PlaceholderText = "Value",
-    RemoveTextAfterFocusLost = false,
-    Flag = "4",
+    Default = "1.7",
+    TextDisappear = false,
     Callback = function(Value)
         increaseLineExtendV = Value
     end
 })
-extendLineInput:Set(1.7)
 
-grabTab:CreateSection("Other")
-local AntiStruggleGrab = grabTab:CreateToggle({
+grabTab:AddSection({
+    Name = "Other"
+})
+
+local AntiStruggleGrab = grabTab:AddToggle({
     Name = "Loop Grab",
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         AntiStruggleGrabT = Value
         if Value then
@@ -6088,10 +6104,9 @@ local AntiStruggleGrab = grabTab:CreateToggle({
     end
 })
 
-local RagdollGrabToggle = grabTab:CreateToggle({
+local RagdollGrabToggle = grabTab:AddToggle({
     Name = "Ragdoll Grab",
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         RagdollGrabT = Value
         if Value then
@@ -6100,10 +6115,9 @@ local RagdollGrabToggle = grabTab:CreateToggle({
     end
 })
 
-local MasslessGrab = grabTab:CreateToggle({ 
+local MasslessGrab = grabTab:AddToggle({ 
     Name = "Massless Grab", 
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         MasslessGrabT = Value
         if Value then
@@ -6112,10 +6126,9 @@ local MasslessGrab = grabTab:CreateToggle({
     end
 })
 
-local NoClipGrab = grabTab:CreateToggle({ 
+local NoClipGrab = grabTab:AddToggle({ 
     Name = "No-clip Grab", 
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         NoClipGrabT = Value
         if Value then
@@ -6124,40 +6137,39 @@ local NoClipGrab = grabTab:CreateToggle({
     end
 })
 
-grabTab:CreateToggle({ 
+grabTab:AddToggle({ 
     Name = "Kill Grab", 
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         KillGrabT = Value
         KillGrabF()
     end
 })
 
-grabTab:CreateToggle({ 
+grabTab:AddToggle({ 
     Name = "[ Void ]", 
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         TpKLG = Value
     end
 })
 
-grabTab:CreateSection("")
-grabTab:CreateToggle({
+grabTab:AddSection({
+    Name = ""
+})
+
+grabTab:AddToggle({
     Name = "Kick Grab",
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         KickGrabT = Value
         if Value then KickGrabF() end
     end
 })
 
-grabTab:CreateToggle({
+grabTab:AddToggle({
     Name = "[ Anchored ]",
-    CurrentValue = false,
-    Flag = "1",
+    Default = false,
     Callback = function(Value)
         AnhKick = Value
     end

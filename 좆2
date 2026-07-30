@@ -1133,104 +1133,106 @@ AutoTab:AddSection({ Name = "무기 설정" })
 local SelectedWeapon = ""
 local AttackDelay = 0.1
 local AutoAttackEnabled = false
+local AutoWeaponSelectEnabled = false
+local AutoWeaponConnection = nil
 
-local function resetAttributesAndValues(obj)
-    if not obj then return end
-    if obj:IsA("NumberValue") or obj:IsA("IntValue") or obj:IsA("DoubleConstrainedValue") then
-        local nameLower = obj.Name:lower()
-        if nameLower:find("cooldown") or nameLower:find("cd") or nameLower:find("delay") or nameLower:find("time") or nameLower:find("wait") then
-            obj.Value = 0
-        end
-    elseif obj:IsA("TextLabel") or obj:IsA("TextBox") then
-        if obj.Text:find("쿨타임") or obj.Text:find("Cooldown") then
-            obj.Text = "쿨타임: 0초"
-        end
-    end
-    local attributes = obj:GetAttributes()
-    for attrName, attrVal in pairs(attributes) do
-        local nameLower = attrName:lower()
-        if nameLower:find("cooldown") or nameLower:find("cd") or nameLower:find("delay") or nameLower:find("time") or nameLower:find("lastattack") or nameLower:find("lastuse") then
-            if type(attrVal) == "number" then
-                obj:SetAttribute(attrName, 0)
-            elseif type(attrVal) == "boolean" then
-                obj:SetAttribute(attrName, false)
-            end
-        end
-    end
+
+local function updateSelectedWeapon(toolName)
+SelectedWeapon = toolName
+OrionLib:MakeNotification({ Name = "완료", Content = "무기: " .. SelectedWeapon, Image = "rbxassetid://4483362458", Time = 2.5 })
 end
 
-local function wipeCooldowns(instance)
-    if not instance then return end
-    resetAttributesAndValues(instance)
-    for _, child in ipairs(instance:GetDescendants()) do
-        resetAttributesAndValues(child)
-    end
+
+local function trackCharacterTools(character)
+if AutoWeaponConnection then
+AutoWeaponConnection:Disconnect()
+AutoWeaponConnection = nil
+end
+if not character then return end
+
+
+local currentTool = character:FindFirstChildOfClass("Tool")
+if currentTool and AutoWeaponSelectEnabled then
+updateSelectedWeapon(currentTool.Name)
 end
 
-wipeCooldowns(workspace)
-workspace.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
-if LocalPlayer:FindFirstChild("PlayerGui") then
-    wipeCooldowns(LocalPlayer.PlayerGui)
-    LocalPlayer.PlayerGui.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
+
+AutoWeaponConnection = character.ChildAdded:Connect(function(child)
+if AutoWeaponSelectEnabled and child:IsA("Tool") then
+updateSelectedWeapon(child.Name)
 end
+end)
+end
+
+
 if LocalPlayer.Character then
-    wipeCooldowns(LocalPlayer.Character)
-    LocalPlayer.Character.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
+trackCharacterTools(LocalPlayer.Character)
 end
 LocalPlayer.CharacterAdded:Connect(function(char)
-    wipeCooldowns(char)
-    char.DescendantAdded:Connect(function(obj) resetAttributesAndValues(obj) end)
+trackCharacterTools(char)
 end)
 
-AutoTab:AddButton({
-   Name = "오토팜 무기 등록(장착한 무기)",
-   Callback = function()
-      local character = LocalPlayer.Character
-      if character then
-         local tool = character:FindFirstChildOfClass("Tool")
-         if tool then
-            SelectedWeapon = tool.Name
-            wipeCooldowns(tool)
-            OrionLib:MakeNotification({ Name = "완료", Content = "무기: " .. SelectedWeapon, Image = "rbxassetid://4483362458", Time = 2.5 })
-         else
-            OrionLib:MakeNotification({ Name = "실패", Content = "무기를 장착해주세요.", Image = "rbxassetid://4483362458", Time = 2.5 })
-         end
-      end
-   end,
-})
-
-AutoTab:AddTextbox({
-   Name = "오토팜 딜레이",
-   Default = "0.1",
-   TextDisappear = false,
-   Callback = function(Text)
-      local num = tonumber(Text)
-      if num and num >= 0 then AttackDelay = num else AttackDelay = 0.1 end
-   end,
-})
 
 AutoTab:AddToggle({
-   Name = "오토팜",
-   Default = false,
-   Callback = function(Value)
-      AutoAttackEnabled = Value
-      if AutoAttackEnabled then
-         task.spawn(function()
-            while AutoAttackEnabled do
-               if SelectedWeapon ~= "" then
-                  local myChar = LocalPlayer.Character
-                  if myChar then
-                     local tool = myChar:FindFirstChild(SelectedWeapon)
-                     if tool then wipeCooldowns(tool) end
-                  end
-                  CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
-               end
-               if AttackDelay > 0 then task.wait(AttackDelay) else RunService.RenderStepped:Wait() end
-            end
-         end)
-      end
-   end,
+Name = "자동 무기 등록",
+Default = false,
+Callback = function(Value)
+AutoWeaponSelectEnabled = Value
+if AutoWeaponSelectEnabled and LocalPlayer.Character then
+local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
+if tool then
+updateSelectedWeapon(tool.Name)
+end
+end
+end,
 })
+
+
+AutoTab:AddButton({
+Name = "수동 무기 등록",
+Callback = function()
+local character = LocalPlayer.Character
+if character then
+local tool = character:FindFirstChildOfClass("Tool")
+if tool then
+updateSelectedWeapon(tool.Name)
+else
+OrionLib:MakeNotification({ Name = "실패", Content = "무기를 장착해주세요.", Image = "rbxassetid://4483362458", Time = 2.5 })
+end
+end
+end,
+})
+
+
+AutoTab:AddTextbox({
+Name = "오토팜 딜레이",
+Default = "0.1",
+TextDisappear = false,
+Callback = function(Text)
+local num = tonumber(Text)
+if num and num >= 0 then AttackDelay = num else AttackDelay = 0.1 end
+end,
+})
+
+
+AutoTab:AddToggle({
+Name = "오토팜",
+Default = false,
+Callback = function(Value)
+AutoAttackEnabled = Value
+if AutoAttackEnabled then
+task.spawn(function()
+while AutoAttackEnabled do
+if SelectedWeapon ~= "" then
+CentralEvent:FireServer("ToolClick", SelectedWeapon, 1, workspace:GetServerTimeNow())
+end
+if AttackDelay > 0 then task.wait(AttackDelay) else RunService.RenderStepped:Wait() end
+end
+end)
+end
+end,
+})
+
 
 
 

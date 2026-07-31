@@ -1181,7 +1181,7 @@ local function LoadAll(silent)
     end
 end
 
-
+local NTab = Window:MakeTab({Name = "ONWER", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local TeleportTab = Window:MakeTab({Name = "TP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local AutoTab = Window:MakeTab({Name = "오토팜", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local GTab = Window:MakeTab({Name = "오토 강화", Icon = "rbxassetid://4483362458", PremiumOnly = false})
@@ -2765,7 +2765,11 @@ MUTab:AddButton({
 		end
 	end    
 })
+NTab:AddLabel("The owner of the script is ZK. ")
 
+NTab:AddLabel("https://youtu.be/_y8RT7vibQA?si=exmVsdPvDMi1HnVJ ")
+NTab:AddLabel("I have never promoted YouTube. ")
+NTab:AddLabel("This YouTube video is an unauthorized use of ZeScript. )
 local ConfigTab = Window:MakeTab({
     Name = "설정 저장",
     Icon = "rbxassetid://4483345998",

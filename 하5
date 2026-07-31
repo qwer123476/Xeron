@@ -1535,8 +1535,76 @@ AutoTab:AddToggle({
 		State.AutoEnchant = Value
 	end    
 })
+AutoTab:AddSection({ Name = "NEW 인챈트" })
+local ToggleActive = false
+local Player = game:GetService("Players").LocalPlayer
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
+AutoTab:AddToggle({
+	Name = "오토 인챈트",
+	Default = false,
+	Callback = function(Value)
+		ToggleActive = Value
+		local Character = Player.Character
+		if not Character then return end
+		local HRP = Character:FindFirstChild("HumanoidRootPart")
+		if not HRP then return end
 
+		if ToggleActive then
+			HRP.CFrame = CFrame.new(257.026794, -373.259155, 12.853211)
+			
+			for _, part in ipairs(Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Anchored = true
+				end
+			end
+
+			task.spawn(function()
+				while ToggleActive do
+					for _, v in ipairs(workspace:GetDescendants()) do
+						if v:IsA("ProximityPrompt") then
+							local parentPart = v.Parent
+							if parentPart and parentPart:IsA("BasePart") then
+								if (HRP.Position - parentPart.Position).Magnitude <= 10 then
+									fireproximityprompt(v)
+								end
+							end
+						elseif v:IsA("ClickDetector") then
+							local parentPart = v.Parent
+							if parentPart and parentPart:IsA("BasePart") then
+								if (HRP.Position - parentPart.Position).Magnitude <= 10 then
+									fireclickdetector(v)
+								end
+							end
+						end
+					end
+					task.wait(0.4)
+				end
+			end)
+
+			task.spawn(function()
+				local args = {
+					"NPCDialogue_Choose",
+					{
+						choiceIndex = 1
+					}
+				}
+				while ToggleActive do
+					CentralEvent:FireServer(unpack(args))
+					task.wait()
+				end
+			end)
+
+		else
+			for _, part in ipairs(Character:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Anchored = false
+				end
+			end
+		end
+	end
+})
 GTab:AddSection({ Name = "플레이어 상태" })
 
 

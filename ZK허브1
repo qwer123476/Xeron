@@ -2769,7 +2769,7 @@ NTab:AddLabel("The owner of the script is ZK. ")
 
 NTab:AddLabel("https://youtu.be/_y8RT7vibQA?si=exmVsdPvDMi1HnVJ ")
 NTab:AddLabel("I have never promoted YouTube. ")
-NTab:AddLabel("This YouTube video is an unauthorized use of ZeScript. )
+NTab:AddLabel("This YouTube video is an unauthorized use of ZeScript.")
 local ConfigTab = Window:MakeTab({
     Name = "설정 저장",
     Icon = "rbxassetid://4483345998",

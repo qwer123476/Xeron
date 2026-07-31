@@ -1185,6 +1185,7 @@ end
 local TeleportTab = Window:MakeTab({Name = "TP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local AutoTab = Window:MakeTab({Name = "오토팜", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local GTab = Window:MakeTab({Name = "오토 강화", Icon = "rbxassetid://4483362458", PremiumOnly = false})
+local MUTab = Window:MakeTab({Name = "물약 상점", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local PlayerTab = Window:MakeTab({Name = "플레이어", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local PVPTab = Window:MakeTab({Name = "PVP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
 local ESPTab = Window:MakeTab({Name = "ESP", Icon = "rbxassetid://4483362458", PremiumOnly = false})
@@ -2472,6 +2473,93 @@ MusicTab:AddToggle({
 			playMusic(musicList[selectedMusic])
 		else
 			stopMusic()
+		end
+	end    
+}
+
+local PotionList = {
+	["문헌의 물약"] = "\235\172\184\237\151\140\236\157\152 \235\172\188\236\149\189",
+	["사도의 물약"] = "\236\130\172\235\143\132\236\157\152 \235\172\188\236\149\189",
+	["속도의 물약"] = "\236\134\141\235\143\132 \235\172\188\236\149\189",
+	["코인 물약"] = "\236\189\148\236\157\184 \235\172\188\236\149\189",
+	["행운 물약"] = "\237\150\137\236\154\180 \235\172\188\236\149\189"
+}
+
+
+local Recipes = {
+	["문헌의 물약"] = {{"고대의책", 50}, {"사도의 물약", 20}, {"인챈트북", 1000}, {"책", 2000}, {"텍스트박스", 1000}},
+	["사도의 물약"] = {{"사도의 낫", 4}},
+	["속도의 물약"] = {{"인챈트북", 1}},
+	["코인 물약"] = {{"인챈트북", 1}},
+	["행운 물약"] = {{"인챈트북", 1}}
+}
+
+local SelectedPotion = "문헌의 물약"
+local PotionAmount = 1
+local CostLabel 
+
+
+local function UpdateCostLabel()
+	if not CostLabel then return end
+	if PotionAmount <= 0 then
+		CostLabel:Set("가격: 1개 이상 입력해주세요.")
+		return
+	end
+	
+	local recipe = Recipes[SelectedPotion]
+	local text = "가격: "
+	
+	for i, item in ipairs(recipe) do
+		local itemName = item[1]
+		local totalCost = item[2] * PotionAmount
+		
+		text = text .. itemName .. " " .. tostring(totalCost) .. "개"
+		if i < #recipe then
+			text = text .. ", "
+		end
+	end
+	
+	CostLabel:Set(text)
+end
+
+
+MUTab:AddDropdown({
+	Name = "물약 선택",
+	Default = "문헌의 물약",
+	Options = {"문헌의 물약", "사도의 물약", "속도의 물약", "코인 물약", "행운 물약"},
+	Callback = function(Value)
+		SelectedPotion = Value
+		UpdateCostLabel() 
+	end    
+})
+
+MUTab:AddTextbox({
+	Name = "물약 제작 개수",
+	Default = "1",
+	TextDisappear = false,
+	Callback = function(Value)
+		local num = tonumber(Value)
+		if num and num > 0 then
+			PotionAmount = math.floor(num) 
+		else
+			PotionAmount = 0
+		end
+		UpdateCostLabel() 
+	end	  
+})
+
+CostLabel = MUTab:AddLabel("가격: 고대의책 50개, 사도의 물약 20개, 인챈트북 1000개, 책 2000개, 텍스트박스 1000개")
+
+MUTab:AddButton({
+	Name = "선택한 물약 제작하기",
+	Callback = function()
+		if PotionList[SelectedPotion] and PotionAmount > 0 then
+			local args = {
+				"CraftPotion",
+				PotionList[SelectedPotion],
+				PotionAmount
+			}
+			game:GetService("ReplicatedStorage"):WaitForChild("CentralEvent"):FireServer(unpack(args))
 		end
 	end    
 })

@@ -1542,17 +1542,16 @@ local Player = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
-AutoTab:AddSlider({
+AutoTab:AddTextbox({
 	Name = "인챈트 속도",
-	Min = 0.1,
-	Max = 5.0,
-	Default = 0.4,
-	Color = Color3.fromRGB(255,255,255),
-	Increment = 0.1,
-	ValueName = "s",
+	Default = "0.4",
+	TextDisappear = false,
 	Callback = function(Value)
-		InteractDelay = Value
-	end    
+		local num = tonumber(Value)
+		if num then
+			InteractDelay = num
+		end
+	end	  
 })
 
 AutoTab:AddToggle({

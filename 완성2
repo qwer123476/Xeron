@@ -1900,7 +1900,114 @@ playerTab:AddToggle({
         mflyF()
     end
 })
+playerTab:AddToggle({ 
+    Name = "플라이   <font color='rgb(255,0,0)'>[데스크톱]</font>", 
+    Default = false,
+    save = true,
+    Flag = "5jeis",
+    Callback = function(Value)
+        flyT = Value
+        flyF()
+    end
+})
+function flyF()
+    if not flyT then return end
+    
+    local Players = game:GetService("Players")
+    local UserInputService = game:GetService("UserInputService")
+    local RunService = game:GetService("RunService")
 
+    local plr = Players.LocalPlayer
+    local char = plr.Character or plr.CharacterAdded:Wait()
+    local humanoid = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid")
+    local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart")
+
+    local BV = Instance.new("BodyVelocity")
+    local BG = Instance.new("BodyGyro")
+
+    BG.P = 9e4
+    BG.Parent = hrp
+    BV.Parent = hrp
+    BG.MaxTorque = Vector3.new(9e9, 9e9, 9e9)
+    BG.CFrame = hrp.CFrame
+    BV.Velocity = Vector3.new(0,0,0)
+    BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
+
+    local CONTROL = {F=0,B=0,L=0,R=0}
+    local lCONTROL = {F=0,B=0,L=0,R=0}
+    local SPEED = flyV
+
+    if flyKeyDown then flyKeyDown:Disconnect() end
+    if flyKeyUp then flyKeyUp:Disconnect() end
+    if flyConnection then flyConnection:Disconnect() end
+
+    flyKeyDown = UserInputService.InputBegan:Connect(function(input, processed)
+        if processed then return end
+        if input.KeyCode == Enum.KeyCode.W then
+            CONTROL.F = 1
+        elseif input.KeyCode == Enum.KeyCode.S then
+            CONTROL.B = -1
+        elseif input.KeyCode == Enum.KeyCode.A then
+            CONTROL.L = -1
+        elseif input.KeyCode == Enum.KeyCode.D then
+            CONTROL.R = 1
+        end
+    end)
+
+    flyKeyUp = UserInputService.InputEnded:Connect(function(input, processed)
+        if input.KeyCode == Enum.KeyCode.W then
+            CONTROL.F = 0
+        elseif input.KeyCode == Enum.KeyCode.S then
+            CONTROL.B = 0
+        elseif input.KeyCode == Enum.KeyCode.A then
+            CONTROL.L = 0
+        elseif input.KeyCode == Enum.KeyCode.D then
+            CONTROL.R = 0
+        end
+    end)
+
+    flyConnection = RunService.Heartbeat:Connect(function()
+        if not flyT then
+            flyConnection:Disconnect()
+            if flyKeyDown then flyKeyDown:Disconnect() end
+            if flyKeyUp then flyKeyUp:Disconnect() end
+            BV:Destroy()
+            BG:Destroy()
+            humanoid.PlatformStand = false
+            return
+        end
+        
+        local camera = workspace.CurrentCamera
+        SPEED = flyV
+        
+        if CONTROL.F + CONTROL.B ~= 0 or CONTROL.L + CONTROL.R ~= 0 then
+            BV.Velocity = ((camera.CFrame.LookVector * (CONTROL.F + CONTROL.B)) + 
+                ((camera.CFrame * CFrame.new(CONTROL.L + CONTROL.R, 0, 0).p) - camera.CFrame.p)) * SPEED
+            lCONTROL = {F=CONTROL.F,B=CONTROL.B,L=CONTROL.L,R=CONTROL.R}
+        else
+            BV.Velocity = Vector3.new(0,0,0)
+        end
+        BG.CFrame = camera.CFrame
+    end)
+end
+
+plr.CharacterAdded:Connect(function()
+    task.wait(0.2)
+    if flyT then
+        flyF()
+    end
+end)
+playerTab:AddTextbox({
+    Name = "속도",
+    Default = "",
+    save = true,
+    Placeholder = "Value",
+    RemoveTextAfterFocusLost = false,
+    Flag = "38887",
+    Callback = function(Value)
+        flyV = Value
+    end
+})
 playerTab:AddSection({
     Name = "서버이동&FPS"
 })

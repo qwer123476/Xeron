@@ -1840,9 +1840,7 @@ UserInputService.JumpRequest:Connect(function()
       end
    end
 end)
-playerTab:AddSection({
-    Name = "플라이 모바일"
-})
+
 local function mflyF()
     if not mflyT then return end
     

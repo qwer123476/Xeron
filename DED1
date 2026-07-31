@@ -3695,7 +3695,7 @@ function AntiGrabF(enable)
     local shouldKeepSit = false
     local wasHeld = false
     local lastRagdollTime = 0
-    local ragdollDuration = 0.48
+    local ragdollDuration = 0.3
 
     antiGrabConn = RunService.Heartbeat:Connect(function(deltaTime)
         local char = plr.Character
@@ -3723,7 +3723,7 @@ function AntiGrabF(enable)
         end
 
         if isvs and POR then
-            task.wait(0.3)
+            task.wait()
         end
 
         if POR and POR.Value then
@@ -3743,7 +3743,7 @@ function AntiGrabF(enable)
             end
         end
 
-        if isvs then task.wait(0.3) end
+        if isvs then task.wait() end
 
         local rag = hum:FindFirstChild("Ragdolled")
         if isHeld.Value == true and rag and rag.Value == true then
@@ -6058,7 +6058,7 @@ local Window = OrionLib:MakeWindow({
         SaveConfig = true,
         ConfigFolder = "Script",
         IntroEnabled = true,
-        KeyToOpenWindow = "M",
+        KeyToOpenWindow = "T",
         FreeMouse = true,
         IntroText = "mad by paca",
         IntroIcon = "rbxassetid://130521044774541",

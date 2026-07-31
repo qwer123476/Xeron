@@ -1537,12 +1537,26 @@ AutoTab:AddToggle({
 })
 AutoTab:AddSection({ Name = "NEW 인챈트" })
 local ToggleActive = false
+local InteractDelay = 0.4
 local Player = game:GetService("Players").LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local CentralEvent = ReplicatedStorage:WaitForChild("CentralEvent")
 
+AutoTab:AddSlider({
+	Name = "인챈트 속도",
+	Min = 0.1,
+	Max = 5.0,
+	Default = 0.4,
+	Color = Color3.fromRGB(255,255,255),
+	Increment = 0.1,
+	ValueName = "s",
+	Callback = function(Value)
+		InteractDelay = Value
+	end    
+})
+
 AutoTab:AddToggle({
-	Name = "오토 인챈트",
+	Name = "오토인챈트 V2",
 	Default = false,
 	Callback = function(Value)
 		ToggleActive = Value
@@ -1579,7 +1593,7 @@ AutoTab:AddToggle({
 							end
 						end
 					end
-					task.wait(0.4)
+					task.wait(InteractDelay)
 				end
 			end)
 

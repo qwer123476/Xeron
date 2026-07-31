@@ -1989,12 +1989,12 @@ function flyF()
     end)
 end
 
-plr.CharacterAdded:Connect(function()
+--plr.CharacterAdded:Connect(function()
     task.wait(0.2)
     if flyT then
         flyF()
     end
-end)
+
 PlayerTab:AddTextbox({
     Name = "속도",
     Default = "",

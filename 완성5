@@ -1841,6 +1841,22 @@ UserInputService.JumpRequest:Connect(function()
    end
 end)
 
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local plr = Players.LocalPlayer
+
+local mflyT = false
+local flyT = false
+local mflyV = 100
+local flyV = 100
+
+local mflyConnection
+local flyConnection
+local flyKeyDown
+local flyKeyUp
+
 local function mflyF()
     if not mflyT then return end
     
@@ -1870,7 +1886,7 @@ local function mflyF()
         end
         
         local camera = workspace.CurrentCamera
-        local SPEED = mflyV or 100
+        local SPEED = tonumber(mflyV) or 100
         
         if humanoid.MoveDirection.Magnitude > 0 then
             local localMove = camera.CFrame:VectorToObjectSpace(humanoid.MoveDirection)
@@ -1887,35 +1903,9 @@ local function mflyF()
     end)
 end
 
-
-PlayerTab:AddToggle({ 
-    Name = "플라이   <font color='rgb(0,255,0)'>[모바일]</font>", 
-    Default = false,
-    save = true,
-    Flag = "jdjdididie5",
-    Callback = function(Value)
-        mflyT = Value
-        mflyF()
-    end
-})
-PlayerTab:AddToggle({ 
-    Name = "플라이   <font color='rgb(255,0,0)'>[데스크톱]</font>", 
-    Default = false,
-    save = true,
-    Flag = "5jeis",
-    Callback = function(Value)
-        flyT = Value
-        flyF()
-    end
-})
 function flyF()
     if not flyT then return end
     
-    local Players = game:GetService("Players")
-    local UserInputService = game:GetService("UserInputService")
-    local RunService = game:GetService("RunService")
-
-    local plr = Players.LocalPlayer
     local char = plr.Character or plr.CharacterAdded:Wait()
     local humanoid = char:FindFirstChildOfClass("Humanoid") or char:WaitForChild("Humanoid")
     local hrp = char:FindFirstChild("HumanoidRootPart") or char:WaitForChild("HumanoidRootPart")
@@ -1932,8 +1922,7 @@ function flyF()
     BV.MaxForce = Vector3.new(9e9, 9e9, 9e9)
 
     local CONTROL = {F=0,B=0,L=0,R=0}
-    local lCONTROL = {F=0,B=0,L=0,R=0}
-    local SPEED = flyV
+    local SPEED = tonumber(flyV) or 100
 
     if flyKeyDown then flyKeyDown:Disconnect() end
     if flyKeyUp then flyKeyUp:Disconnect() end
@@ -1952,7 +1941,7 @@ function flyF()
         end
     end)
 
-    flyKeyUp = UserInputService.InputEnded:Connect(function(input, processed)
+    flyKeyUp = UserInputService.InputEnded:Connect(function(input)
         if input.KeyCode == Enum.KeyCode.W then
             CONTROL.F = 0
         elseif input.KeyCode == Enum.KeyCode.S then
@@ -1976,12 +1965,11 @@ function flyF()
         end
         
         local camera = workspace.CurrentCamera
-        SPEED = flyV
+        SPEED = tonumber(flyV) or 100
         
         if CONTROL.F + CONTROL.B ~= 0 or CONTROL.L + CONTROL.R ~= 0 then
             BV.Velocity = ((camera.CFrame.LookVector * (CONTROL.F + CONTROL.B)) + 
                 ((camera.CFrame * CFrame.new(CONTROL.L + CONTROL.R, 0, 0).p) - camera.CFrame.p)) * SPEED
-            lCONTROL = {F=CONTROL.F,B=CONTROL.B,L=CONTROL.L,R=CONTROL.R}
         else
             BV.Velocity = Vector3.new(0,0,0)
         end
@@ -1989,11 +1977,33 @@ function flyF()
     end)
 end
 
---plr.CharacterAdded:Connect(function()
+plr.CharacterAdded:Connect(function()
     task.wait(0.2)
-    if flyT then
+    if flyT then flyF() end
+    if mflyT then mflyF() end
+end)
+
+PlayerTab:AddToggle({ 
+    Name = "플라이   <font color='rgb(0,255,0)'>[모바일]</font>", 
+    Default = false,
+    save = true,
+    Flag = "jdjdididie5",
+    Callback = function(Value)
+        mflyT = Value
+        mflyF()
+    end
+})
+
+PlayerTab:AddToggle({ 
+    Name = "플라이   <font color='rgb(255,0,0)'>[데스크톱]</font>", 
+    Default = false,
+    save = true,
+    Flag = "5jeis",
+    Callback = function(Value)
+        flyT = Value
         flyF()
     end
+})
 
 PlayerTab:AddTextbox({
     Name = "속도",
@@ -2003,7 +2013,8 @@ PlayerTab:AddTextbox({
     RemoveTextAfterFocusLost = false,
     Flag = "38887",
     Callback = function(Value)
-        flyV = Value
+        flyV = tonumber(Value) or 100
+        mflyV = tonumber(Value) or 100
     end
 })
 PlayerTab:AddSection({

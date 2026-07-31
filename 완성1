@@ -2475,7 +2475,7 @@ MusicTab:AddToggle({
 			stopMusic()
 		end
 	end    
-}
+})
 
 local PotionList = {
 	["문헌의 물약"] = "\235\172\184\237\151\140\236\157\152 \235\172\188\236\149\189",
